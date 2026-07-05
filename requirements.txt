@@ -8,6 +8,12 @@ yfinance>=0.2.40
 # Telegram bot
 python-telegram-bot>=21.0.0
 
+# Web server (for Stripe webhooks)
+flask>=3.0.0
+
+# Payment processing
+stripe>=7.0.0
+
 # Optional — uncomment as needed
 # ccxt>=4.0.0            # for crypto data via exchange APIs
 # metaapi-cloud-sdk      # for MetaAPI (live MT4/MT5 data + execution)

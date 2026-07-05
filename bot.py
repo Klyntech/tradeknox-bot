@@ -1,7 +1,8 @@
 """
 Main Bot Orchestrator
-Ties all 15 layers together. Runs the scan loop, fires Telegram signals,
-tracks trade management, and handles security/anti-leak logic.
+Ties all layers together. Runs the scan loop, fires Telegram signals,
+tracks trade management, handles security/anti-leak logic,
+and processes user commands.
 """
 
 import asyncio
@@ -16,7 +17,10 @@ from typing import Dict, Optional, Set
 logger = logging.getLogger(__name__)
 
 try:
-    from telegram import Bot, constants
+    from telegram import Bot, constants, Update
+    from telegram.ext import (
+        Application, CommandHandler, CallbackQueryHandler, ContextTypes
+    )
     from telegram.error import TelegramError
     TELEGRAM_AVAILABLE = True
 except ImportError:
@@ -391,6 +395,56 @@ class TradingSignalBot:
 
 
 # ──────────────────────────────────────────────────────────────────────────────
+# Telegram Bot with Command Handlers
+# ──────────────────────────────────────────────────────────────────────────────
+
+def run_bot_with_commands():
+    """Run the bot with both signal scanning and command handlers."""
+    from config import CONFIG
+    from commands import (
+        start_command, subscribe_command, subscribe_callback,
+        status_command, stats_command, key_command, help_command
+    )
+
+    if not TELEGRAM_AVAILABLE or CONFIG.TELEGRAM_TOKEN == "YOUR_BOT_TOKEN":
+        logger.warning("Telegram not available — running in dry-run mode")
+        bot = TradingSignalBot(CONFIG)
+        asyncio.run(bot.run())
+        return
+
+    # Build the Application
+    application = Application.builder().token(CONFIG.TELEGRAM_TOKEN).build()
+
+    # Register command handlers
+    application.add_handler(CommandHandler("start", start_command))
+    application.add_handler(CommandHandler("subscribe", subscribe_command))
+    application.add_handler(CommandHandler("status", status_command))
+    application.add_handler(CommandHandler("stats", stats_command))
+    application.add_handler(CommandHandler("key", key_command))
+    application.add_handler(CommandHandler("help", help_command))
+    application.add_handler(CallbackQueryHandler(subscribe_callback, pattern="^subscribe_"))
+
+    # Create bot instance for signal scanning
+    bot = TradingSignalBot(CONFIG)
+
+    # Run scan loop in background
+    async def scan_loop():
+        while True:
+            try:
+                await bot.run_scan_cycle()
+            except Exception as e:
+                logger.exception(f"Scan cycle error: {e}")
+            await asyncio.sleep(CONFIG.SCAN_INTERVAL_SECONDS)
+
+    # Start the bot
+    logger.info("TradeKnox bot starting with command handlers")
+    application.run_polling(
+        allowed_updates=Update.ALL_TYPES,
+        drop_pending_updates=True
+    )
+
+
+# ──────────────────────────────────────────────────────────────────────────────
 # Entry Point
 # ──────────────────────────────────────────────────────────────────────────────
 
@@ -401,6 +455,4 @@ if __name__ == "__main__":
         datefmt="%Y-%m-%d %H:%M:%S"
     )
 
-    from config import CONFIG
-    bot = TradingSignalBot(CONFIG)
-    asyncio.run(bot.run())
+    run_bot_with_commands()

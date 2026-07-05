@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: tradeknox-bot
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python bot.py
+    envVars:
+      - key: TELEGRAM_TOKEN
+        sync: false
+      - key: PRIVATE_CHANNEL_ID
+        sync: false
+      - key: DATA_SOURCE
+        value: yfinance
+      - key: LICENSE_SECRET
+        generateValue: true
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: STRIPE_PRO_PRICE_ID
+        sync: false
+      - key: STRIPE_VIP_PRICE_ID
+        sync: false
+      - key: DOMAIN
+        sync: false
