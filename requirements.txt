@@ -1,0 +1,19 @@
+# Core
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Data sources
+yfinance>=0.2.40
+
+# Telegram bot
+python-telegram-bot>=21.0.0
+
+# Optional — uncomment as needed
+# ccxt>=4.0.0            # for crypto data via exchange APIs
+# metaapi-cloud-sdk      # for MetaAPI (live MT4/MT5 data + execution)
+# requests>=2.31.0       # for ForexFactory/news API calls
+# aiohttp>=3.9.0         # for async HTTP requests
+
+# Development / backtesting
+# matplotlib>=3.7.0      # for equity curve plots
+# jupyter>=1.0.0         # for analysis notebooks
