@@ -25,7 +25,7 @@ class BotConfig:
 
     # ── Instruments ─────────────────────────────────────────────────────────
     SYMBOLS: List[str] = field(default_factory=lambda: [
-        "XAUUSD", "EURUSD", "GBPUSD", "USDJPY", "GBPJPY"
+        "XAUUSD", "GBPJPY"
     ])
     PRIMARY_TIMEFRAME: str = "1h"       # main analysis TF
     CONFIRM_TIMEFRAME: str = "15m"      # entry confirmation TF
