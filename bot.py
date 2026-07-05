@@ -47,6 +47,7 @@ class TradingSignalBot:
         from entry_logic import find_best_entry
         from scoring_engine import assess_indicators, score_signal, is_news_blackout, build_risk_profile
         from signal_output import TradeDatabase, format_signal_message, format_performance_report, should_send_monthly_report
+        from strategies import assess_strategies
 
         self._sync_timeframes = sync_timeframes
         self._add_indicators = add_indicators
@@ -61,6 +62,7 @@ class TradingSignalBot:
         self._format_signal = format_signal_message
         self._format_report = format_performance_report
         self._should_report = should_send_monthly_report
+        self._assess_strategies = assess_strategies
 
         self.db = TradeDatabase("trades.db")
 
@@ -165,10 +167,14 @@ class TradingSignalBot:
             # ── Layer 4: Indicators ──────────────────────────────────────────
             indicator_sig = self._assess_indicators(df_primary, direction, config)
 
+            # ── Layer 4b: Strategy Confluence ────────────────────────────────
+            strategy_conv = self._assess_strategies(df_primary, direction, config)
+
             # ── Layer 6: Scoring Engine ──────────────────────────────────────
             score = self._score_signal(
                 structure, entry_setup, indicator_sig,
-                session, news_clear=True, config=config
+                session, news_clear=True, config=config,
+                strategy_confluence=strategy_conv
             )
 
             if not score.passed:
@@ -197,9 +203,21 @@ class TradingSignalBot:
             if indicator_sig.volume_elevated:
                 ind_details.append(f"RVOL {indicator_sig.details['rvol']:.1f}×")
 
+            # Strategy confluence details
+            strat_details = []
+            strat_dir = "bullish" if direction == "buy" else "bearish"
+            if strategy_conv.ma_direction == strat_dir:
+                strat_details.append(f"MA{config.MA_FAST_PERIOD}/{config.MA_SLOW_PERIOD} Cross")
+            if strategy_conv.breakout_direction == strat_dir:
+                strat_details.append("Breakout confirmed")
+            if strategy_conv.ema_direction == strat_dir and strategy_conv.ema_aligned:
+                strat_details.append("EMA aligned")
+
             full_reason = entry_setup.reason
             if ind_details:
                 full_reason += ", " + ", ".join(ind_details)
+            if strat_details:
+                full_reason += " | " + ", ".join(strat_details)
 
             signals_found.append({
                 "symbol": symbol,

@@ -47,11 +47,18 @@ class BotConfig:
         "market_structure":  5,   # Trend + BOS/CHoCH
         "entry_zone":        4,   # OB + FVG + Fib confluence
         "indicators":        3,   # RSI + EMA + Volume
+        "strategy_confluence": 3,  # MA Crossover + RSI Mean Rev + Breakout
         "session_timing":    3,   # Allowed session active
         "news_clear":        2,   # No high-impact event nearby
     }
-    MIN_SCORE_THRESHOLD: int = 12       # out of 17 — below this = NO TRADE
-    MIN_CONFIDENCE_PCT: float = 65.0    # minimum confidence to fire signal
+    MIN_SCORE_THRESHOLD: int = 11       # out of 20 — below this = NO TRADE
+    MIN_CONFIDENCE_PCT: float = 55.0    # minimum confidence to fire signal
+
+    # ── Strategy Parameters (Research-Backed) ──────────────────────────────
+    MA_FAST_PERIOD: int = 50            # Best on XAUUSD (PF 1.18)
+    MA_SLOW_PERIOD: int = 200           # Best on XAUUSD (PF 1.18)
+    BREAKOUT_LOOKBACK: int = 20         # Best on XAUUSD (PF 1.14)
+    BREAKOUT_VOLUME_MULT: float = 1.5   # Volume must be >= 1.5× average
 
     # ── Risk Management ──────────────────────────────────────────────────────
     DEFAULT_RISK_PCT: float = 1.0       # % of account per trade
@@ -77,9 +84,9 @@ class BotConfig:
     NEWS_BLACKOUT_AFTER_MIN: int = 15   # block 15 min after
 
     # ── TP Levels (ATR-based) ─────────────────────────────────────────────────
-    TP1_ATR_MULT: float = 1.0
-    TP2_ATR_MULT: float = 2.0
-    TP3_ATR_MULT: float = 3.0
+    TP1_ATR_MULT: float = 1.5
+    TP2_ATR_MULT: float = 2.5
+    TP3_ATR_MULT: float = 3.5
 
     # ── Scan interval ────────────────────────────────────────────────────────
     SCAN_INTERVAL_SECONDS: int = 300    # scan every 5 minutes

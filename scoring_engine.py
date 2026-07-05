@@ -255,7 +255,8 @@ def score_signal(structure,
                  indicator_signal: IndicatorSignal,
                  session: str,
                  news_clear: bool,
-                 config) -> SignalScore:
+                 config,
+                 strategy_confluence=None) -> SignalScore:
     """
     Assign scores per category, compute confidence, apply threshold gate.
     Below MIN_SCORE_THRESHOLD = NO TRADE.
@@ -324,7 +325,22 @@ def score_signal(structure,
     ind_score = min(ind_score, weights["indicators"])
     breakdown["indicators"] = ind_score
 
-    # ── 4. Session Timing Score (max 3) ────────────────────────────────────
+    # ── 4. Strategy Confluence Score (max 3) ───────────────────────────────
+    strat_score = 0
+    if strategy_confluence:
+        # Each strategy agreeing with direction = 1 point (max 3)
+        strat_direction = "bullish" if direction == "buy" else "bearish"
+        if strategy_confluence.ma_direction == strat_direction:
+            strat_score += 1
+        if strategy_confluence.breakout_direction == strat_direction:
+            strat_score += 1
+        if strategy_confluence.ema_direction == strat_direction:
+            strat_score += 1
+
+    strat_score = min(strat_score, weights.get("strategy_confluence", 3))
+    breakdown["strategy_confluence"] = strat_score
+
+    # ── 5. Session Timing Score (max 3) ────────────────────────────────────
     session_scores = {
         "overlap":   3,
         "london":    2,
@@ -335,7 +351,7 @@ def score_signal(structure,
     sess_score = min(session_scores.get(session, 0), weights["session_timing"])
     breakdown["session_timing"] = sess_score
 
-    # ── 5. News Clear Score (max 2) ────────────────────────────────────────
+    # ── 6. News Clear Score (max 2) ────────────────────────────────────────
     news_score = weights["news_clear"] if news_clear else 0
     breakdown["news_clear"] = news_score
 

@@ -59,6 +59,7 @@ class EntrySetup:
     candle_confirmed: bool
     confirmation_type: str      # "engulfing" | "rejection" | "none"
     reason: str                 # human-readable explanation
+    atr_fallback: bool = False  # True if no OB/FVG found, used ATR-based entry
 
 
 def detect_order_blocks(df: pd.DataFrame, lookback: int = 20, atr: float = 1.0) -> List[OrderBlock]:
@@ -95,7 +96,7 @@ def detect_order_blocks(df: pd.DataFrame, lookback: int = 20, atr: float = 1.0) 
         if bearish_body:
             impulse = future["high"].max() - candle["low"]
             if impulse >= min_move:
-                already_mitigated = df["low"].iloc[idx + 1:].min() <= candle["close"]
+                already_mitigated = df["close"].iloc[idx + 1:].min() < candle["low"]
                 strength = min(3.0, impulse / atr)
                 blocks.append(OrderBlock(
                     kind="bullish",
@@ -111,7 +112,7 @@ def detect_order_blocks(df: pd.DataFrame, lookback: int = 20, atr: float = 1.0) 
         elif bullish_body:
             impulse = candle["high"] - future["low"].min()
             if impulse >= min_move:
-                already_mitigated = df["high"].iloc[idx + 1:].max() >= candle["close"]
+                already_mitigated = df["close"].iloc[idx + 1:].max() > candle["high"]
                 strength = min(3.0, impulse / atr)
                 blocks.append(OrderBlock(
                     kind="bearish",
@@ -292,9 +293,23 @@ def find_best_entry(df: pd.DataFrame,
     # Candle confirmation
     confirmed, conf_type = detect_candle_confirmation(df, direction)
 
-    # We need at least an OB or FVG to proceed
-    if matching_ob is None and matching_fvg is None:
+    # ── Structure alignment check ──────────────────────────────────────────
+    # Don't buy at the top (premium) or sell at the bottom (discount)
+    if direction == "buy" and structure.current_price_zone == "premium":
         return None
+    if direction == "sell" and structure.current_price_zone == "discount":
+        return None
+
+    # ── ATR-based fallback if no OB or FVG found ─────────────────────────────
+    atr_fallback = False
+    if matching_ob is None and matching_fvg is None:
+        # Only allow fallback if price is in a valid zone (discount for buy, premium for sell)
+        if direction == "buy" and structure.current_price_zone == "discount":
+            atr_fallback = True
+        elif direction == "sell" and structure.current_price_zone == "premium":
+            atr_fallback = True
+        else:
+            return None
 
     # ── Calculate SL and TP levels ──────────────────────────────────────────
     if direction == "buy":
@@ -305,9 +320,9 @@ def find_best_entry(df: pd.DataFrame,
             sl_price = current_price - atr * config.ATR_SL_MULTIPLIER
 
         risk = current_price - sl_price
-        tp1 = current_price + risk * 1.0
-        tp2 = current_price + risk * 2.0
-        tp3 = current_price + risk * 3.0
+        tp1 = current_price + risk * config.TP1_ATR_MULT
+        tp2 = current_price + risk * config.TP2_ATR_MULT
+        tp3 = current_price + risk * config.TP3_ATR_MULT
         entry = current_price
 
     else:  # sell
@@ -317,9 +332,9 @@ def find_best_entry(df: pd.DataFrame,
             sl_price = current_price + atr * config.ATR_SL_MULTIPLIER
 
         risk = sl_price - current_price
-        tp1 = current_price - risk * 1.0
-        tp2 = current_price - risk * 2.0
-        tp3 = current_price - risk * 3.0
+        tp1 = current_price - risk * config.TP1_ATR_MULT
+        tp2 = current_price - risk * config.TP2_ATR_MULT
+        tp3 = current_price - risk * config.TP3_ATR_MULT
         entry = current_price
 
     if risk <= 0:
@@ -338,6 +353,8 @@ def find_best_entry(df: pd.DataFrame,
         reasons.append(f"{direction.capitalize()} OB (strength {matching_ob.strength}×)")
     if matching_fvg:
         reasons.append(f"{fvg_kind.capitalize()} FVG at {matching_fvg.bottom:.2f}–{matching_fvg.top:.2f}")
+    if atr_fallback:
+        reasons.append(f"ATR-based entry ({structure.current_price_zone} zone)")
     if fib_confluence:
         reasons.append("Fib confluence")
     if confirmed:
@@ -364,5 +381,6 @@ def find_best_entry(df: pd.DataFrame,
         fib_confluence=fib_confluence,
         candle_confirmed=confirmed,
         confirmation_type=conf_type,
-        reason=reason_str
+        reason=reason_str,
+        atr_fallback=atr_fallback
     )
