@@ -301,44 +301,56 @@ class StrategyConfluence:
     ema_aligned: bool
     confluence_score: int     # 0-3
     confluence_direction: str
+    day_filter: str           # "best" | "avoid" | "neutral"
+    day_name: str
 
 
-# Per-pair optimal strategy configs
+# Per-pair optimal strategy configs (from research)
 PAIR_STRATEGIES: Dict[str, Dict] = {
     "XAUUSD": {
         "timeframe": "4h",
         "ma_fast": 9, "ma_slow": 21,
         "breakout_lookback": 10,
         "rsi_oversold": 30, "rsi_overbought": 70,
-        "weights": {"breakout": 2, "ma": 1, "ema": 0},  # breakout dominates
+        "weights": {"breakout": 2, "ma": 1, "ema": 0},
+        "best_days": ["Thursday", "Friday"],  # Breakout PF 1.74-1.94, MA PF 2.14
+        "avoid_days": ["Monday"],              # MA 9/21 PF 0.81
     },
     "EURUSD": {
         "timeframe": "15m",
         "ma_fast": 21, "ma_slow": 50,
         "breakout_lookback": 20,
         "rsi_oversold": 25, "rsi_overbought": 75,
-        "weights": {"ma": 2, "ema": 1, "breakout": 0},  # MA crossover dominates
+        "weights": {"ma": 2, "ema": 1, "breakout": 0},
+        "best_days": ["Tuesday", "Monday"],    # MA 21/50 PF 2.4, MA 9/21 PF 1.59
+        "avoid_days": ["Friday"],              # MA 9/21 PF 0.4, RSI PF 0.51
     },
     "GBPUSD": {
         "timeframe": "4h",
         "ma_fast": 9, "ma_slow": 21,
         "breakout_lookback": 20,
         "rsi_oversold": 30, "rsi_overbought": 70,
-        "weights": {"ma": 2, "ema": 1, "breakout": 0},  # MA crossover dominates
+        "weights": {"ma": 2, "ema": 1, "breakout": 0},
+        "best_days": ["Friday", "Tuesday"],    # MA 9/21 PF 2.57, MA 9/21 PF 1.69
+        "avoid_days": ["Thursday"],            # Breakout 50 PF 0.63
     },
     "USDJPY": {
         "timeframe": "15m",
         "ma_fast": 9, "ma_slow": 21,
         "breakout_lookback": 20,
         "rsi_oversold": 20, "rsi_overbought": 80,
-        "weights": {"rsi": 2, "session": 1, "ma": 0},  # RSI extremes + session
+        "weights": {"rsi": 2, "session": 1, "ma": 0},
+        "best_days": ["Tuesday", "Thursday"],  # RSI 20/80 PF 2.72, RSI PF 2.0
+        "avoid_days": ["Thursday"],            # Breakout PF 0.35 (conflicts: RSI good, breakout bad)
     },
     "GBPJPY": {
         "timeframe": "4h",
         "ma_fast": 50, "ma_slow": 200,
         "breakout_lookback": 20,
         "rsi_oversold": 20, "rsi_overbought": 80,
-        "weights": {"rsi": 2, "ma": 1, "ema": 0},  # RSI extremes dominate
+        "weights": {"rsi": 2, "ma": 1, "ema": 0},
+        "best_days": ["Thursday", "Wednesday"],  # RSI 20/80 PF 4.71, RSI 25/75 PF 1.5
+        "avoid_days": ["Wednesday"],             # EMA Align PF 0.66
     },
 }
 
@@ -448,6 +460,21 @@ def assess_strategies(df: pd.DataFrame, direction: str,
     else:
         confluence_dir = "neutral"
 
+    # Day-of-week filter
+    from datetime import datetime
+    day_name = datetime.now().strftime("%A")
+    best_days = pair_cfg.get("best_days", [])
+    avoid_days = pair_cfg.get("avoid_days", [])
+
+    if day_name in avoid_days:
+        day_filter = "avoid"
+        confluence_score = 0  # Zero out on bad days
+    elif day_name in best_days:
+        day_filter = "best"
+        confluence_score = min(3, confluence_score + 1)  # Bonus on best days
+    else:
+        day_filter = "neutral"
+
     return StrategyConfluence(
         ma_direction=ma_signal.direction,
         ma_strength=ma_signal.strength,
@@ -459,5 +486,7 @@ def assess_strategies(df: pd.DataFrame, direction: str,
         ema_direction=ema_signal.direction,
         ema_aligned=ema_signal.aligned,
         confluence_score=confluence_score,
-        confluence_direction=confluence_dir
+        confluence_direction=confluence_dir,
+        day_filter=day_filter,
+        day_name=day_name
     )
