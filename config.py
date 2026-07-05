@@ -30,6 +30,7 @@ class BotConfig:
     PRIMARY_TIMEFRAME: str = "1h"       # main analysis TF
     CONFIRM_TIMEFRAME: str = "15m"      # entry confirmation TF
     HTF_TIMEFRAME: str = "4h"           # higher timeframe bias
+    STRATEGY_TIMEFRAME: str = "4h"      # strategy signals (research: 4h best)
 
     # ── Market Sessions (UTC) ────────────────────────────────────────────────
     SESSIONS = {

@@ -328,14 +328,9 @@ def score_signal(structure,
     # ── 4. Strategy Confluence Score (max 3) ───────────────────────────────
     strat_score = 0
     if strategy_confluence:
-        # Each strategy agreeing with direction = 1 point (max 3)
         strat_direction = "bullish" if direction == "buy" else "bearish"
-        if strategy_confluence.ma_direction == strat_direction:
-            strat_score += 1
-        if strategy_confluence.breakout_direction == strat_direction:
-            strat_score += 1
-        if strategy_confluence.ema_direction == strat_direction:
-            strat_score += 1
+        # Use the confluence score directly (0-3, weighted per-pair)
+        strat_score = strategy_confluence.confluence_score
 
     strat_score = min(strat_score, weights.get("strategy_confluence", 3))
     breakdown["strategy_confluence"] = strat_score

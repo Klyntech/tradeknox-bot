@@ -168,7 +168,7 @@ class TradingSignalBot:
             indicator_sig = self._assess_indicators(df_primary, direction, config)
 
             # ── Layer 4b: Strategy Confluence ────────────────────────────────
-            strategy_conv = self._assess_strategies(df_primary, direction, config)
+            strategy_conv = self._assess_strategies(df_primary, direction, config, symbol=symbol)
 
             # ── Layer 6: Scoring Engine ──────────────────────────────────────
             score = self._score_signal(
@@ -207,11 +207,19 @@ class TradingSignalBot:
             strat_details = []
             strat_dir = "bullish" if direction == "buy" else "bearish"
             if strategy_conv.ma_direction == strat_dir:
-                strat_details.append(f"MA{config.MA_FAST_PERIOD}/{config.MA_SLOW_PERIOD} Cross")
+                from strategies import get_pair_config
+                pair_cfg = get_pair_config(symbol)
+                strat_details.append(f"MA{pair_cfg['ma_fast']}/{pair_cfg['ma_slow']} Cross")
             if strategy_conv.breakout_direction == strat_dir:
                 strat_details.append("Breakout confirmed")
+            if strategy_conv.rsi_direction == strat_dir:
+                from strategies import get_pair_config
+                pair_cfg = get_pair_config(symbol)
+                strat_details.append(f"RSI {pair_cfg['rsi_oversold']}/{pair_cfg['rsi_overbought']}")
             if strategy_conv.ema_direction == strat_dir and strategy_conv.ema_aligned:
                 strat_details.append("EMA aligned")
+            if strategy_conv.session_active:
+                strat_details.append("Session active")
 
             full_reason = entry_setup.reason
             if ind_details:
