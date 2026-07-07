@@ -42,6 +42,10 @@ class UserManager:
         logger.info(f"New user registered: {user_id} (@{username})")
         return self.db.get_user(user_id)
 
+    def get_user_by_stripe_customer_id(self, stripe_customer_id: str) -> Optional[dict]:
+        """Look up a user by their Stripe customer ID."""
+        return self.db.get_user_by_stripe_customer_id(stripe_customer_id)
+
     def activate_license(self, user_id: str, license_key: str) -> Tuple[bool, str]:
         """
         Activate a license key for a user.

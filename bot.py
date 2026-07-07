@@ -453,14 +453,17 @@ def run_bot_with_commands():
     # Create bot instance for signal scanning
     bot = TradingSignalBot(CONFIG)
 
-    # Run scan loop in background
-    async def scan_loop():
-        while True:
-            try:
-                await bot.run_scan_cycle()
-            except Exception as e:
-                logger.exception(f"Scan cycle error: {e}")
-            await asyncio.sleep(CONFIG.SCAN_INTERVAL_SECONDS)
+    # Schedule scan loop via job queue
+    async def scheduled_scan(context: ContextTypes.DEFAULT_TYPE):
+        await bot.run_scan_cycle()
+
+    job_queue = application.job_queue
+    job_queue.run_repeating(
+        scheduled_scan,
+        interval=CONFIG.SCAN_INTERVAL_SECONDS,
+        first=10,
+        name="signal_scan",
+    )
 
     # Start the bot
     logger.info("TradeKnox bot starting with command handlers")

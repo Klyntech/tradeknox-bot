@@ -141,7 +141,8 @@ class LicenseDatabase:
                     license_key TEXT,
                     joined_at   TEXT,
                     last_scan   TEXT,
-                    signals_used_today INTEGER DEFAULT 0
+                    signals_used_today INTEGER DEFAULT 0,
+                    stripe_customer_id TEXT
                 )
             """)
             conn.commit()
@@ -174,17 +175,19 @@ class LicenseDatabase:
             conn.commit()
 
     def upsert_user(self, user_id: str, username: str = None,
-                    tier: str = "free", license_key: str = None):
+                    tier: str = "free", license_key: str = None,
+                    stripe_customer_id: str = None):
         with sqlite3.connect(self.db_path) as conn:
             conn.execute("""
-                INSERT INTO users (user_id, username, tier, license_key, joined_at)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO users (user_id, username, tier, license_key, joined_at, stripe_customer_id)
+                VALUES (?, ?, ?, ?, ?, ?)
                 ON CONFLICT(user_id) DO UPDATE SET
                     username = COALESCE(excluded.username, username),
                     tier = excluded.tier,
-                    license_key = COALESCE(excluded.license_key, license_key)
+                    license_key = COALESCE(excluded.license_key, license_key),
+                    stripe_customer_id = COALESCE(excluded.stripe_customer_id, stripe_customer_id)
             """, (user_id, username, tier, license_key,
-                  datetime.now(timezone.utc).isoformat()))
+                  datetime.now(timezone.utc).isoformat(), stripe_customer_id))
             conn.commit()
 
     def get_user(self, user_id: str) -> Optional[dict]:
@@ -192,6 +195,14 @@ class LicenseDatabase:
             conn.row_factory = sqlite3.Row
             row = conn.execute(
                 "SELECT * FROM users WHERE user_id = ?", (user_id,)
+            ).fetchone()
+            return dict(row) if row else None
+
+    def get_user_by_stripe_customer_id(self, stripe_customer_id: str) -> Optional[dict]:
+        with sqlite3.connect(self.db_path) as conn:
+            conn.row_factory = sqlite3.Row
+            row = conn.execute(
+                "SELECT * FROM users WHERE stripe_customer_id = ?", (stripe_customer_id,)
             ).fetchone()
             return dict(row) if row else None
 

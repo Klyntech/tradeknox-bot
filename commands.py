@@ -11,8 +11,10 @@ Commands:
 """
 
 import logging
+import os
 from typing import Optional
 
+import requests
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 
@@ -23,6 +25,9 @@ logger = logging.getLogger(__name__)
 
 # Initialize user manager
 user_mgr = UserManager()
+
+# Stripe checkout domain
+DOMAIN = os.getenv("DOMAIN", "http://localhost:5000")
 
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -92,7 +97,7 @@ Choose a plan to get started:"""
 
 
 async def subscribe_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handle subscription button clicks."""
+    """Handle subscription button clicks — redirect to Stripe Checkout."""
     query = update.callback_query
     await query.answer()
 
@@ -102,20 +107,30 @@ async def subscribe_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
     if tier not in ("pro", "vip"):
         return
 
-    # Generate license key directly (simplified — no Stripe yet)
-    key = generate_license_key(user_id, tier, TIER_DURATIONS[tier])
-    success, message = user_mgr.activate_license(user_id, key)
+    price = "29" if tier == "pro" else "49"
 
-    if success:
-        await query.edit_message_text(
-            f"Activated!\n\n"
-            f"Your `{tier.upper()}` license:\n"
-            f"`{key}`\n\n"
-            f"Use /status to verify your plan.",
-            parse_mode="Markdown"
+    try:
+        resp = requests.post(
+            f"{DOMAIN}/create-checkout",
+            json={"user_id": user_id, "tier": tier},
+            timeout=10,
         )
-    else:
-        await query.edit_message_text(f"Error: {message}")
+        resp.raise_for_status()
+        checkout_url = resp.json()["url"]
+
+        await query.edit_message_text(
+            f"**Upgrade to {tier.upper()}**\n\n"
+            f"${price}/mo • Unlimited signals • Instant delivery\n\n"
+            f"[Click here to pay]({checkout_url})\n\n"
+            f"You'll receive your license key in Telegram after payment.",
+            parse_mode="Markdown",
+        )
+    except Exception as e:
+        logger.error(f"Checkout error for {user_id}: {e}")
+        await query.edit_message_text(
+            "Payment system is temporarily unavailable.\n"
+            "Please try again in a few minutes."
+        )
 
 
 async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE):

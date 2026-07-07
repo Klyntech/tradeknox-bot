@@ -7,6 +7,7 @@ Handles:
 - Generating license keys after successful payment
 """
 
+import asyncio
 import json
 import logging
 import os
@@ -32,8 +33,29 @@ STRIPE_VIP_PRICE_ID = os.getenv("STRIPE_VIP_PRICE_ID", "")
 # Domain for success/cancel URLs
 DOMAIN = os.getenv("DOMAIN", "http://localhost:5000")
 
+# Telegram config (for sending license keys)
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "")
+
 # User manager
 user_mgr = UserManager()
+
+
+def _send_telegram_message(chat_id: str, text: str):
+    """Send a Telegram message using requests (sync, for Flask context)."""
+    if not TELEGRAM_TOKEN or not chat_id:
+        return
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    try:
+        import requests as req
+        resp = req.post(url, json={
+            "chat_id": chat_id,
+            "text": text,
+            "parse_mode": "Markdown",
+        }, timeout=10)
+        if not resp.ok:
+            logger.error(f"Telegram send failed: {resp.text}")
+    except Exception as e:
+        logger.error(f"Telegram send error: {e}")
 
 
 @app.route("/")
@@ -112,6 +134,7 @@ def _handle_checkout_completed(session: dict):
     """Generate license key after successful checkout."""
     user_id = session.get("metadata", {}).get("user_id")
     tier = session.get("metadata", {}).get("tier")
+    customer_id = session.get("customer")
 
     if not user_id or not tier:
         logger.error("Missing user_id or tier in checkout session metadata")
@@ -123,12 +146,23 @@ def _handle_checkout_completed(session: dict):
 
     # Save to database
     user_mgr.db.save_license(user_id, tier, key, expires.isoformat())
-    user_mgr.db.upsert_user(user_id, tier=tier, license_key=key)
+    user_mgr.db.upsert_user(
+        user_id, tier=tier, license_key=key,
+        stripe_customer_id=customer_id,
+    )
 
     logger.info(f"License generated for {user_id}: {tier} -> {key}")
 
-    # TODO: Send license key to user via Telegram
-    # This requires the bot to be running and have the user's chat_id
+    # Send license key to user via Telegram
+    price = "29" if tier == "pro" else "49"
+    msg = (
+        f"*Payment received!*\n\n"
+        f"Your *{tier.upper()}* plan is now active.\n\n"
+        f"License key:\n`{key}`\n\n"
+        f"Use /key `{key}` to activate, or /status to verify.\n\n"
+        f"_This key is tied to your account. Do not share it._"
+    )
+    _send_telegram_message(user_id, msg)
 
 
 def _handle_payment_succeeded(invoice: dict):
@@ -136,23 +170,91 @@ def _handle_payment_succeeded(invoice: dict):
     customer_id = invoice.get("customer")
     subscription_id = invoice.get("subscription")
 
-    # TODO: Look up user by Stripe customer ID
-    # For now, log the event
-    logger.info(f"Payment succeeded: customer={customer_id}, sub={subscription_id}")
+    user = user_mgr.get_user_by_stripe_customer_id(customer_id)
+    if not user:
+        logger.warning(f"Payment succeeded but no user found for customer={customer_id}")
+        return
+
+    user_id = user["user_id"]
+    tier = user.get("tier", "pro")
+
+    # Generate new key with extended expiry
+    key = generate_license_key(user_id, tier, TIER_DURATIONS[tier])
+    expires = datetime.now(timezone.utc) + timedelta(days=TIER_DURATIONS[tier])
+
+    user_mgr.db.save_license(user_id, tier, key, expires.isoformat())
+    user_mgr.db.upsert_user(user_id, tier=tier, license_key=key)
+
+    logger.info(f"Subscription renewed for {user_id}: {tier} -> {key}")
+
+    msg = (
+        f"*Subscription renewed!*\n\n"
+        f"Your *{tier.upper()}* plan has been extended.\n"
+        f"New expiry: {expires.strftime('%Y-%m-%d')}\n\n"
+        f"New key:\n`{key}`"
+    )
+    _send_telegram_message(user_id, msg)
 
 
 def _handle_payment_failed(invoice: dict):
-    """Handle failed payment — could downgrade user."""
+    """Handle failed payment — notify user, grace period before downgrade."""
     customer_id = invoice.get("customer")
-    logger.warning(f"Payment failed: customer={customer_id}")
-    # TODO: Send notification to user, grace period before downgrade
+    attempt = invoice.get("attempt_count", 1)
+
+    user = user_mgr.get_user_by_stripe_customer_id(customer_id)
+    if not user:
+        logger.warning(f"Payment failed but no user found for customer={customer_id}")
+        return
+
+    user_id = user["user_id"]
+    tier = user.get("tier", "pro")
+
+    logger.warning(f"Payment failed for {user_id} (attempt {attempt})")
+
+    if attempt >= 3:
+        # Final attempt failed — downgrade
+        user_mgr.db.revoke_license(user_id)
+        user_mgr.db.upsert_user(user_id, tier="free")
+        msg = (
+            f"*Subscription cancelled*\n\n"
+            f"Payment failed after {attempt} attempts.\n"
+            f"Your plan has been downgraded to *FREE*.\n\n"
+            f"Use /subscribe to renew."
+        )
+    else:
+        msg = (
+            f"*Payment failed*\n\n"
+            f"Attempt {attempt} of 3.\n"
+            f"Please update your payment method.\n"
+            f"Your plan will remain active until all attempts are exhausted.\n\n"
+            f"Use /subscribe to renew."
+        )
+    _send_telegram_message(user_id, msg)
 
 
 def _handle_subscription_deleted(subscription: dict):
     """Downgrade user to free when subscription is cancelled."""
     customer_id = subscription.get("customer")
-    logger.info(f"Subscription deleted: customer={customer_id}")
-    # TODO: Find user by Stripe customer ID, downgrade to free
+
+    user = user_mgr.get_user_by_stripe_customer_id(customer_id)
+    if not user:
+        logger.warning(f"Subscription deleted but no user found for customer={customer_id}")
+        return
+
+    user_id = user["user_id"]
+
+    user_mgr.db.revoke_license(user_id)
+    user_mgr.db.upsert_user(user_id, tier="free")
+
+    logger.info(f"Subscription cancelled for {user_id} — downgraded to free")
+
+    msg = (
+        f"*Subscription cancelled*\n\n"
+        f"Your plan has been downgraded to *FREE*.\n"
+        f"You'll receive up to 3 signals/day with a 15-min delay.\n\n"
+        f"Use /subscribe to renew."
+    )
+    _send_telegram_message(user_id, msg)
 
 
 @app.route("/success")
