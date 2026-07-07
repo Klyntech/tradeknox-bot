@@ -61,6 +61,51 @@ def index():
     return jsonify({"status": "ok", "service": "TradeKnox Subscription API"})
 
 
+@app.route("/health")
+def health():
+    """Health check endpoint for uptime monitoring."""
+    import sqlite3
+    from datetime import datetime, timezone
+
+    checks = {
+        "status": "ok",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "checks": {}
+    }
+
+    # Database check
+    try:
+        db_path = os.getenv("TRADES_DB_PATH", "trades.db")
+        with sqlite3.connect(db_path, timeout=5) as conn:
+            conn.execute("SELECT 1")
+        checks["checks"]["database"] = "ok"
+    except Exception as e:
+        checks["checks"]["database"] = f"error: {e}"
+        checks["status"] = "degraded"
+
+    # Stripe config check
+    if stripe.api_key:
+        checks["checks"]["stripe"] = "ok"
+    else:
+        checks["checks"]["stripe"] = "not_configured"
+
+    # Telegram config check
+    if TELEGRAM_TOKEN and TELEGRAM_TOKEN != "YOUR_BOT_TOKEN":
+        checks["checks"]["telegram"] = "ok"
+    else:
+        checks["checks"]["telegram"] = "not_configured"
+
+    # Webhook secret check
+    if STRIPE_WEBHOOK_SECRET:
+        checks["checks"]["webhook_secret"] = "ok"
+    else:
+        checks["checks"]["webhook_secret"] = "not_set"
+        checks["status"] = "degraded"
+
+    status_code = 200 if checks["status"] == "ok" else 503
+    return jsonify(checks), status_code
+
+
 @app.route("/create-checkout", methods=["POST"])
 def create_checkout():
     """
@@ -103,17 +148,17 @@ def webhook():
     sig_header = request.headers.get("Stripe-Signature")
 
     if not STRIPE_WEBHOOK_SECRET:
-        logger.warning("Stripe webhook secret not set — skipping verification")
-        event = json.loads(payload)
-    else:
-        try:
-            event = stripe.Webhook.construct_event(
-                payload, sig_header, STRIPE_WEBHOOK_SECRET
-            )
-        except ValueError:
-            return jsonify({"error": "Invalid payload"}), 400
-        except stripe.error.SignatureVerificationError:
-            return jsonify({"error": "Invalid signature"}), 400
+        logger.error("Stripe webhook secret not configured — rejecting webhook")
+        return jsonify({"error": "Webhook secret not configured"}), 500
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, STRIPE_WEBHOOK_SECRET
+        )
+    except ValueError:
+        return jsonify({"error": "Invalid payload"}), 400
+    except stripe.error.SignatureVerificationError:
+        return jsonify({"error": "Invalid signature"}), 400
 
     # Handle events
     if event["type"] == "checkout.session.completed":

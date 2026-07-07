@@ -157,125 +157,148 @@ class TradeDatabase:
         self._init_db()
 
     def _init_db(self):
-        with sqlite3.connect(self.db_path) as conn:
-            conn.execute("""
-                CREATE TABLE IF NOT EXISTS trades (
-                    id          TEXT PRIMARY KEY,
-                    symbol      TEXT NOT NULL,
-                    direction   TEXT NOT NULL,
-                    entry       REAL,
-                    stop_loss   REAL,
-                    tp1         REAL,
-                    tp2         REAL,
-                    tp3         REAL,
-                    rr_tp1      REAL,
-                    confidence  REAL,
-                    score       INTEGER,
-                    session     TEXT,
-                    reason      TEXT,
-                    status      TEXT DEFAULT 'open',
-                    result      TEXT,
-                    actual_rr   REAL,
-                    opened_at   TEXT,
-                    closed_at   TEXT,
-                    tp1_hit     INTEGER DEFAULT 0,
-                    tp2_hit     INTEGER DEFAULT 0,
-                    tp3_hit     INTEGER DEFAULT 0,
-                    be_moved    INTEGER DEFAULT 0
-                )
-            """)
-            conn.commit()
+        try:
+            with sqlite3.connect(self.db_path, timeout=10) as conn:
+                conn.execute("""
+                    CREATE TABLE IF NOT EXISTS trades (
+                        id          TEXT PRIMARY KEY,
+                        symbol      TEXT NOT NULL,
+                        direction   TEXT NOT NULL,
+                        entry       REAL,
+                        stop_loss   REAL,
+                        tp1         REAL,
+                        tp2         REAL,
+                        tp3         REAL,
+                        rr_tp1      REAL,
+                        confidence  REAL,
+                        score       INTEGER,
+                        session     TEXT,
+                        reason      TEXT,
+                        status      TEXT DEFAULT 'open',
+                        result      TEXT,
+                        actual_rr   REAL,
+                        opened_at   TEXT,
+                        closed_at   TEXT,
+                        tp1_hit     INTEGER DEFAULT 0,
+                        tp2_hit     INTEGER DEFAULT 0,
+                        tp3_hit     INTEGER DEFAULT 0,
+                        be_moved    INTEGER DEFAULT 0
+                    )
+                """)
+                conn.commit()
+        except sqlite3.Error as e:
+            logger.error(f"Database init failed: {e}")
 
     def save_trade(self, signal_id: str, symbol: str, direction: str,
                    entry: float, sl: float, tp1: float, tp2: float, tp3: float,
                    rr1: float, confidence: float, score: int,
                    session: str, reason: str):
-        with sqlite3.connect(self.db_path) as conn:
-            conn.execute("""
-                INSERT OR REPLACE INTO trades
-                (id, symbol, direction, entry, stop_loss, tp1, tp2, tp3,
-                 rr_tp1, confidence, score, session, reason, status, opened_at)
-                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,'open',?)
-            """, (signal_id, symbol, direction, entry, sl, tp1, tp2, tp3,
-                  rr1, confidence, score, session, reason,
-                  datetime.now(timezone.utc).isoformat()))
-            conn.commit()
+        try:
+            with sqlite3.connect(self.db_path, timeout=10) as conn:
+                conn.execute("""
+                    INSERT OR REPLACE INTO trades
+                    (id, symbol, direction, entry, stop_loss, tp1, tp2, tp3,
+                     rr_tp1, confidence, score, session, reason, status, opened_at)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,'open',?)
+                """, (signal_id, symbol, direction, entry, sl, tp1, tp2, tp3,
+                      rr1, confidence, score, session, reason,
+                      datetime.now(timezone.utc).isoformat()))
+                conn.commit()
+        except sqlite3.Error as e:
+            logger.error(f"Failed to save trade {signal_id}: {e}")
 
     def update_tp_hit(self, signal_id: str, tp_num: int):
-        col = f"tp{tp_num}_hit"
-        with sqlite3.connect(self.db_path) as conn:
-            conn.execute(f"UPDATE trades SET {col}=1 WHERE id=?", (signal_id,))
-            if tp_num == 1:
-                conn.execute("UPDATE trades SET be_moved=1 WHERE id=?", (signal_id,))
-            conn.commit()
+        try:
+            col = f"tp{tp_num}_hit"
+            with sqlite3.connect(self.db_path, timeout=10) as conn:
+                conn.execute(f"UPDATE trades SET {col}=1 WHERE id=?", (signal_id,))
+                if tp_num == 1:
+                    conn.execute("UPDATE trades SET be_moved=1 WHERE id=?", (signal_id,))
+                conn.commit()
+        except sqlite3.Error as e:
+            logger.error(f"Failed to update TP hit for {signal_id}: {e}")
 
     def close_trade(self, signal_id: str, result: str, actual_rr: float):
-        with sqlite3.connect(self.db_path) as conn:
-            conn.execute("""
-                UPDATE trades SET status='closed', result=?, actual_rr=?, closed_at=?
-                WHERE id=?
-            """, (result, actual_rr, datetime.now(timezone.utc).isoformat(), signal_id))
-            conn.commit()
+        try:
+            with sqlite3.connect(self.db_path, timeout=10) as conn:
+                conn.execute("""
+                    UPDATE trades SET status='closed', result=?, actual_rr=?, closed_at=?
+                    WHERE id=?
+                """, (result, actual_rr, datetime.now(timezone.utc).isoformat(), signal_id))
+                conn.commit()
+        except sqlite3.Error as e:
+            logger.error(f"Failed to close trade {signal_id}: {e}")
 
     def get_open_trades(self) -> List[Dict]:
-        with sqlite3.connect(self.db_path) as conn:
-            conn.row_factory = sqlite3.Row
-            rows = conn.execute(
-                "SELECT * FROM trades WHERE status='open' ORDER BY opened_at DESC"
-            ).fetchall()
-            return [dict(r) for r in rows]
+        try:
+            with sqlite3.connect(self.db_path, timeout=10) as conn:
+                conn.row_factory = sqlite3.Row
+                rows = conn.execute(
+                    "SELECT * FROM trades WHERE status='open' ORDER BY opened_at DESC"
+                ).fetchall()
+                return [dict(r) for r in rows]
+        except sqlite3.Error as e:
+            logger.error(f"Failed to get open trades: {e}")
+            return []
 
     def get_performance_stats(self, days: int = 30) -> Dict:
-        cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
-        with sqlite3.connect(self.db_path) as conn:
-            rows = conn.execute("""
-                SELECT result, session, actual_rr FROM trades
-                WHERE status='closed' AND opened_at >= ?
-            """, (cutoff,)).fetchall()
+        try:
+            cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+            with sqlite3.connect(self.db_path, timeout=10) as conn:
+                rows = conn.execute("""
+                    SELECT result, session, actual_rr FROM trades
+                    WHERE status='closed' AND opened_at >= ?
+                """, (cutoff,)).fetchall()
 
-        if not rows:
+            if not rows:
+                return {"total_trades": 0, "win_rate": 0, "avg_rr": 0}
+
+            total = len(rows)
+            wins = sum(1 for r in rows if r[0] == "win")
+            losses = total - wins
+            win_rate = (wins / total * 100) if total > 0 else 0
+
+            rrs = [r[2] for r in rows if r[2] and r[0] == "win"]
+            avg_rr = sum(rrs) / len(rrs) if rrs else 0
+
+            session_wins = {}
+            for r in rows:
+                sess = r[1] or "unknown"
+                if r[0] == "win":
+                    session_wins[sess] = session_wins.get(sess, 0) + 1
+            best_session = max(session_wins, key=session_wins.get) if session_wins else "N/A"
+
+            return {
+                "total_trades": total,
+                "wins": wins,
+                "losses": losses,
+                "win_rate": round(win_rate, 1),
+                "avg_rr": round(avg_rr, 2),
+                "best_session": best_session,
+                "month": datetime.now(timezone.utc).strftime("%B %Y"),
+            }
+        except sqlite3.Error as e:
+            logger.error(f"Failed to get performance stats: {e}")
             return {"total_trades": 0, "win_rate": 0, "avg_rr": 0}
 
-        total = len(rows)
-        wins = sum(1 for r in rows if r[0] == "win")
-        losses = total - wins
-        win_rate = (wins / total * 100) if total > 0 else 0
-
-        rrs = [r[2] for r in rows if r[2] and r[0] == "win"]
-        avg_rr = sum(rrs) / len(rrs) if rrs else 0
-
-        # Best session
-        session_wins = {}
-        for r in rows:
-            sess = r[1] or "unknown"
-            if r[0] == "win":
-                session_wins[sess] = session_wins.get(sess, 0) + 1
-        best_session = max(session_wins, key=session_wins.get) if session_wins else "N/A"
-
-        return {
-            "total_trades": total,
-            "wins": wins,
-            "losses": losses,
-            "win_rate": round(win_rate, 1),
-            "avg_rr": round(avg_rr, 2),
-            "best_session": best_session,
-            "month": datetime.now(timezone.utc).strftime("%B %Y"),
-        }
-
     def count_trades_today(self, session: str = None) -> int:
-        today = datetime.now(timezone.utc).date().isoformat()
-        with sqlite3.connect(self.db_path) as conn:
-            if session:
-                count = conn.execute(
-                    "SELECT COUNT(*) FROM trades WHERE opened_at LIKE ? AND session=?",
-                    (f"{today}%", session)
-                ).fetchone()[0]
-            else:
-                count = conn.execute(
-                    "SELECT COUNT(*) FROM trades WHERE opened_at LIKE ?",
-                    (f"{today}%",)
-                ).fetchone()[0]
-        return count
+        try:
+            today = datetime.now(timezone.utc).date().isoformat()
+            with sqlite3.connect(self.db_path, timeout=10) as conn:
+                if session:
+                    count = conn.execute(
+                        "SELECT COUNT(*) FROM trades WHERE opened_at LIKE ? AND session=?",
+                        (f"{today}%", session)
+                    ).fetchone()[0]
+                else:
+                    count = conn.execute(
+                        "SELECT COUNT(*) FROM trades WHERE opened_at LIKE ?",
+                        (f"{today}%",)
+                    ).fetchone()[0]
+            return count
+        except sqlite3.Error as e:
+            logger.error(f"Failed to count trades today: {e}")
+            return 0
 
 
 # ──────────────────────────────────────────────────────────────────────────────

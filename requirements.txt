@@ -21,6 +21,9 @@ requests>=2.31.0
 matplotlib>=3.7.0
 Pillow>=10.0.0
 
+# Testing
+pytest>=7.0.0
+
 # Optional — uncomment as needed
 # ccxt>=4.0.0            # for crypto data via exchange APIs
 # metaapi-cloud-sdk      # for MetaAPI (live MT4/MT5 data + execution)

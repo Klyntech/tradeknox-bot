@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#0a0a0a"/>
+  <rect x="40" y="40" width="1120" height="550" rx="20" fill="#131722" stroke="#D4A843" stroke-width="2" opacity="0.8"/>
+  
+  <!-- Logo -->
+  <rect x="80" y="80" width="80" height="80" rx="12" fill="#D4A843" opacity="0.15"/>
+  <text x="120" y="135" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-weight="700" font-size="36" fill="#D4A843">TK</text>
+  
+  <!-- Brand name -->
+  <text x="180" y="135" font-family="Inter, system-ui, sans-serif" font-weight="700" font-size="42" fill="#ffffff">TradeKnox</text>
+  
+  <!-- Tagline -->
+  <text x="600" y="260" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="56" fill="#ffffff">Institutional-Grade</text>
+  <text x="600" y="330" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="56" fill="#D4A843">Trading Signals</text>
+  
+  <!-- Stats -->
+  <text x="600" y="420" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-weight="400" font-size="28" fill="#787b86">53% Win Rate  ·  1.45 R:R  ·  116+ Signals Tested</text>
+  
+  <!-- CTA -->
+  <rect x="420" y="460" width="360" height="60" rx="12" fill="#D4A843"/>
+  <text x="600" y="500" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="22" fill="#0a0a0a">Start Free at t.me/TradeKnoxBot</text>
+  
+  <!-- URL -->
+  <text x="600" y="570" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="400" font-size="18" fill="#787b86">tradeknox.com</text>
+</svg>

@@ -9,10 +9,25 @@ import asyncio
 import hashlib
 import logging
 import os
+import signal
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional, Set
 
 logger = logging.getLogger(__name__)
+
+# ── Graceful shutdown ────────────────────────────────────────────────────────
+_shutdown_requested = False
+
+
+def _handle_shutdown(signum, frame):
+    global _shutdown_requested
+    sig_name = signal.Signals(signum).name
+    logger.info(f"Received {sig_name} — shutting down gracefully...")
+    _shutdown_requested = True
+
+
+signal.signal(signal.SIGTERM, _handle_shutdown)
+signal.signal(signal.SIGINT, _handle_shutdown)
 
 try:
     from telegram import Bot, constants, Update
@@ -77,11 +92,16 @@ class TradingSignalBot:
             self.bot = Bot(token=config.TELEGRAM_TOKEN)
 
     async def send_telegram(self, chat_id: str, text: str, delay_seconds: int = 0):
-        """Send a message to a Telegram channel with optional delay (anti-leak)."""
+        """Send a message to a Telegram channel with retry logic and optional delay."""
         if delay_seconds > 0:
             await asyncio.sleep(delay_seconds)
 
-        if self.bot:
+        if not self.bot:
+            logger.info(f"[DRY RUN → {chat_id}]\n{text}")
+            return
+
+        max_retries = 3
+        for attempt in range(max_retries):
             try:
                 await self.bot.send_message(
                     chat_id=chat_id,
@@ -90,17 +110,20 @@ class TradingSignalBot:
                     disable_web_page_preview=True
                 )
                 logger.info(f"Telegram message sent to {chat_id}")
-            except TelegramError as e:
-                logger.error(f"Telegram send failed: {e}")
-        else:
-            # Dry-run: log to console
-            logger.info(f"[DRY RUN → {chat_id}]\n{text}")
+                return
+            except Exception as e:
+                wait = 2 ** attempt  # 1s, 2s, 4s
+                if attempt < max_retries - 1:
+                    logger.warning(f"Telegram send attempt {attempt + 1} failed: {e}. Retrying in {wait}s...")
+                    await asyncio.sleep(wait)
+                else:
+                    logger.error(f"Telegram send failed after {max_retries} attempts: {e}")
 
     async def send_telegram_with_chart(
         self, chat_id: str, text: str, chart_path: str,
         is_pro: bool = True, delay_seconds: int = 0
     ):
-        """Send a chart image with text caption. Pro/VIP get full chart, free get blurred."""
+        """Send a chart image with text caption and retry logic."""
         if delay_seconds > 0:
             await asyncio.sleep(delay_seconds)
 
@@ -108,39 +131,44 @@ class TradingSignalBot:
             logger.info(f"[DRY RUN → {chat_id}] (chart: {'full' if is_pro else 'blurred'})\n{text}")
             return
 
-        try:
-            if is_pro:
-                # Full chart
-                with open(chart_path, "rb") as img:
-                    await self.bot.send_photo(
-                        chat_id=chat_id,
-                        photo=img,
-                        caption=text,
-                        parse_mode=constants.ParseMode.MARKDOWN_V2,
-                    )
-            else:
-                # Blurred chart for free tier
-                blurred_bytes = self._render_blurred(chart_path)
-                if blurred_bytes:
-                    from io import BytesIO
-                    buf = BytesIO(blurred_bytes)
-                    buf.name = "chart_blurred.png"
-                    await self.bot.send_photo(
-                        chat_id=chat_id,
-                        photo=buf,
-                        caption=text,
-                        parse_mode=constants.ParseMode.MARKDOWN_V2,
-                    )
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                if is_pro:
+                    with open(chart_path, "rb") as img:
+                        await self.bot.send_photo(
+                            chat_id=chat_id,
+                            photo=img,
+                            caption=text,
+                            parse_mode=constants.ParseMode.MARKDOWN_V2,
+                        )
                 else:
-                    # Fallback to text-only if blur fails
-                    await self.send_telegram(chat_id, text)
-                    return
+                    blurred_bytes = self._render_blurred(chart_path)
+                    if blurred_bytes:
+                        from io import BytesIO
+                        buf = BytesIO(blurred_bytes)
+                        buf.name = "chart_blurred.png"
+                        await self.bot.send_photo(
+                            chat_id=chat_id,
+                            photo=buf,
+                            caption=text,
+                            parse_mode=constants.ParseMode.MARKDOWN_V2,
+                        )
+                    else:
+                        await self.send_telegram(chat_id, text)
+                        return
 
-            logger.info(f"Telegram chart sent to {chat_id}")
-        except TelegramError as e:
-            logger.error(f"Telegram chart send failed: {e}")
-            # Fallback to text-only
-            await self.send_telegram(chat_id, text)
+                logger.info(f"Telegram chart sent to {chat_id}")
+                return
+            except Exception as e:
+                wait = 2 ** attempt
+                if attempt < max_retries - 1:
+                    logger.warning(f"Telegram chart send attempt {attempt + 1} failed: {e}. Retrying in {wait}s...")
+                    await asyncio.sleep(wait)
+                else:
+                    logger.error(f"Telegram chart send failed after {max_retries} attempts: {e}")
+                    # Fallback to text-only
+                    await self.send_telegram(chat_id, text)
 
     def _generate_signal_id(self, symbol: str, direction: str, entry: float) -> str:
         """Generate a deduplication key for a signal."""
@@ -499,14 +527,19 @@ class TradingSignalBot:
         logger.info(f"   Min confidence: {self.config.MIN_CONFIDENCE_PCT}%")
         logger.info(f"   Min score: {self.config.MIN_SCORE_THRESHOLD}/{sum(self.config.SCORE_WEIGHTS.values())}")
 
-        while True:
+        while not _shutdown_requested:
             try:
                 await self.run_scan_cycle()
             except Exception as e:
                 logger.exception(f"Scan cycle error: {e}")
 
+            if _shutdown_requested:
+                break
+
             logger.debug(f"Sleeping {self.config.SCAN_INTERVAL_SECONDS}s...")
             await asyncio.sleep(self.config.SCAN_INTERVAL_SECONDS)
+
+        logger.info("Bot shut down gracefully")
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -520,6 +553,11 @@ def run_bot_with_commands():
         start_command, subscribe_command, subscribe_callback,
         status_command, stats_command, key_command, help_command
     )
+
+    # Validate config at startup
+    if not CONFIG.validate_or_exit():
+        logger.error("Startup aborted due to configuration errors")
+        return
 
     if not TELEGRAM_AVAILABLE or CONFIG.TELEGRAM_TOKEN == "YOUR_BOT_TOKEN":
         logger.warning("Telegram not available — running in dry-run mode")

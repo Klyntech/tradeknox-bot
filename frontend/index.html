@@ -6,15 +6,99 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0a0a0a" />
     <meta name="description" content="Institutional-grade trading signals powered by market structure analysis. Backtested 53% win rate. Free, Pro, and VIP plans." />
+    <link rel="canonical" href="https://tradeknox.com/" />
+
+    <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content="TradeKnox — SMC Trading Signals" />
     <meta property="og:description" content="Institutional-grade trading signals powered by market structure analysis. Backtested 53% win rate." />
-    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:image" content="https://tradeknox.com/og-image.svg" />
+    <meta property="og:url" content="https://tradeknox.com/" />
+    <meta property="og:site_name" content="TradeKnox" />
+
+    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="TradeKnox — SMC Trading Signals" />
+    <meta name="twitter:description" content="Institutional-grade trading signals powered by market structure analysis. Backtested 53% win rate." />
+    <meta name="twitter:image" content="https://tradeknox.com/og-image.svg" />
+
     <title>TradeKnox — SMC Trading Signals</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- FAQ Schema (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What pairs do you cover?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "XAUUSD (Gold) and GBPJPY — the only two pairs that showed consistent profitability across 6 months of backtesting."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How accurate are the signals?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "53% win rate with 1.45 R:R reward-to-risk. That means you can lose nearly half your trades and still be profitable."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do you generate signals?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "6 category scoring system (0-20 points): trend detection, order blocks, BOS/CHoCH, RSI, S/R zones, and session filters. Only trades scoring 11+ and passing 2+ strategy checks are sent."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I use any broker?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Any broker with MT4/MT5. We do not take trades for you — we give you entry, stop loss, and take profit levels. You execute."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do payments work?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Stripe checkout. Credit card or PayPal. Cancel anytime. No contracts, no hidden fees."
+          }
+        }
+      ]
+    }
+    </script>
+
+    <!-- Organization Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "TradeKnox",
+      "url": "https://tradeknox.com",
+      "logo": "https://tradeknox.com/favicon.svg",
+      "description": "Institutional-grade trading signals powered by market structure analysis."
+    }
+    </script>
+
+    <!-- Analytics placeholder — replace MEASUREMENT_ID with your GA4 ID -->
+    <!--
+    <script async src="https://www.googletagmanager.com/gtag/js?id=MEASUREMENT_ID"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'MEASUREMENT_ID');
+    </script>
+    -->
   </head>
   <body>
     <div id="root"></div>
