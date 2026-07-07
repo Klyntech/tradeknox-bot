@@ -104,18 +104,19 @@ python app.py
 
 ## Backtested Performance
 
-6-month backtest (Jan–Jul 2026) on XAUUSD + GBPJPY, 4h timeframe:
+3.5-year backtest (Jan 2023 — Jul 2026) on 3 pairs, 8 strategies:
 
-| Metric | Value |
-|--------|-------|
-| Total trades | 116 |
-| Win rate | 52.6% |
-| Avg R:R | 1:1.45 |
-| Combined return | +14.84% |
-| Max drawdown | 10.6% |
-| Min score threshold | 11/20 |
+| Pair | Best Strategy | Win Rate | Profit Factor | Annual Return |
+|------|---------------|----------|---------------|---------------|
+| **XAUUSD** | EMA Crossover (MM-008) | 58.0% | **2.17** | ~18.9% |
+| **USDJPY** | EMA Crossover (MM-008) | 52.1% | **1.82** | ~6.3% |
+| **GBPJPY** | Stochastic Extreme (MM-016) | 54.2% | **1.69** | ~2.0% |
 
-Per-pair configs are in `strategies.py` with day-of-week filters.
+**Strategies:** MA Crossover, Breakout, RSI Extremes, EMA Crossover (MM-008), Heikin Ashi Trend (MM-017), Stochastic Extreme (MM-016), Session Timing, EMA Alignment
+
+**Excluded:** EURUSD, GBPUSD (consistently unprofitable)
+
+Full backtest report: [`docs/10-backtest-report.md`](docs/10-backtest-report.md)
 
 ## Tech Stack
 
