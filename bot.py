@@ -10,7 +10,7 @@ import hashlib
 import logging
 import os
 from datetime import datetime, timezone, timedelta
-from typing import Dict, Optional, Set
+from typing import Dict, List, Optional, Set
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +63,16 @@ class TradingSignalBot:
 
         self.db = TradeDatabase(config.TRADES_DB_PATH)
 
+        # Chart renderer (lazy import)
+        self._chart_available = False
+        try:
+            from charts import render_signal_chart, render_blurred_chart
+            self._render_chart = render_signal_chart
+            self._render_blurred = render_blurred_chart
+            self._chart_available = True
+        except ImportError:
+            logger.warning("charts.py not available — signals will be text-only")
+
         if TELEGRAM_AVAILABLE and config.TELEGRAM_TOKEN != "YOUR_BOT_TOKEN":
             self.bot = Bot(token=config.TELEGRAM_TOKEN)
 
@@ -85,6 +95,52 @@ class TradingSignalBot:
         else:
             # Dry-run: log to console
             logger.info(f"[DRY RUN → {chat_id}]\n{text}")
+
+    async def send_telegram_with_chart(
+        self, chat_id: str, text: str, chart_path: str,
+        is_pro: bool = True, delay_seconds: int = 0
+    ):
+        """Send a chart image with text caption. Pro/VIP get full chart, free get blurred."""
+        if delay_seconds > 0:
+            await asyncio.sleep(delay_seconds)
+
+        if not self.bot:
+            logger.info(f"[DRY RUN → {chat_id}] (chart: {'full' if is_pro else 'blurred'})\n{text}")
+            return
+
+        try:
+            if is_pro:
+                # Full chart
+                with open(chart_path, "rb") as img:
+                    await self.bot.send_photo(
+                        chat_id=chat_id,
+                        photo=img,
+                        caption=text,
+                        parse_mode=constants.ParseMode.MARKDOWN_V2,
+                    )
+            else:
+                # Blurred chart for free tier
+                blurred_bytes = self._render_blurred(chart_path)
+                if blurred_bytes:
+                    from io import BytesIO
+                    buf = BytesIO(blurred_bytes)
+                    buf.name = "chart_blurred.png"
+                    await self.bot.send_photo(
+                        chat_id=chat_id,
+                        photo=buf,
+                        caption=text,
+                        parse_mode=constants.ParseMode.MARKDOWN_V2,
+                    )
+                else:
+                    # Fallback to text-only if blur fails
+                    await self.send_telegram(chat_id, text)
+                    return
+
+            logger.info(f"Telegram chart sent to {chat_id}")
+        except TelegramError as e:
+            logger.error(f"Telegram chart send failed: {e}")
+            # Fallback to text-only
+            await self.send_telegram(chat_id, text)
 
     def _generate_signal_id(self, symbol: str, direction: str, entry: float) -> str:
         """Generate a deduplication key for a signal."""
@@ -239,6 +295,11 @@ class TradingSignalBot:
                 "reason": full_reason,
                 "position_size": risk.position_size,
                 "breakdown": score.breakdown,
+                # Chart data
+                "_df": df_primary,
+                "_order_blocks": getattr(entry_setup, 'order_blocks', []),
+                "_fvgs": getattr(entry_setup, 'fvgs', []),
+                "_bos": structure.last_bos,
             })
 
         if not signals_found:
@@ -298,15 +359,49 @@ class TradingSignalBot:
             reason=signal["reason"]
         )
 
+        # ── Generate chart if available ───────────────────────────────────────
+        chart_path = None
+        if self._chart_available and "_df" in signal:
+            try:
+                chart_path = await self._render_chart(
+                    signal=signal,
+                    df=signal["_df"],
+                    order_blocks=signal.get("_order_blocks", []),
+                    fvgs=signal.get("_fvgs", []),
+                    bos=signal.get("_bos"),
+                )
+            except Exception as e:
+                logger.warning(f"Chart generation failed: {e}")
+
         # ── Layer 13: Security — Private channel first ─────────────────────
-        await self.send_telegram(config.PRIVATE_CHANNEL_ID, msg)
+        if chart_path:
+            # Send chart with caption (Pro/VIP get full chart, free get blurred)
+            await self.send_telegram_with_chart(
+                config.PRIVATE_CHANNEL_ID, msg, chart_path, is_pro=True
+            )
+        else:
+            # Text-only fallback
+            await self.send_telegram(config.PRIVATE_CHANNEL_ID, msg)
 
         # Public channel with delay (anti-leak)
         if config.PUBLIC_CHANNEL_ID:
             delay = config.PUBLIC_DELAY_MINUTES * 60
-            asyncio.create_task(
-                self.send_telegram(config.PUBLIC_CHANNEL_ID, msg, delay_seconds=delay)
-            )
+            if chart_path:
+                asyncio.create_task(
+                    self.send_telegram_with_chart(
+                        config.PUBLIC_CHANNEL_ID, msg, chart_path,
+                        is_pro=True, delay_seconds=delay
+                    )
+                )
+            else:
+                asyncio.create_task(
+                    self.send_telegram(config.PUBLIC_CHANNEL_ID, msg, delay_seconds=delay)
+                )
+
+        # Clean up chart file
+        if chart_path:
+            from charts import _cleanup
+            _cleanup(chart_path)
 
         logger.info(
             f"Signal fired: {signal['symbol']} {signal['direction'].upper()} "

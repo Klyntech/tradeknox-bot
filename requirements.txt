@@ -17,11 +17,14 @@ stripe>=7.0.0
 # HTTP requests (Stripe checkout, Telegram API)
 requests>=2.31.0
 
+# Chart generation
+matplotlib>=3.7.0
+Pillow>=10.0.0
+
 # Optional — uncomment as needed
 # ccxt>=4.0.0            # for crypto data via exchange APIs
 # metaapi-cloud-sdk      # for MetaAPI (live MT4/MT5 data + execution)
 # aiohttp>=3.9.0         # for async HTTP requests
 
 # Development / backtesting
-# matplotlib>=3.7.0      # for equity curve plots
 # jupyter>=1.0.0         # for analysis notebooks

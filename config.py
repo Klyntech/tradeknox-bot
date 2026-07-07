@@ -97,5 +97,10 @@ class BotConfig:
     # ── Scan interval ────────────────────────────────────────────────────────
     SCAN_INTERVAL_SECONDS: int = 300    # scan every 5 minutes
 
+    # ── Chart Generation ───────────────────────────────────────────────────
+    CHART_CANDLE_COUNT: int = 100       # candles to render on chart
+    CHART_TIMEFRAME: str = "1h"         # timeframe for chart data
+    CHART_BLUR_ENABLED: bool = True     # blur charts for free tier
+
 
 CONFIG = BotConfig()
