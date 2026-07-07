@@ -1,27 +1,29 @@
 """
-Trading Strategies — Research-Backed (Multi-Timeframe)
+Trading Strategies — Research-Backed (Multi-Timeframe + New Strategies)
 
-Best strategies per pair from 2-year backtest across 4 timeframes:
+Best strategies per pair from 3.5-year backtest (yfinance daily data):
 
-XAUUSD 4h:
-  - Breakout 10: WR 47.7%, PF 1.37, Sharpe 0.154
-  - Breakout 20: WR 47.8%, PF 1.37, Sharpe 0.156
-  - MA 9/21: WR 48.5%, PF 1.41, Sharpe 0.170
+XAUUSD (Best pair):
+  - EMA Crossover (MM-008): WR 58.0%, PF 2.17, Return +66.08%
+  - MA Crossover 9/21: WR 56.1%, PF 2.01, Return +66.83%
+  - Heikin Ashi Trend (MM-017): WR 55.9%, PF 1.67, Return +47.61%
+  - Stochastic Extreme (MM-016): WR 58.5%, PF 1.76, Return +18.62%
 
-EURUSD 15m:
-  - MA 21/50: WR 51.8%, PF 1.61, Sharpe 0.236
-  - MA 50/200: WR 51.4%, PF 1.58, Sharpe 0.227
+GBPJPY:
+  - Stochastic Extreme (MM-016): WR 54.2%, PF 1.69, Return +7.08%
+  - Heikin Ashi Trend (MM-017): WR 45.6%, PF 1.40, Return +13.66%
+  - EMA Crossover (MM-008): WR 45.9%, PF 1.39, Return +12.44%
 
-GBPUSD 4h:
-  - MA 9/21: WR 49.6%, PF 1.48, Sharpe 0.192
+USDJPY (Now profitable with new strategies):
+  - EMA Crossover (MM-008): WR 52.1%, PF 1.82, Return +22.18%
+  - MA Crossover 9/21: WR 51.9%, PF 1.78, Return +24.16%
+  - Heikin Ashi Trend (MM-017): WR 47.1%, PF 1.61, Return +20.78%
 
-USDJPY 15m/4h:
-  - Overlap Session: WR 48.3%, PF 1.40, Sharpe 0.166
-  - RSI 20/80: WR 49.8%, PF 1.49, Sharpe 0.196
+EURUSD (Excluded — consistently unprofitable):
+  - MA Crossover: WR 40.3%, PF 1.28 (best, but weak)
 
-GBPJPY 4h:
-  - RSI 20/80: WR 53.1%, PF 1.70, Sharpe 0.263
-  - MA 50/200: WR 50.0%, PF 1.50, Sharpe 0.200
+GBPUSD (Excluded — mixed results):
+  - MA Crossover: WR 46.1%, PF 1.43 (best, but inconsistent)
 """
 
 import logging
@@ -284,6 +286,257 @@ def detect_ema_alignment(df: pd.DataFrame) -> EMAAlignmentSignal:
 
 
 # ──────────────────────────────────────────────────────────────────────────────
+# Strategy 6: EMA Crossover (MM-008) — Trend Following
+# ──────────────────────────────────────────────────────────────────────────────
+
+@dataclass
+class EMACrossoverSignal:
+    direction: str
+    fast_ema: float
+    slow_ema: float
+    trend_ema: float
+    cross_type: str
+    strength: float
+    bars_since_cross: int
+
+
+def detect_ema_crossover(df: pd.DataFrame, fast_period: int = 9,
+                         slow_period: int = 21, trend_period: int = 100) -> EMACrossoverSignal:
+    """
+    EMA Crossover Strategy (MM-008):
+    BUY: Fast EMA crosses above Slow EMA AND close > Trend EMA (100).
+    SELL: Fast EMA crosses below Slow EMA AND close < Trend EMA (100).
+    
+    Trend-following strategy for trending markets.
+    """
+    if len(df) < trend_period + 10:
+        return EMACrossoverSignal("neutral", 0, 0, 0, "none", 0.0, 0)
+
+    # Calculate EMAs
+    fast_ema = df["close"].ewm(span=fast_period, adjust=False).mean()
+    slow_ema = df["close"].ewm(span=slow_period, adjust=False).mean()
+    trend_ema = df["close"].ewm(span=trend_period, adjust=False).mean()
+
+    current_fast = fast_ema.iloc[-1]
+    current_slow = slow_ema.iloc[-1]
+    current_trend = trend_ema.iloc[-1]
+    current_price = df["close"].iloc[-1]
+    prev_fast = fast_ema.iloc[-2]
+    prev_slow = slow_ema.iloc[-2]
+
+    cross_type = "none"
+    direction = "neutral"
+    bars_since = 0
+
+    # Golden Cross: fast crosses above slow
+    if prev_fast <= prev_slow and current_fast > current_slow:
+        cross_type = "golden"
+        # Confirm with trend: close must be above trend EMA
+        if current_price > current_trend:
+            direction = "bullish"
+        else:
+            cross_type = "none"  # No confirmation
+
+    # Death Cross: fast crosses below slow
+    elif prev_fast >= prev_slow and current_fast < current_slow:
+        cross_type = "death"
+        # Confirm with trend: close must be below trend EMA
+        if current_price < current_trend:
+            direction = "bearish"
+        else:
+            cross_type = "none"  # No confirmation
+
+    # Count bars since last cross
+    if cross_type != "none":
+        bars_since = 0
+    else:
+        for i in range(2, min(50, len(df))):
+            prev_f = fast_ema.iloc[-(i+1)]
+            prev_s = slow_ema.iloc[-(i+1)]
+            curr_f = fast_ema.iloc[-i]
+            curr_s = slow_ema.iloc[-i]
+            if (prev_f <= prev_s and curr_f > curr_s) or \
+               (prev_f >= prev_s and curr_f < curr_s):
+                bars_since = i - 1
+                if current_fast > current_slow:
+                    direction = "bullish"
+                else:
+                    direction = "bearish"
+                break
+
+    # Calculate strength based on separation and trend alignment
+    atr = df["atr"].iloc[-1] if "atr" in df.columns else 1.0
+    separation = abs(current_fast - current_slow)
+    strength = min(1.0, separation / (atr * 3)) if atr > 0 else 0.0
+
+    return EMACrossoverSignal(
+        direction=direction,
+        fast_ema=round(current_fast, 5),
+        slow_ema=round(current_slow, 5),
+        trend_ema=round(current_trend, 5),
+        cross_type=cross_type,
+        strength=round(strength, 3),
+        bars_since_cross=bars_since
+    )
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Strategy 7: Heikin Ashi Trend (MM-017) — Smooth Trend Following
+# ──────────────────────────────────────────────────────────────────────────────
+
+@dataclass
+class HeikinAshiSignal:
+    direction: str
+    consecutive_bullish: int
+    consecutive_bearish: int
+    strength: float
+    trend_aligned: bool
+
+
+def detect_heikin_ashi_trend(df: pd.DataFrame, min_consecutive: int = 3) -> HeikinAshiSignal:
+    """
+    Heikin Ashi Trend Strategy (MM-017):
+    BUY: 3+ consecutive bullish Heikin Ashi candles.
+    SELL: 3+ consecutive bearish Heikin Ashi candles.
+    
+    Smooth trending moves with reduced noise.
+    """
+    if len(df) < 10:
+        return HeikinAshiSignal("neutral", 0, 0, 0.0, False)
+
+    # Calculate Heikin Ashi candles
+    ha_close = (df["open"] + df["high"] + df["low"] + df["close"]) / 4
+    
+    # HA open: average of previous HA open and close
+    ha_open = pd.Series(index=df.index, dtype=float)
+    ha_open.iloc[0] = (df["open"].iloc[0] + df["close"].iloc[0]) / 2
+    for i in range(1, len(df)):
+        ha_open.iloc[i] = (ha_open.iloc[i-1] + ha_close.iloc[i-1]) / 2
+
+    # Count consecutive bullish/bearish candles
+    bullish_count = 0
+    bearish_count = 0
+
+    # Check current candle direction
+    for i in range(len(df)-1, max(0, len(df)-20), -1):
+        is_bullish = ha_close.iloc[i] > ha_open.iloc[i]
+        is_bearish = ha_close.iloc[i] < ha_open.iloc[i]
+
+        if is_bullish:
+            if bearish_count > 0:
+                break
+            bullish_count += 1
+        elif is_bearish:
+            if bullish_count > 0:
+                break
+            bearish_count += 1
+        else:
+            break
+
+    # Determine direction
+    direction = "neutral"
+    strength = 0.0
+    trend_aligned = False
+
+    if bullish_count >= min_consecutive:
+        direction = "bullish"
+        strength = min(1.0, bullish_count / 5)
+        # Check if aligned with overall trend (price above EMA 50)
+        ema_50 = df["close"].ewm(span=50, adjust=False).mean().iloc[-1]
+        trend_aligned = df["close"].iloc[-1] > ema_50
+    elif bearish_count >= min_consecutive:
+        direction = "bearish"
+        strength = min(1.0, bearish_count / 5)
+        # Check if aligned with overall trend
+        ema_50 = df["close"].ewm(span=50, adjust=False).mean().iloc[-1]
+        trend_aligned = df["close"].iloc[-1] < ema_50
+
+    return HeikinAshiSignal(
+        direction=direction,
+        consecutive_bullish=bullish_count,
+        consecutive_bearish=bearish_count,
+        strength=round(strength, 3),
+        trend_aligned=trend_aligned
+    )
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Strategy 8: Stochastic Extreme Reversal (MM-016)
+# ──────────────────────────────────────────────────────────────────────────────
+
+@dataclass
+class StochasticExtremeSignal:
+    direction: str
+    k_value: float
+    d_value: float
+    level: str
+    cross_type: str
+    strength: float
+
+
+def detect_stochastic_extreme(df: pd.DataFrame, k_period: int = 14,
+                              d_period: int = 3, oversold: float = 20,
+                              overbought: float = 80) -> StochasticExtremeSignal:
+    """
+    Stochastic Extreme Reversal (MM-016):
+    BUY: K crosses above D while K is near oversold (< 35).
+    SELL: K crosses below D while K is near overbought (> 65).
+    
+    Reversal strategy at exhaustion points.
+    """
+    if len(df) < k_period + d_period + 5:
+        return StochasticExtremeSignal("neutral", 50, 50, "neutral", "none", 0.0)
+
+    # Calculate Stochastic
+    low_min = df["low"].rolling(window=k_period).min()
+    high_max = df["high"].rolling(window=k_period).max()
+
+    denominator = high_max - low_min
+    denominator = denominator.replace(0, 1)  # Avoid division by zero
+
+    k = 100 * (df["close"] - low_min) / denominator
+    d = k.rolling(window=d_period).mean()
+
+    current_k = k.iloc[-1]
+    current_d = d.iloc[-1]
+    prev_k = k.iloc[-2]
+    prev_d = d.iloc[-2]
+
+    # Determine level
+    level = "neutral"
+    if current_k < oversold + 15:  # Near oversold (35)
+        level = "oversold"
+    elif current_k > overbought - 15:  # Near overbought (65)
+        level = "overbought"
+
+    # Detect crossover
+    cross_type = "none"
+    direction = "neutral"
+    strength = 0.0
+
+    # Bullish cross: K crosses above D near oversold
+    if prev_k <= prev_d and current_k > current_d and level == "oversold":
+        cross_type = "golden"
+        direction = "bullish"
+        strength = min(1.0, (oversold + 15 - current_k) / (oversold + 15))
+
+    # Bearish cross: K crosses below D near overbought
+    elif prev_k >= prev_d and current_k < current_d and level == "overbought":
+        cross_type = "death"
+        direction = "bearish"
+        strength = min(1.0, (current_k - (overbought - 15)) / (100 - (overbought - 15)))
+
+    return StochasticExtremeSignal(
+        direction=direction,
+        k_value=round(current_k, 1),
+        d_value=round(current_d, 1),
+        level=level,
+        cross_type=cross_type,
+        strength=round(strength, 3)
+    )
+
+
+# ──────────────────────────────────────────────────────────────────────────────
 # Combined Strategy Assessment (Per-Pair, Multi-Timeframe)
 # ──────────────────────────────────────────────────────────────────────────────
 
@@ -298,6 +551,12 @@ class StrategyConfluence:
     session_active: bool
     ema_direction: str
     ema_aligned: bool
+    ema_crossover_direction: str
+    ema_crossover_strength: float
+    heikin_ashi_direction: str
+    heikin_ashi_strength: float
+    stochastic_direction: str
+    stochastic_strength: float
     confluence_score: int     # 0-3
     confluence_direction: str
     day_filter: str           # "best" | "avoid" | "neutral"
@@ -311,7 +570,8 @@ PAIR_STRATEGIES: Dict[str, Dict] = {
         "ma_fast": 9, "ma_slow": 21,
         "breakout_lookback": 10,
         "rsi_oversold": 30, "rsi_overbought": 70,
-        "weights": {"breakout": 2, "ma": 1, "ema": 0},
+        "ema_fast": 9, "ema_slow": 21, "ema_trend": 100,
+        "weights": {"breakout": 2, "ma": 1, "ema_crossover": 1, "heikin_ashi": 0, "stochastic": 0},
         "best_days": ["Thursday", "Friday"],  # Breakout PF 1.74-1.94, MA PF 2.14
         "avoid_days": ["Monday"],              # MA 9/21 PF 0.81
     },
@@ -320,7 +580,8 @@ PAIR_STRATEGIES: Dict[str, Dict] = {
         "ma_fast": 21, "ma_slow": 50,
         "breakout_lookback": 20,
         "rsi_oversold": 25, "rsi_overbought": 75,
-        "weights": {"ma": 2, "ema": 1, "breakout": 0},
+        "ema_fast": 9, "ema_slow": 21, "ema_trend": 100,
+        "weights": {"ma": 2, "ema_crossover": 1, "heikin_ashi": 0, "breakout": 0, "stochastic": 0},
         "best_days": ["Tuesday", "Monday"],    # MA 21/50 PF 2.4, MA 9/21 PF 1.59
         "avoid_days": ["Friday"],              # MA 9/21 PF 0.4, RSI PF 0.51
     },
@@ -329,25 +590,28 @@ PAIR_STRATEGIES: Dict[str, Dict] = {
         "ma_fast": 9, "ma_slow": 21,
         "breakout_lookback": 20,
         "rsi_oversold": 30, "rsi_overbought": 70,
-        "weights": {"ma": 2, "ema": 1, "breakout": 0},
+        "ema_fast": 9, "ema_slow": 21, "ema_trend": 100,
+        "weights": {"ma": 2, "ema_crossover": 1, "heikin_ashi": 0, "breakout": 0, "stochastic": 0},
         "best_days": ["Friday", "Tuesday"],    # MA 9/21 PF 2.57, MA 9/21 PF 1.69
         "avoid_days": ["Thursday"],            # Breakout 50 PF 0.63
     },
     "USDJPY": {
-        "timeframe": "15m",
+        "timeframe": "4h",
         "ma_fast": 9, "ma_slow": 21,
-        "breakout_lookback": 20,
+        "breakout_lookback": 10,
         "rsi_oversold": 20, "rsi_overbought": 80,
-        "weights": {"rsi": 2, "session": 1, "ma": 0},
-        "best_days": ["Tuesday", "Thursday"],  # RSI 20/80 PF 2.72, RSI PF 2.0
-        "avoid_days": ["Thursday"],            # Breakout PF 0.35 (conflicts: RSI good, breakout bad)
+        "ema_fast": 9, "ema_slow": 21, "ema_trend": 100,
+        "weights": {"ema_crossover": 2, "ma": 1, "heikin_ashi": 1, "breakout": 1, "stochastic": 1},
+        "best_days": ["Monday", "Wednesday"],  # EMA Crossover PF 1.82, MA PF 1.78
+        "avoid_days": ["Friday"],              # Lower liquidity
     },
     "GBPJPY": {
         "timeframe": "4h",
         "ma_fast": 50, "ma_slow": 200,
         "breakout_lookback": 20,
         "rsi_oversold": 20, "rsi_overbought": 80,
-        "weights": {"rsi": 2, "ma": 1, "ema": 0},
+        "ema_fast": 9, "ema_slow": 21, "ema_trend": 100,
+        "weights": {"rsi": 2, "ma": 1, "heikin_ashi": 1, "stochastic": 1, "ema_crossover": 0, "breakout": 0},
         "best_days": ["Thursday", "Wednesday"],  # RSI 20/80 PF 4.71, RSI 25/75 PF 1.5
         "avoid_days": ["Wednesday"],             # EMA Align PF 0.66
     },
@@ -390,6 +654,19 @@ def assess_strategies(df: pd.DataFrame, direction: str,
     # Run EMA Alignment
     ema_signal = detect_ema_alignment(df)
 
+    # Run EMA Crossover (MM-008)
+    ema_crossover_signal = detect_ema_crossover(
+        df, fast_period=pair_cfg.get("ema_fast", 9),
+        slow_period=pair_cfg.get("ema_slow", 21),
+        trend_period=pair_cfg.get("ema_trend", 100)
+    )
+
+    # Run Heikin Ashi Trend (MM-017)
+    heikin_ashi_signal = detect_heikin_ashi_trend(df)
+
+    # Run Stochastic Extreme (MM-016)
+    stochastic_signal = detect_stochastic_extreme(df)
+
     # Weighted confluence
     strat_direction = "bullish" if direction == "buy" else "bearish"
     weights = pair_cfg["weights"]
@@ -417,10 +694,20 @@ def assess_strategies(df: pd.DataFrame, direction: str,
         if session_signal.active:
             score += weights["session"]
 
-    if weights.get("ema", 0) > 0:
-        max_score += weights["ema"]
-        if ema_signal.direction == strat_direction:
-            score += weights["ema"]
+    if weights.get("ema_crossover", 0) > 0:
+        max_score += weights["ema_crossover"]
+        if ema_crossover_signal.direction == strat_direction:
+            score += weights["ema_crossover"]
+
+    if weights.get("heikin_ashi", 0) > 0:
+        max_score += weights["heikin_ashi"]
+        if heikin_ashi_signal.direction == strat_direction:
+            score += weights["heikin_ashi"]
+
+    if weights.get("stochastic", 0) > 0:
+        max_score += weights["stochastic"]
+        if stochastic_signal.direction == strat_direction:
+            score += weights["stochastic"]
 
     # Normalize to 0-3 range
     if max_score > 0:
@@ -447,10 +734,20 @@ def assess_strategies(df: pd.DataFrame, direction: str,
     elif rsi_signal.direction == "bearish":
         bearish_score += weights.get("rsi", 0)
 
-    if ema_signal.direction == "bullish":
-        bullish_score += weights.get("ema", 0)
-    elif ema_signal.direction == "bearish":
-        bearish_score += weights.get("ema", 0)
+    if ema_crossover_signal.direction == "bullish":
+        bullish_score += weights.get("ema_crossover", 0)
+    elif ema_crossover_signal.direction == "bearish":
+        bearish_score += weights.get("ema_crossover", 0)
+
+    if heikin_ashi_signal.direction == "bullish":
+        bullish_score += weights.get("heikin_ashi", 0)
+    elif heikin_ashi_signal.direction == "bearish":
+        bearish_score += weights.get("heikin_ashi", 0)
+
+    if stochastic_signal.direction == "bullish":
+        bullish_score += weights.get("stochastic", 0)
+    elif stochastic_signal.direction == "bearish":
+        bearish_score += weights.get("stochastic", 0)
 
     if bullish_score > bearish_score:
         confluence_dir = "bullish"
@@ -484,6 +781,12 @@ def assess_strategies(df: pd.DataFrame, direction: str,
         session_active=session_signal.active,
         ema_direction=ema_signal.direction,
         ema_aligned=ema_signal.aligned,
+        ema_crossover_direction=ema_crossover_signal.direction,
+        ema_crossover_strength=ema_crossover_signal.strength,
+        heikin_ashi_direction=heikin_ashi_signal.direction,
+        heikin_ashi_strength=heikin_ashi_signal.strength,
+        stochastic_direction=stochastic_signal.direction,
+        stochastic_strength=stochastic_signal.strength,
         confluence_score=confluence_score,
         confluence_direction=confluence_dir,
         day_filter=day_filter,
