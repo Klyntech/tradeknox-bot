@@ -2,6 +2,23 @@
 
 SMC-based trading signal bot + education bundle.
 
+## Documentation
+
+Full documentation in [`docs/`](docs/README.md):
+- [Getting Started](docs/01-getting-started.md)
+- [Architecture](docs/02-architecture.md)
+- [Strategies](docs/03-strategies.md)
+- [Scoring System](docs/04-scoring-system.md)
+- [Risk Management](docs/05-risk-management.md)
+- [Signal Pipeline](docs/06-signal-pipeline.md)
+- [Deployment](docs/07-deployment.md)
+- [Revenue Model](docs/08-revenue-model.md)
+- [Decisions](docs/09-decisions.md)
+- [Backtest Report](docs/10-backtest-report.md)
+- [API Reference](docs/11-api-reference.md)
+- [Troubleshooting](docs/12-troubleshooting.md)
+- [Changelog](docs/13-changelog.md)
+
 ## What It Does
 
 Scans XAUUSD and GBPJPY using Smart Money Concepts (market structure, order blocks, fair value gaps, Fibonacci), scores setups against a weighted confidence system, and sends formatted signals to a private Telegram channel.
