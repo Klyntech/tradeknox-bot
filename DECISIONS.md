@@ -53,17 +53,21 @@
 - Public channel delayed 15 minutes
 - Decision: incentivizes paid subscriptions, prevents scraping
 
-## Symbols: XAUUSD + GBPJPY Only
+## Symbols: XAUUSD + GBPJPY + USDJPY
 
-- Backtested all 5 symbols (XAUUSD, EURUSD, GBPUSD, USDJPY, GBPJPY)
-- Only XAUUSD and GBPJPY were consistently profitable
-- EURUSD, GBPUSD, USDJPY excluded — unprofitable across all strategy combos
-- Combined 6-month return: +14.84%, 116 trades, 52.6% win rate
+- Backtested all 5 symbols (XAUUSD, EURUSD, GBPUSD, USDJPY, GBPJPY) on 8 strategies
+- 3.5 years of daily data (Jan 2023 — Jul 2026)
+- XAUUSD, GBPJPY, USDJPY consistently profitable
+- EURUSD, GBPUSD excluded — unprofitable across all strategies
+- XAUUSD: PF 2.17 (EMA Crossover), ~18.9%/year
+- USDJPY: PF 1.82 (EMA Crossover), ~6.3%/year
+- GBPJPY: PF 1.69 (Stochastic Extreme), ~2.0%/year
 
 ## Strategy Parameters: Per-Pair Optimization
 
-- XAUUSD: 4h, MA 9/21, Breakout 10, RSI 30/70
-- GBPJPY: 4h, MA 50/200, Breakout 20, RSI 20/80
+- XAUUSD: 4h, MA 9/21, Breakout 10, RSI 30/70, EMA 9/21/100
+- GBPJPY: 4h, MA 50/200, Breakout 20, RSI 20/80, Stochastic
+- USDJPY: 4h, MA 9/21, Breakout 10, RSI 20/80, EMA 9/21/100
 - Day-of-week filters added from backtest research
 - Confluence score from strategies.py fed into scoring engine
 
