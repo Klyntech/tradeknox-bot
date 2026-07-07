@@ -31,7 +31,8 @@
 
 - Free web service, auto-deploys from GitHub
 - Sleeps after 15 min inactivity — mitigated by UptimeRobot ping
-- Fallback: Oracle Cloud always-free VPS if needed
+- Single-process deployment: Flask (webhooks) + Telegram (bot) in one process
+- Flask runs in background thread, Telegram polling on main thread
 
 ## Data Source: yfinance (default)
 
@@ -52,8 +53,34 @@
 - Public channel delayed 15 minutes
 - Decision: incentivizes paid subscriptions, prevents scraping
 
+## Symbols: XAUUSD + GBPJPY Only
+
+- Backtested all 5 symbols (XAUUSD, EURUSD, GBPUSD, USDJPY, GBPJPY)
+- Only XAUUSD and GBPJPY were consistently profitable
+- EURUSD, GBPUSD, USDJPY excluded — unprofitable across all strategy combos
+- Combined 6-month return: +14.84%, 116 trades, 52.6% win rate
+
+## Strategy Parameters: Per-Pair Optimization
+
+- XAUUSD: 4h, MA 9/21, Breakout 10, RSI 30/70
+- GBPJPY: 4h, MA 50/200, Breakout 20, RSI 20/80
+- Day-of-week filters added from backtest research
+- Confluence score from strategies.py fed into scoring engine
+
+## Score Threshold: 11/20
+
+- Below 11 = no trade (hard gate)
+- Requires strategy confluence (min 2 strategies agreeing)
+- Tested threshold sensitivity: 11 balanced signal quality vs frequency
+
 ## Repo Visibility: Public (temporary)
 
 - Can't create private repo without GitHub org
 - Code isn't secret — strategy is in the execution
 - Make private later once org is created
+
+## NEWS_API_KEY: Optional
+
+- News filter only active when API key is configured
+- Without key, news_clear points not awarded (honest scoring)
+- Prevents 2 free points from always-true news check

@@ -1,12 +1,16 @@
 # TradeKnox
 
-SMC-based trading signal bot + education bundle.
+SMC-based trading signal bot with backtested strategies, Stripe subscriptions, and tiered access.
 
 ## What It Does
 
-Scans XAUUSD and GBPJPY using Smart Money Concepts (market structure, order blocks, fair value gaps, Fibonacci), scores setups against a weighted confidence system, and sends formatted signals to a private Telegram channel.
+Scans XAUUSD and GBPJPY using Smart Money Concepts — market structure, order blocks, fair value gaps, Fibonacci — scores setups against a weighted confidence system, and sends formatted signals to a private Telegram channel.
 
-Free users see 3 signals/day with a 15-minute delay. Pro ($29/mo) and VIP ($49/mo) get instant access.
+| Tier | Price | Features |
+|------|-------|----------|
+| Free | $0 | 3 signals/day, 15 min delay |
+| Pro | $29/mo | Unlimited signals, instant delivery |
+| VIP | $49/mo | Signals + risk management + course |
 
 ## Architecture
 
@@ -26,7 +30,7 @@ app.py                        — single-process entry (Flask + Telegram)
 └── config.py                 — all env vars and constants
 ```
 
-### Signal Pipeline
+## Signal Pipeline
 
 1. **Session Filter** — only trade during London, NY, or Overlap sessions
 2. **News Blackout** — block around high-impact events (when API configured)
@@ -41,25 +45,45 @@ app.py                        — single-process entry (Flask + Telegram)
 11. **Trade Management** — TP/SL alerts, breakeven moves, performance tracking
 12. **Telegram Output** — formatted signals with optional anti-leak delay
 
-## Coding Standards
+## Setup
 
-- **Python 3.11+** with type hints on all functions
-- **Dataclasses** for structured data, not raw dicts
-- **Logging** via `logging` module, never `print()`
-- **All config** in `config.py` via environment variables
-- **SQLite** for trade persistence and subscription tracking
-- **Async** Telegram sends with `python-telegram-bot`
-- **No hardcoded secrets** — everything via env vars
-- **Commit messages** follow conventional commits: `feat:`, `fix:`, `docs:`, `refactor:`, `chore:`
+### Environment Variables
 
-## Revenue Model
+```bash
+# Required
+TELEGRAM_TOKEN=           # Bot token from @BotFather
+PRIVATE_CHANNEL_ID=       # Telegram channel ID for signals
+LICENSE_SECRET=           # HMAC key for license signing (Render auto-generates)
 
-| Tier | Price | Features |
-|------|-------|----------|
-| Free | $0 | 3 signals/day, 15 min delay |
-| Pro | $29/mo | Unlimited signals, instant delivery |
-| VIP | $49/mo | Signals + risk management + course |
-| Course | $39 one-time | "SMC Trading Blueprint" PDF on Gumroad |
+# Stripe (required for payments)
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
+STRIPE_PRO_PRICE_ID=
+STRIPE_VIP_PRICE_ID=
+DOMAIN=                   # Your Render URL (e.g., https://tradeknox.onrender.com)
+
+# Optional
+ACCOUNT_BALANCE=10000     # Account size for risk calculations
+PUBLIC_CHANNEL_ID=        # Public channel with 15-min delayed signals
+NEWS_API_KEY=             # For news blackout filtering
+TRADES_DB_PATH=trades.db
+LICENSES_DB_PATH=licenses.db
+```
+
+### Local Development
+
+```bash
+pip install -r requirements.txt
+python app.py
+```
+
+### Deploy to Render
+
+1. Push to GitHub
+2. Connect repo to Render
+3. Render auto-detects `render.yaml` and sets up the service
+4. Set env vars in Render dashboard
+5. Bot starts on `https://<your-app>.onrender.com`
 
 ## Backtested Performance
 
@@ -74,27 +98,18 @@ app.py                        — single-process entry (Flask + Telegram)
 | Max drawdown | 10.6% |
 | Min score threshold | 11/20 |
 
-## Current Status
+Per-pair configs are in `strategies.py` with day-of-week filters.
 
-### Done
-- [x] Brand selection and repo setup
-- [x] Full signal pipeline (12 layers)
-- [x] Subscription/license system (HMAC keys)
-- [x] Stripe webhook handler (Checkout + 4 webhook events)
-- [x] Telegram bot commands (/start, /subscribe, /status, /stats, /key, /help)
-- [x] Landing page (React + Tailwind)
-- [x] Render deployment config (single-process)
-- [x] Backtested strategy research (17 strategies, 5 symbols, 4 timeframes)
-- [x] Per-pair optimized strategies with day-of-week filters
+## Tech Stack
 
-### Blocked
-- [ ] Telegram bot token (phone unavailable)
-- [ ] Stripe account (need API keys + Price IDs)
-- [ ] Deploy to Render (needs Telegram + Stripe credentials)
+- Python 3.11+
+- python-telegram-bot (async Telegram API)
+- Flask (Stripe webhook server)
+- Stripe (subscription payments)
+- yfinance (market data)
+- SQLite (trade + license persistence)
+- Render (hosting)
 
-### Next
-- [ ] Launch public channel @TradeKnoxSignals
-- [ ] Test bot live
-- [ ] Launch publicly, post first signals
-- [ ] Write "SMC Trading Blueprint" PDF course
-- [ ] Publish course on Gumroad ($39)
+## License
+
+Proprietary — not for redistribution.
