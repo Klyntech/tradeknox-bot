@@ -26,7 +26,10 @@ logger = logging.getLogger(__name__)
 class UserManager:
     """Manages Telegram users, their tiers, and signal access."""
 
-    def __init__(self, db_path: str = "licenses.db"):
+    def __init__(self, db_path: str = None):
+        if db_path is None:
+            from config import CONFIG
+            db_path = CONFIG.LICENSES_DB_PATH
         self.db = LicenseDatabase(db_path)
 
     def register_user(self, user_id: str, username: str = None) -> dict:

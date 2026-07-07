@@ -8,6 +8,7 @@ Signed with HMAC-SHA256 to prevent tampering.
 import hashlib
 import hmac
 import json
+import logging
 import os
 import secrets
 import sqlite3
@@ -15,9 +16,20 @@ from base64 import urlsafe_b64decode, urlsafe_b64encode
 from datetime import datetime, timezone, timedelta
 from typing import Optional, Tuple
 
+logger = logging.getLogger(__name__)
 
-# Secret key for HMAC signing — set via env var or generate on first run
-LICENSE_SECRET = os.getenv("LICENSE_SECRET", secrets.token_hex(32))
+# Secret key for HMAC signing — MUST be set via env var (Render auto-generates it)
+# If not set, a random key is used but ALL existing keys will be invalidated on restart
+_LICENSE_SECRET_RAW = os.getenv("LICENSE_SECRET", "")
+if not _LICENSE_SECRET_RAW:
+    logger.critical(
+        "LICENSE_SECRET env var not set! "
+        "License keys will be invalidated on every restart. "
+        "Set LICENSE_SECRET in your Render dashboard."
+    )
+    _LICENSE_SECRET_RAW = secrets.token_hex(32)
+
+LICENSE_SECRET = _LICENSE_SECRET_RAW
 
 # Tier durations (days)
 TIER_DURATIONS = {

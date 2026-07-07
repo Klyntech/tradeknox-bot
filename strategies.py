@@ -26,10 +26,9 @@ GBPJPY 4h:
 
 import logging
 from dataclasses import dataclass
-from typing import Optional, Dict
+from typing import Dict
 
 import pandas as pd
-import numpy as np
 
 logger = logging.getLogger(__name__)
 

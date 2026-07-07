@@ -9,8 +9,6 @@ import asyncio
 import hashlib
 import logging
 import os
-import time
-import uuid
 from datetime import datetime, timezone, timedelta
 from typing import Dict, Optional, Set
 
@@ -42,7 +40,7 @@ class TradingSignalBot:
         self._last_report: Optional[datetime] = None
 
         # Lazy imports (so each module can be tested independently)
-        from data_layer import sync_timeframes, add_indicators, is_session_allowed, get_current_session
+        from data_layer import sync_timeframes, add_indicators, get_current_session
         from market_structure import analyze_market_structure
         from entry_logic import find_best_entry
         from scoring_engine import assess_indicators, score_signal, is_news_blackout, build_risk_profile
@@ -51,7 +49,6 @@ class TradingSignalBot:
 
         self._sync_timeframes = sync_timeframes
         self._add_indicators = add_indicators
-        self._is_session_allowed = is_session_allowed
         self._get_current_session = get_current_session
         self._analyze_structure = analyze_market_structure
         self._find_entry = find_best_entry
@@ -64,7 +61,7 @@ class TradingSignalBot:
         self._should_report = should_send_monthly_report
         self._assess_strategies = assess_strategies
 
-        self.db = TradeDatabase("trades.db")
+        self.db = TradeDatabase(config.TRADES_DB_PATH)
 
         if TELEGRAM_AVAILABLE and config.TELEGRAM_TOKEN != "YOUR_BOT_TOKEN":
             self.bot = Bot(token=config.TELEGRAM_TOKEN)
@@ -86,11 +83,8 @@ class TradingSignalBot:
             except TelegramError as e:
                 logger.error(f"Telegram send failed: {e}")
         else:
-            # Dry-run: print to console
-            print(f"\n{'='*50}")
-            print(f"[DRY RUN → {chat_id}]")
-            print(text)
-            print('='*50)
+            # Dry-run: log to console
+            logger.info(f"[DRY RUN → {chat_id}]\n{text}")
 
     def _generate_signal_id(self, symbol: str, direction: str, entry: float) -> str:
         """Generate a deduplication key for a signal."""
@@ -185,7 +179,7 @@ class TradingSignalBot:
             risk = self._build_risk(
                 entry_setup.entry_price, entry_setup.stop_loss,
                 entry_setup.tp1, entry_setup.tp2, entry_setup.tp3,
-                account_balance=10000,  # default; override via env var
+                account_balance=config.ACCOUNT_BALANCE,
                 config=config
             )
 

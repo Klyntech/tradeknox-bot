@@ -5,7 +5,7 @@ Every entry must have a reason — not just 'price is there'.
 """
 
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import List, Optional, Tuple
 
 import pandas as pd

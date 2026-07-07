@@ -3,10 +3,9 @@ Layers 7, 10, 14: Signal Output, Trade Management & Performance Analytics
 The product layer — this is what users actually see and interact with.
 """
 
-import json
 import logging
 import sqlite3
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional
 

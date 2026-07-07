@@ -12,7 +12,6 @@ Commands:
 
 import logging
 import os
-from typing import Optional
 
 import requests
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -160,9 +159,10 @@ Use /subscribe to upgrade."""
 
 async def stats_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /stats — show bot performance (public)."""
+    from config import CONFIG
     from signal_output import TradeDatabase
 
-    db = TradeDatabase("trades.db")
+    db = TradeDatabase(CONFIG.TRADES_DB_PATH)
     stats = db.get_performance_stats(days=30)
 
     if stats["total_trades"] == 0:

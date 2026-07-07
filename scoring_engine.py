@@ -4,6 +4,7 @@ The gate keeper. Below threshold = NO TRADE. Not 'maybe trade'.
 """
 
 import logging
+import os
 from dataclasses import dataclass
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional, Tuple
@@ -12,6 +13,9 @@ import pandas as pd
 import numpy as np
 
 logger = logging.getLogger(__name__)
+
+# News API configured?
+NEWS_API_CONFIGURED = bool(os.getenv("NEWS_API_KEY", ""))
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -347,7 +351,8 @@ def score_signal(structure,
     breakdown["session_timing"] = sess_score
 
     # ── 6. News Clear Score (max 2) ────────────────────────────────────────
-    news_score = weights["news_clear"] if news_clear else 0
+    # Only award points if news API is configured; otherwise it's always True
+    news_score = weights["news_clear"] if news_clear and NEWS_API_CONFIGURED else 0
     breakdown["news_clear"] = news_score
 
     # ── Final Score ────────────────────────────────────────────────────────

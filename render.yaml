@@ -26,3 +26,5 @@ services:
         sync: false
       - key: DOMAIN
         sync: false
+      - key: ACCOUNT_BALANCE
+        value: "10000"

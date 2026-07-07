@@ -7,12 +7,10 @@ Handles:
 - Generating license keys after successful payment
 """
 
-import asyncio
 import json
 import logging
 import os
 from datetime import datetime, timezone, timedelta
-from typing import Optional
 
 from flask import Flask, request, jsonify
 
@@ -288,4 +286,5 @@ def cancel():
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    debug = os.getenv("FLASK_DEBUG", "false").lower() == "true"
+    app.run(host="0.0.0.0", port=5000, debug=debug)

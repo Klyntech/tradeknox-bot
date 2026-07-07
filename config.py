@@ -62,6 +62,7 @@ class BotConfig:
     BREAKOUT_VOLUME_MULT: float = 1.5   # Volume must be >= 1.5× average
 
     # ── Risk Management ──────────────────────────────────────────────────────
+    ACCOUNT_BALANCE: float = float(os.getenv("ACCOUNT_BALANCE", "10000"))
     DEFAULT_RISK_PCT: float = 1.0       # % of account per trade
     MIN_RR_RATIO: float = 1.5           # minimum 1:1.5 required
     ATR_SL_MULTIPLIER: float = 1.5      # SL = ATR × multiplier
@@ -88,6 +89,10 @@ class BotConfig:
     TP1_ATR_MULT: float = 1.5
     TP2_ATR_MULT: float = 2.5
     TP3_ATR_MULT: float = 3.5
+
+    # ── Database ───────────────────────────────────────────────────────────
+    TRADES_DB_PATH: str = os.getenv("TRADES_DB_PATH", "trades.db")
+    LICENSES_DB_PATH: str = os.getenv("LICENSES_DB_PATH", "licenses.db")
 
     # ── Scan interval ────────────────────────────────────────────────────────
     SCAN_INTERVAL_SECONDS: int = 300    # scan every 5 minutes
