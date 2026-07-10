@@ -232,7 +232,7 @@ def main():
     print("Phase 2: Market Character Profile")
     print("=" * 60)
 
-    symbols = ["XAUUSD", "EURUSD", "GBPUSD", "USDJPY", "GBPJPY"]
+    symbols = ["XAUUSD", "EURUSD", "GBPUSD", "USDJPY", "GBPJPY", "AUDUSD", "NZDUSD", "USDCAD"]
     all_results = []
 
     for sym in symbols:

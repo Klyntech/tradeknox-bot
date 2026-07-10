@@ -24,6 +24,19 @@ EURUSD (Excluded — consistently unprofitable):
 
 GBPUSD (Excluded — mixed results):
   - MA Crossover: WR 46.1%, PF 1.43 (best, but inconsistent)
+
+AUDUSD (New — 4h data):
+  - MA Crossover 50/200: PF 1.93, WR 56.2%, 16 trades (small sample)
+  - MA Crossover 9/21: PF 1.00, WR 40.0%
+
+NZDUSD (New — 4h data):
+  - MA Crossover 9/21: PF 1.52, WR 50.4%, Sharpe 0.208
+  - MA Crossover 21/50: PF 1.67, WR 52.7%, Sharpe 0.255
+
+USDCAD (New — 4h data):
+  - Breakout all lookbacks: PF > 1.25 (highest of any pair)
+  - MA Crossover 9/21: PF 1.41, WR 48.5%
+  - MA Crossover 50/200: PF 3.75, WR 71.4% (14 trades)
 """
 
 import logging
@@ -571,7 +584,7 @@ PAIR_STRATEGIES: Dict[str, Dict] = {
         "breakout_lookback": 10,
         "rsi_oversold": 30, "rsi_overbought": 70,
         "ema_fast": 9, "ema_slow": 21, "ema_trend": 100,
-        "weights": {"breakout": 2, "ma": 1, "ema_crossover": 1, "heikin_ashi": 0, "stochastic": 0},
+        "weights": {"breakout": 2, "ma": 1, "ema_crossover": 2, "heikin_ashi": 1, "stochastic": 0},
         "best_days": ["Thursday", "Friday"],  # Breakout PF 1.74-1.94, MA PF 2.14
         "avoid_days": ["Monday"],              # MA 9/21 PF 0.81
     },
@@ -591,7 +604,7 @@ PAIR_STRATEGIES: Dict[str, Dict] = {
         "breakout_lookback": 20,
         "rsi_oversold": 30, "rsi_overbought": 70,
         "ema_fast": 9, "ema_slow": 21, "ema_trend": 100,
-        "weights": {"ma": 2, "ema_crossover": 1, "heikin_ashi": 0, "breakout": 0, "stochastic": 0},
+        "weights": {"ma": 2, "ema_crossover": 1, "heikin_ashi": 0, "breakout": 1, "stochastic": 0},
         "best_days": ["Friday", "Tuesday"],    # MA 9/21 PF 2.57, MA 9/21 PF 1.69
         "avoid_days": ["Thursday"],            # Breakout 50 PF 0.63
     },
@@ -614,6 +627,36 @@ PAIR_STRATEGIES: Dict[str, Dict] = {
         "weights": {"rsi": 2, "ma": 1, "heikin_ashi": 1, "stochastic": 1, "ema_crossover": 0, "breakout": 0},
         "best_days": ["Thursday", "Wednesday"],  # RSI 20/80 PF 4.71, RSI 25/75 PF 1.5
         "avoid_days": ["Wednesday"],             # EMA Align PF 0.66
+    },
+    "AUDUSD": {
+        "timeframe": "4h",
+        "ma_fast": 9, "ma_slow": 21,
+        "breakout_lookback": 20,
+        "rsi_oversold": 30, "rsi_overbought": 70,
+        "ema_fast": 9, "ema_slow": 21, "ema_trend": 100,
+        "weights": {"ma": 2, "ema_crossover": 1, "breakout": 0, "heikin_ashi": 0, "stochastic": 0},
+        "best_days": ["Tuesday", "Thursday"],
+        "avoid_days": ["Monday"],
+    },
+    "NZDUSD": {
+        "timeframe": "4h",
+        "ma_fast": 9, "ma_slow": 21,
+        "breakout_lookback": 10,
+        "rsi_oversold": 30, "rsi_overbought": 70,
+        "ema_fast": 9, "ema_slow": 21, "ema_trend": 100,
+        "weights": {"ma": 2, "ema_crossover": 1, "breakout": 0, "heikin_ashi": 0, "stochastic": 0},
+        "best_days": ["Wednesday", "Friday"],
+        "avoid_days": ["Monday"],
+    },
+    "USDCAD": {
+        "timeframe": "4h",
+        "ma_fast": 9, "ma_slow": 21,
+        "breakout_lookback": 20,
+        "rsi_oversold": 30, "rsi_overbought": 70,
+        "ema_fast": 9, "ema_slow": 21, "ema_trend": 100,
+        "weights": {"breakout": 2, "ma": 2, "ema_crossover": 1, "heikin_ashi": 0, "stochastic": 0},
+        "best_days": ["Tuesday", "Thursday"],
+        "avoid_days": ["Friday"],
     },
 }
 

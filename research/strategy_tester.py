@@ -13,7 +13,7 @@ import numpy as np
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 REPORT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 
-SYMBOLS = ["XAUUSD", "EURUSD", "GBPUSD", "USDJPY", "GBPJPY"]
+SYMBOLS = ["XAUUSD", "EURUSD", "GBPUSD", "USDJPY", "GBPJPY", "AUDUSD", "NZDUSD", "USDCAD"]
 TIMEFRAMES = ["15m", "1h", "4h", "1d"]
 
 

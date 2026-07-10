@@ -75,7 +75,7 @@ def main():
     print("Phase 4: Strategy Combination Analysis")
     print("=" * 70)
 
-    symbols = ["XAUUSD", "EURUSD", "GBPUSD", "USDJPY", "GBPJPY"]
+    symbols = ["XAUUSD", "EURUSD", "GBPUSD", "USDJPY", "GBPJPY", "AUDUSD", "NZDUSD", "USDCAD"]
     all_results = []
 
     for symbol in symbols:

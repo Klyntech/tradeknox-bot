@@ -24,6 +24,9 @@ COSTS = {
     "GBPUSD": {"spread": 0.00020, "slippage": 0.00005},
     "USDJPY": {"spread": 0.020, "slippage": 0.005},
     "GBPJPY": {"spread": 0.030, "slippage": 0.005},
+    "AUDUSD": {"spread": 0.00015, "slippage": 0.00005},
+    "NZDUSD": {"spread": 0.00018, "slippage": 0.00005},
+    "USDCAD": {"spread": 0.00018, "slippage": 0.00005},
 }
 
 DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]

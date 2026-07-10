@@ -22,6 +22,9 @@ SYMBOLS = {
     "GBPUSD": "GBPUSD=X",
     "USDJPY": "USDJPY=X",
     "GBPJPY": "GBPJPY=X",
+    "AUDUSD": "AUDUSD=X",
+    "NZDUSD": "NZDUSD=X",
+    "USDCAD": "USDCAD=X",
 }
 
 # Timeframes to download
