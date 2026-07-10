@@ -13,7 +13,7 @@ from typing import Dict, List, Optional
 from datetime import datetime
 
 from config import CONFIG
-from strategies import get_pair_config, detect_ma_crossover, detect_breakout, detect_rsi_extremes, detect_ema_alignment
+from strategies import get_pair_config
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 
@@ -105,30 +105,9 @@ def compute_indicator_signals(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def compute_strategy_signals(df: pd.DataFrame, symbol: str) -> pd.DataFrame:
-    """Pre-compute strategy signals per pair."""
+    """Day/session filter only. Add new strategies here in the lab."""
     df = df.copy()
     pair_cfg = get_pair_config(symbol)
-
-    # MA Crossover (actual cross detection)
-    fast = df["close"].ewm(span=pair_cfg["ma_fast"], adjust=False).mean()
-    slow = df["close"].ewm(span=pair_cfg["ma_slow"], adjust=False).mean()
-    df["ma_cross_bull"] = (fast.shift(1) <= slow.shift(1)) & (fast > slow)
-    df["ma_cross_bear"] = (fast.shift(1) >= slow.shift(1)) & (fast < slow)
-
-    # Breakout
-    lb = pair_cfg["breakout_lookback"]
-    high_n = df["high"].rolling(lb).max().shift(1)
-    low_n = df["low"].rolling(lb).min().shift(1)
-    df["breakout_bull"] = df["close"] > high_n
-    df["breakout_bear"] = df["close"] < low_n
-
-    # RSI extremes
-    df["rsi_extreme_bull"] = df["rsi"] < pair_cfg["rsi_oversold"]
-    df["rsi_extreme_bear"] = df["rsi"] > pair_cfg["rsi_overbought"]
-
-    # EMA alignment
-    df["ema_aligned_bull"] = (df["ema_9"] > df["ema_21"]) & (df["ema_21"] > df["ema_50"]) & (df["close"] > df["ema_200"])
-    df["ema_aligned_bear"] = (df["ema_9"] < df["ema_21"]) & (df["ema_21"] < df["ema_50"]) & (df["close"] < df["ema_200"])
 
     # Day filter
     df["day_name"] = df.index.day_name()
@@ -144,26 +123,7 @@ def compute_strategy_signals(df: pd.DataFrame, symbol: str) -> pd.DataFrame:
     df.loc[(df["hour"] >= sessions["new_york"]["start"]) & (df["hour"] < sessions["new_york"]["end"]), "session"] = "new_york"
     df["allowed_session"] = df["session"].isin(CONFIG.ALLOWED_SESSIONS)
 
-    # Combined strategy score (weighted per pair)
-    weights = pair_cfg["weights"]
-    df["strat_score_bull"] = 0
-    df["strat_score_bear"] = 0
-
-    if weights.get("breakout", 0) > 0:
-        df["strat_score_bull"] += df["breakout_bull"].astype(int) * weights["breakout"]
-        df["strat_score_bear"] += df["breakout_bear"].astype(int) * weights["breakout"]
-    if weights.get("ma", 0) > 0:
-        df["strat_score_bull"] += df["ma_cross_bull"].astype(int) * weights["ma"]
-        df["strat_score_bear"] += df["ma_cross_bear"].astype(int) * weights["ma"]
-    if weights.get("rsi", 0) > 0:
-        df["strat_score_bull"] += df["rsi_extreme_bull"].astype(int) * weights["rsi"]
-        df["strat_score_bear"] += df["rsi_extreme_bear"].astype(int) * weights["rsi"]
-    if weights.get("ema", 0) > 0:
-        df["strat_score_bull"] += df["ema_aligned_bull"].astype(int) * weights["ema"]
-        df["strat_score_bear"] += df["ema_aligned_bear"].astype(int) * weights["ema"]
-
-    # Normalize to 0-3
-    max_weight = sum(weights.values())
+    return df
     df["strat_score_bull"] = (df["strat_score_bull"] / max_weight * 3).round().clip(0, 3)
     df["strat_score_bear"] = (df["strat_score_bear"] / max_weight * 3).round().clip(0, 3)
 
@@ -206,8 +166,8 @@ def compute_composite_signal(df: pd.DataFrame) -> pd.DataFrame:
     df.loc[df["ema_bear"], "ind_score"] += 1
     df.loc[df["vol_spike"], "ind_score"] += 1
     df["ind_score"] = df["ind_score"].clip(0, 3)
+    # Strategy confluence (max 3) — 0 (indicator strategies removed, SMC only)
 
-    # Strategy confluence (max 3) — already computed
     # Session timing (max 3)
     session_scores = {"overlap": 3, "london": 2, "new_york": 2, "asia": 1, "dead_zone": 0}
     df["sess_score"] = df["session"].map(session_scores).fillna(0).astype(int)
@@ -216,8 +176,8 @@ def compute_composite_signal(df: pd.DataFrame) -> pd.DataFrame:
     df["news_score"] = 2
 
     # Total buy/sell scores
-    df["total_buy"] = df["ms_score"] + df["ez_score"] + df["ind_score"] + df["strat_score_bull"] + df["sess_score"] + df["news_score"]
-    df["total_sell"] = df["ms_score"] + df["ez_score"] + df["ind_score"] + df["strat_score_bear"] + df["sess_score"] + df["news_score"]
+    df["total_buy"] = df["ms_score"] + df["ez_score"] + df["ind_score"] + df["sess_score"] + df["news_score"]
+    df["total_sell"] = df["ms_score"] + df["ez_score"] + df["ind_score"] + df["sess_score"] + df["news_score"]
 
     return df
 
@@ -226,7 +186,6 @@ def simulate_trades(df: pd.DataFrame, symbol: str,
                     initial_balance: float = 10000.0,
                     risk_pct: float = 1.0,
                     min_score: int = 11,
-                    min_strat: int = 0,
                     max_hold: int = 48) -> dict:
     """
     Simulate trades on pre-computed signals.
@@ -316,7 +275,7 @@ def simulate_trades(df: pd.DataFrame, symbol: str,
             continue
 
         # Buy signal
-        if candle["total_buy"] >= min_score and candle["strat_score_bull"] >= min_strat:
+        if candle["total_buy"] >= min_score:
             sl_dist = atr * 1.5
             entry_with_cost = price + costs["spread"] + costs["slippage"]
             open_trade = {
@@ -329,7 +288,6 @@ def simulate_trades(df: pd.DataFrame, symbol: str,
                 "tp2": entry_with_cost + sl_dist * 2.5,
                 "tp3": entry_with_cost + sl_dist * 3.5,
                 "score": candle["total_buy"],
-                "strat_score": candle["strat_score_bull"],
                 "session": session,
                 "day": day,
                 "open_bar": i,
@@ -338,7 +296,7 @@ def simulate_trades(df: pd.DataFrame, symbol: str,
             continue
 
         # Sell signal
-        if candle["total_sell"] >= min_score and candle["strat_score_bear"] >= min_strat:
+        if candle["total_sell"] >= min_score:
             sl_dist = atr * 1.5
             entry_with_cost = price - costs["spread"] - costs["slippage"]
             open_trade = {
@@ -351,7 +309,6 @@ def simulate_trades(df: pd.DataFrame, symbol: str,
                 "tp2": entry_with_cost - sl_dist * 2.5,
                 "tp3": entry_with_cost - sl_dist * 3.5,
                 "score": candle["total_sell"],
-                "strat_score": candle["strat_score_bear"],
                 "session": session,
                 "day": day,
                 "open_bar": i,

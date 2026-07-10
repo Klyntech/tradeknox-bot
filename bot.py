@@ -176,23 +176,8 @@ class TradingSignalBot:
         return hashlib.md5(raw.encode()).hexdigest()[:12]
 
     def _detect_primary_strategy(self, strategy_conv, symbol: str) -> str:
-        """Detect which strategy contributed most to the signal."""
-        from strategies import get_pair_config
-        pair_cfg = get_pair_config(symbol)
-        strat_dir = "bullish" if strategy_conv.ma_direction == "bullish" else "bearish"
-
-        if strategy_conv.ema_direction == strat_dir and strategy_conv.ema_aligned:
-            return "ema_crossover"
-        elif strategy_conv.breakout_direction == strat_dir:
-            return "breakout"
-        elif strategy_conv.ma_direction == strat_dir:
-            return "ma_crossover"
-        elif strategy_conv.rsi_direction == strat_dir:
-            return "rsi_extreme"
-        elif strategy_conv.session_active:
-            return "session_timing"
-        else:
-            return "unknown"
+        """Only SMC 8-Gate — all other strategies removed (MarketMate graveyard)."""
+        return "smc_8gate"
 
     def _detect_regime(self, df) -> str:
         """Detect current market regime based on ADX and ATR."""
@@ -341,21 +326,8 @@ class TradingSignalBot:
 
             # Strategy confluence details
             strat_details = []
-            strat_dir = "bullish" if direction == "buy" else "bearish"
-            if strategy_conv.ma_direction == strat_dir:
-                from strategies import get_pair_config
-                pair_cfg = get_pair_config(symbol)
-                strat_details.append(f"MA{pair_cfg['ma_fast']}/{pair_cfg['ma_slow']} Cross")
-            if strategy_conv.breakout_direction == strat_dir:
-                strat_details.append("Breakout confirmed")
-            if strategy_conv.rsi_direction == strat_dir:
-                from strategies import get_pair_config
-                pair_cfg = get_pair_config(symbol)
-                strat_details.append(f"RSI {pair_cfg['rsi_oversold']}/{pair_cfg['rsi_overbought']}")
-            if strategy_conv.ema_direction == strat_dir and strategy_conv.ema_aligned:
-                strat_details.append("EMA aligned")
-            if strategy_conv.session_active:
-                strat_details.append("Session active")
+            if strategy_conv.day_filter:
+                strat_details.append(f"Day: {strategy_conv.day_name} ({strategy_conv.day_filter})")
 
             full_reason = entry_setup.reason
             if ind_details:

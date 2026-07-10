@@ -276,7 +276,7 @@ def run_pipeline_backtest(
                     day=day_name,
                     open_bar=i,
                     reason=entry_setup.reason,
-                    strategy_confluence=f"{strategy_conv.confluence_direction} ({strategy_conv.confluence_score}/3)",
+                    strategy_confluence=f"neutral ({strategy_conv.confluence_score}/3)",
                     day_filter=strategy_conv.day_filter,
                 )
                 break  # one trade at a time

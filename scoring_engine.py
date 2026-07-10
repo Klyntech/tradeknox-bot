@@ -330,12 +330,9 @@ def score_signal(structure,
     breakdown["indicators"] = ind_score
 
     # ── 4. Strategy Confluence Score (max 3) ───────────────────────────────
+    # All indicator-based strategies removed (MarketMate graveyard).
+    # SMC 8-Gate is the sole signal generator; confluence is built into the pipeline.
     strat_score = 0
-    if strategy_confluence:
-        strat_direction = "bullish" if direction == "buy" else "bearish"
-        # Use the confluence score directly (0-3, weighted per-pair)
-        strat_score = strategy_confluence.confluence_score
-
     strat_score = min(strat_score, weights.get("strategy_confluence", 3))
     breakdown["strategy_confluence"] = strat_score
 
