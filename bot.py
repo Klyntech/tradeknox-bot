@@ -667,8 +667,8 @@ def run_bot_with_commands():
     """Run the bot with both signal scanning and command handlers."""
     from config import CONFIG
     from commands import (
-        start_command, subscribe_command, subscribe_callback,
-        status_command, stats_command, key_command, help_command,
+        start_command, subscribe_command,
+        status_command, stats_command, help_command,
         portfolio_command, strategies_command, pairs_command,
         regimes_command, drawdown_command
     )
@@ -692,14 +692,12 @@ def run_bot_with_commands():
     application.add_handler(CommandHandler("subscribe", subscribe_command))
     application.add_handler(CommandHandler("status", status_command))
     application.add_handler(CommandHandler("stats", stats_command))
-    application.add_handler(CommandHandler("key", key_command))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("portfolio", portfolio_command))
     application.add_handler(CommandHandler("strategies", strategies_command))
     application.add_handler(CommandHandler("pairs", pairs_command))
     application.add_handler(CommandHandler("regimes", regimes_command))
     application.add_handler(CommandHandler("drawdown", drawdown_command))
-    application.add_handler(CallbackQueryHandler(subscribe_callback, pattern="^subscribe_"))
 
     # Create bot instance for signal scanning
     bot = TradingSignalBot(CONFIG)
