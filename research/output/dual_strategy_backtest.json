@@ -1,0 +1,287 @@
+{
+  "timestamp": "2026-07-10T14:26:36.341451",
+  "per_pair": {
+    "XAUUSD": {
+      "fb_trades": 1934,
+      "raw_pf": 1.5769,
+      "net_pf": 1.5697,
+      "wr": 0.5315,
+      "avg_r": 0.2565,
+      "mdd": 13.13,
+      "sharpe": 20.3518
+    },
+    "GBPUSD": {
+      "fb_trades": 2047,
+      "raw_pf": 2.398,
+      "net_pf": 1.9604,
+      "wr": 0.6155,
+      "avg_r": 0.5235,
+      "mdd": 11.9,
+      "sharpe": 40.8695
+    },
+    "EURUSD": {
+      "fb_trades": 1760,
+      "raw_pf": 2.3615,
+      "net_pf": 1.8962,
+      "wr": 0.6119,
+      "avg_r": 0.5087,
+      "mdd": 10.21,
+      "sharpe": 39.9157
+    },
+    "USDJPY": {
+      "fb_trades": 2103,
+      "raw_pf": 1.919,
+      "net_pf": 1.7005,
+      "wr": 0.5654,
+      "avg_r": 0.3869,
+      "mdd": 17.73,
+      "sharpe": 29.9206
+    },
+    "GBPJPY": {
+      "fb_trades": 2186,
+      "raw_pf": 1.899,
+      "net_pf": 1.6553,
+      "wr": 0.5608,
+      "avg_r": 0.3787,
+      "mdd": 18.5,
+      "sharpe": 29.3411
+    },
+    "AUDUSD": {
+      "fb_trades": 2070,
+      "raw_pf": 2.0618,
+      "net_pf": 1.5599,
+      "wr": 0.5792,
+      "avg_r": 0.4301,
+      "mdd": 16.5,
+      "sharpe": 33.3219
+    },
+    "NZDUSD": {
+      "fb_trades": 1943,
+      "raw_pf": 2.1773,
+      "net_pf": 1.4859,
+      "wr": 0.5919,
+      "avg_r": 0.4697,
+      "mdd": 16.5,
+      "sharpe": 36.2112
+    },
+    "USDCAD": {
+      "fb_trades": 2334,
+      "raw_pf": 1.5419,
+      "net_pf": 1.2861,
+      "wr": 0.5274,
+      "avg_r": 0.2378,
+      "mdd": 22.85,
+      "sharpe": 19.1644
+    }
+  },
+  "fb_overall": {
+    "total_trades": 16377,
+    "wins": 9295,
+    "losses": 7082,
+    "pf": 1.62,
+    "wr": 0.5676,
+    "avg_r": 0.2836,
+    "mdd_r": 30.39,
+    "sharpe": 22.1341
+  },
+  "smc_proxy_overall": {
+    "total_trades": 11519,
+    "wins": 4671,
+    "losses": 6846,
+    "pf": 0.8222,
+    "wr": 0.4055,
+    "avg_r": -0.1131,
+    "mdd_r": 1476.09,
+    "sharpe": -8.9242
+  },
+  "regime_breakdown": {
+    "HIGH_VOL": {
+      "total_trades": 2027,
+      "wins": 1125,
+      "losses": 902,
+      "pf": 1.5846,
+      "wr": 0.555,
+      "avg_r": 0.2641,
+      "mdd_r": 18.95,
+      "sharpe": 20.8949
+    },
+    "LOW_VOL": {
+      "total_trades": 7055,
+      "wins": 4007,
+      "losses": 3048,
+      "pf": 1.5994,
+      "wr": 0.568,
+      "avg_r": 0.2789,
+      "mdd_r": 24.97,
+      "sharpe": 21.6247
+    },
+    "MIXED": {
+      "total_trades": 1738,
+      "wins": 999,
+      "losses": 739,
+      "pf": 1.6878,
+      "wr": 0.5748,
+      "avg_r": 0.304,
+      "mdd_r": 21.84,
+      "sharpe": 23.9269
+    },
+    "RANGING": {
+      "total_trades": 965,
+      "wins": 582,
+      "losses": 383,
+      "pf": 1.8844,
+      "wr": 0.6031,
+      "avg_r": 0.3677,
+      "mdd_r": 10.98,
+      "sharpe": 29.1833
+    },
+    "TRENDING": {
+      "total_trades": 4531,
+      "wins": 2548,
+      "losses": 1983,
+      "pf": 1.594,
+      "wr": 0.5623,
+      "avg_r": 0.2743,
+      "mdd_r": 28.99,
+      "sharpe": 21.3828
+    },
+    "UNCLASSIFIED": {
+      "total_trades": 58,
+      "wins": 32,
+      "losses": 26,
+      "pf": 1.4645,
+      "wr": 0.5517,
+      "avg_r": 0.2312,
+      "mdd_r": 5.02,
+      "sharpe": 17.6509
+    }
+  },
+  "conflicts": {
+    "total_fb": 16377,
+    "total_smc_proxy": 11519,
+    "conflict_count": 191995,
+    "conflict_pct": 35358.2,
+    "conflicts": [
+      {
+        "date": "2025-03-18",
+        "symbol": "XAUUSD",
+        "fb_dir": "sell",
+        "smc_dir": "buy"
+      },
+      {
+        "date": "2025-03-18",
+        "symbol": "XAUUSD",
+        "fb_dir": "sell",
+        "smc_dir": "buy"
+      },
+      {
+        "date": "2025-03-18",
+        "symbol": "XAUUSD",
+        "fb_dir": "sell",
+        "smc_dir": "buy"
+      },
+      {
+        "date": "2025-03-18",
+        "symbol": "XAUUSD",
+        "fb_dir": "sell",
+        "smc_dir": "buy"
+      },
+      {
+        "date": "2025-03-18",
+        "symbol": "XAUUSD",
+        "fb_dir": "sell",
+        "smc_dir": "buy"
+      },
+      {
+        "date": "2025-03-18",
+        "symbol": "XAUUSD",
+        "fb_dir": "sell",
+        "smc_dir": "buy"
+      },
+      {
+        "date": "2025-03-18",
+        "symbol": "XAUUSD",
+        "fb_dir": "sell",
+        "smc_dir": "buy"
+      },
+      {
+        "date": "2025-03-18",
+        "symbol": "XAUUSD",
+        "fb_dir": "sell",
+        "smc_dir": "buy"
+      },
+      {
+        "date": "2025-03-18",
+        "symbol": "XAUUSD",
+        "fb_dir": "sell",
+        "smc_dir": "buy"
+      },
+      {
+        "date": "2025-03-18",
+        "symbol": "XAUUSD",
+        "fb_dir": "sell",
+        "smc_dir": "buy"
+      },
+      {
+        "date": "2025-03-18",
+        "symbol": "XAUUSD",
+        "fb_dir": "sell",
+        "smc_dir": "buy"
+      },
+      {
+        "date": "2025-03-18",
+        "symbol": "XAUUSD",
+        "fb_dir": "sell",
+        "smc_dir": "buy"
+      },
+      {
+        "date": "2025-03-18",
+        "symbol": "XAUUSD",
+        "fb_dir": "sell",
+        "smc_dir": "buy"
+      },
+      {
+        "date": "2025-03-18",
+        "symbol": "XAUUSD",
+        "fb_dir": "sell",
+        "smc_dir": "buy"
+      },
+      {
+        "date": "2025-03-18",
+        "symbol": "XAUUSD",
+        "fb_dir": "sell",
+        "smc_dir": "buy"
+      },
+      {
+        "date": "2025-03-18",
+        "symbol": "XAUUSD",
+        "fb_dir": "sell",
+        "smc_dir": "buy"
+      },
+      {
+        "date": "2025-03-18",
+        "symbol": "GBPUSD",
+        "fb_dir": "buy",
+        "smc_dir": "sell"
+      },
+      {
+        "date": "2025-03-18",
+        "symbol": "GBPUSD",
+        "fb_dir": "buy",
+        "smc_dir": "sell"
+      },
+      {
+        "date": "2025-03-18",
+        "symbol": "GBPUSD",
+        "fb_dir": "buy",
+        "smc_dir": "sell"
+      },
+      {
+        "date": "2025-03-18",
+        "symbol": "GBPUSD",
+        "fb_dir": "buy",
+        "smc_dir": "sell"
+      }
+    ]
+  }
+}

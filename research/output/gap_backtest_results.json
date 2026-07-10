@@ -1,0 +1,1823 @@
+{
+  "timestamp": "2026-07-10T13:11:17.711103",
+  "strategies": {
+    "MM-002": {
+      "EURUSD": {
+        "best_params": {
+          "min_gap_atr_mult": 0.2,
+          "sl_atr_mult": 1.5,
+          "max_hold_bars": 10.0
+        },
+        "best_stats": {
+          "total_trades": 318.0,
+          "pf": 1.4063,
+          "wr": 0.7893,
+          "avg_r": 0.0766,
+          "mdd_r": 4.63,
+          "sharpe": 1.0127
+        },
+        "grid_top5": [
+          {
+            "min_gap_atr_mult": 0.2,
+            "sl_atr_mult": 1.5,
+            "max_hold_bars": 10,
+            "total_trades": 318,
+            "pf": 1.4063,
+            "wr": 0.7893,
+            "avg_r": 0.0766,
+            "mdd_r": 4.63,
+            "sharpe": 1.0127
+          },
+          {
+            "min_gap_atr_mult": 0.2,
+            "sl_atr_mult": 1.2,
+            "max_hold_bars": 10,
+            "total_trades": 318,
+            "pf": 1.3499,
+            "wr": 0.7547,
+            "avg_r": 0.0828,
+            "mdd_r": 6.02,
+            "sharpe": 0.9291
+          },
+          {
+            "min_gap_atr_mult": 0.2,
+            "sl_atr_mult": 1.2,
+            "max_hold_bars": 3,
+            "total_trades": 318,
+            "pf": 1.3417,
+            "wr": 0.6855,
+            "avg_r": 0.0691,
+            "mdd_r": 8.8,
+            "sharpe": 0.871
+          },
+          {
+            "min_gap_atr_mult": 0.3,
+            "sl_atr_mult": 1.5,
+            "max_hold_bars": 10,
+            "total_trades": 261,
+            "pf": 1.3267,
+            "wr": 0.751,
+            "avg_r": 0.0725,
+            "mdd_r": 5.04,
+            "sharpe": 0.8795
+          },
+          {
+            "min_gap_atr_mult": 0.2,
+            "sl_atr_mult": 1.5,
+            "max_hold_bars": 3,
+            "total_trades": 318,
+            "pf": 1.3151,
+            "wr": 0.6887,
+            "avg_r": 0.0521,
+            "mdd_r": 7.9,
+            "sharpe": 0.7889
+          }
+        ]
+      },
+      "GBPUSD": {
+        "best_params": {
+          "min_gap_atr_mult": 0.5,
+          "sl_atr_mult": 1.2,
+          "max_hold_bars": 10.0
+        },
+        "best_stats": {
+          "total_trades": 161.0,
+          "pf": 1.0419,
+          "wr": 0.6087,
+          "avg_r": 0.0158,
+          "mdd_r": 11.44,
+          "sharpe": 0.1404
+        },
+        "grid_top5": [
+          {
+            "min_gap_atr_mult": 0.5,
+            "sl_atr_mult": 1.2,
+            "max_hold_bars": 10,
+            "total_trades": 161,
+            "pf": 1.0419,
+            "wr": 0.6087,
+            "avg_r": 0.0158,
+            "mdd_r": 11.44,
+            "sharpe": 0.1404
+          },
+          {
+            "min_gap_atr_mult": 0.4,
+            "sl_atr_mult": 1.5,
+            "max_hold_bars": 5,
+            "total_trades": 199,
+            "pf": 1.0412,
+            "wr": 0.6332,
+            "avg_r": 0.0105,
+            "mdd_r": 8.61,
+            "sharpe": 0.127
+          },
+          {
+            "min_gap_atr_mult": 0.4,
+            "sl_atr_mult": 1.5,
+            "max_hold_bars": 3,
+            "total_trades": 199,
+            "pf": 1.0334,
+            "wr": 0.608,
+            "avg_r": 0.0077,
+            "mdd_r": 6.75,
+            "sharpe": 0.1013
+          },
+          {
+            "min_gap_atr_mult": 0.4,
+            "sl_atr_mult": 1.2,
+            "max_hold_bars": 10,
+            "total_trades": 199,
+            "pf": 1.0265,
+            "wr": 0.6332,
+            "avg_r": 0.0094,
+            "mdd_r": 16.71,
+            "sharpe": 0.0881
+          },
+          {
+            "min_gap_atr_mult": 0.4,
+            "sl_atr_mult": 1.5,
+            "max_hold_bars": 10,
+            "total_trades": 199,
+            "pf": 1.0259,
+            "wr": 0.6633,
+            "avg_r": 0.0076,
+            "mdd_r": 14.16,
+            "sharpe": 0.0823
+          }
+        ]
+      },
+      "USDJPY": {
+        "best_params": {
+          "min_gap_atr_mult": 0.5,
+          "sl_atr_mult": 0.8,
+          "max_hold_bars": 3.0
+        },
+        "best_stats": {
+          "total_trades": 179.0,
+          "pf": 1.152,
+          "wr": 0.5419,
+          "avg_r": 0.065,
+          "mdd_r": 16.79,
+          "sharpe": 0.4355
+        },
+        "grid_top5": [
+          {
+            "min_gap_atr_mult": 0.5,
+            "sl_atr_mult": 0.8,
+            "max_hold_bars": 3,
+            "total_trades": 179,
+            "pf": 1.152,
+            "wr": 0.5419,
+            "avg_r": 0.065,
+            "mdd_r": 16.79,
+            "sharpe": 0.4355
+          },
+          {
+            "min_gap_atr_mult": 0.4,
+            "sl_atr_mult": 0.8,
+            "max_hold_bars": 10,
+            "total_trades": 226,
+            "pf": 1.1467,
+            "wr": 0.5575,
+            "avg_r": 0.0668,
+            "mdd_r": 22.74,
+            "sharpe": 0.4418
+          },
+          {
+            "min_gap_atr_mult": 0.5,
+            "sl_atr_mult": 1.2,
+            "max_hold_bars": 10,
+            "total_trades": 179,
+            "pf": 1.146,
+            "wr": 0.6034,
+            "avg_r": 0.056,
+            "mdd_r": 17.26,
+            "sharpe": 0.4459
+          },
+          {
+            "min_gap_atr_mult": 0.5,
+            "sl_atr_mult": 0.8,
+            "max_hold_bars": 5,
+            "total_trades": 179,
+            "pf": 1.1449,
+            "wr": 0.5196,
+            "avg_r": 0.0671,
+            "mdd_r": 15.76,
+            "sharpe": 0.4355
+          },
+          {
+            "min_gap_atr_mult": 0.5,
+            "sl_atr_mult": 0.8,
+            "max_hold_bars": 10,
+            "total_trades": 179,
+            "pf": 1.1442,
+            "wr": 0.5196,
+            "avg_r": 0.0713,
+            "mdd_r": 18.23,
+            "sharpe": 0.4389
+          }
+        ]
+      },
+      "XAUUSD": {
+        "best_params": {
+          "min_gap_atr_mult": 0.5,
+          "sl_atr_mult": 0.8,
+          "max_hold_bars": 10.0
+        },
+        "best_stats": {
+          "total_trades": 318.0,
+          "pf": 1.0139,
+          "wr": 0.4811,
+          "avg_r": 0.0073,
+          "mdd_r": 24.68,
+          "sharpe": 0.0472
+        },
+        "grid_top5": [
+          {
+            "min_gap_atr_mult": 0.5,
+            "sl_atr_mult": 0.8,
+            "max_hold_bars": 10,
+            "total_trades": 318,
+            "pf": 1.0139,
+            "wr": 0.4811,
+            "avg_r": 0.0073,
+            "mdd_r": 24.68,
+            "sharpe": 0.0472
+          },
+          {
+            "min_gap_atr_mult": 0.5,
+            "sl_atr_mult": 0.8,
+            "max_hold_bars": 3,
+            "total_trades": 318,
+            "pf": 0.9884,
+            "wr": 0.4874,
+            "avg_r": -0.0056,
+            "mdd_r": 30.47,
+            "sharpe": -0.0401
+          },
+          {
+            "min_gap_atr_mult": 0.4,
+            "sl_atr_mult": 0.8,
+            "max_hold_bars": 10,
+            "total_trades": 412,
+            "pf": 0.9876,
+            "wr": 0.5121,
+            "avg_r": -0.0061,
+            "mdd_r": 30.99,
+            "sharpe": -0.0424
+          },
+          {
+            "min_gap_atr_mult": 0.5,
+            "sl_atr_mult": 0.8,
+            "max_hold_bars": 5,
+            "total_trades": 318,
+            "pf": 0.9592,
+            "wr": 0.4843,
+            "avg_r": -0.0211,
+            "mdd_r": 27.44,
+            "sharpe": -0.1437
+          },
+          {
+            "min_gap_atr_mult": 0.4,
+            "sl_atr_mult": 0.8,
+            "max_hold_bars": 3,
+            "total_trades": 412,
+            "pf": 0.9565,
+            "wr": 0.5146,
+            "avg_r": -0.02,
+            "mdd_r": 33.96,
+            "sharpe": -0.1517
+          }
+        ]
+      },
+      "AUDUSD": {
+        "best_params": {
+          "min_gap_atr_mult": 0.5,
+          "sl_atr_mult": 1.5,
+          "max_hold_bars": 3.0
+        },
+        "best_stats": {
+          "total_trades": 161.0,
+          "pf": 1.395,
+          "wr": 0.6335,
+          "avg_r": 0.0797,
+          "mdd_r": 4.14,
+          "sharpe": 1.0463
+        },
+        "grid_top5": [
+          {
+            "min_gap_atr_mult": 0.5,
+            "sl_atr_mult": 1.5,
+            "max_hold_bars": 3,
+            "total_trades": 161,
+            "pf": 1.395,
+            "wr": 0.6335,
+            "avg_r": 0.0797,
+            "mdd_r": 4.14,
+            "sharpe": 1.0463
+          },
+          {
+            "min_gap_atr_mult": 0.5,
+            "sl_atr_mult": 1.2,
+            "max_hold_bars": 3,
+            "total_trades": 161,
+            "pf": 1.3772,
+            "wr": 0.6273,
+            "avg_r": 0.0954,
+            "mdd_r": 4.4,
+            "sharpe": 1.0315
+          },
+          {
+            "min_gap_atr_mult": 0.5,
+            "sl_atr_mult": 1.5,
+            "max_hold_bars": 5,
+            "total_trades": 161,
+            "pf": 1.366,
+            "wr": 0.6646,
+            "avg_r": 0.0849,
+            "mdd_r": 4.66,
+            "sharpe": 0.9999
+          },
+          {
+            "min_gap_atr_mult": 0.5,
+            "sl_atr_mult": 1.0,
+            "max_hold_bars": 3,
+            "total_trades": 161,
+            "pf": 1.3434,
+            "wr": 0.6087,
+            "avg_r": 0.1051,
+            "mdd_r": 4.27,
+            "sharpe": 0.9738
+          },
+          {
+            "min_gap_atr_mult": 0.5,
+            "sl_atr_mult": 1.2,
+            "max_hold_bars": 5,
+            "total_trades": 161,
+            "pf": 1.3353,
+            "wr": 0.6398,
+            "avg_r": 0.0958,
+            "mdd_r": 6.42,
+            "sharpe": 0.9525
+          }
+        ]
+      },
+      "NZDUSD": {
+        "best_params": {
+          "min_gap_atr_mult": 0.5,
+          "sl_atr_mult": 1.2,
+          "max_hold_bars": 3.0
+        },
+        "best_stats": {
+          "total_trades": 180.0,
+          "pf": 1.4717,
+          "wr": 0.6167,
+          "avg_r": 0.1107,
+          "mdd_r": 6.77,
+          "sharpe": 1.2283
+        },
+        "grid_top5": [
+          {
+            "min_gap_atr_mult": 0.5,
+            "sl_atr_mult": 1.2,
+            "max_hold_bars": 3,
+            "total_trades": 180,
+            "pf": 1.4717,
+            "wr": 0.6167,
+            "avg_r": 0.1107,
+            "mdd_r": 6.77,
+            "sharpe": 1.2283
+          },
+          {
+            "min_gap_atr_mult": 0.5,
+            "sl_atr_mult": 1.5,
+            "max_hold_bars": 3,
+            "total_trades": 180,
+            "pf": 1.4174,
+            "wr": 0.6167,
+            "avg_r": 0.0814,
+            "mdd_r": 5.92,
+            "sharpe": 1.08
+          },
+          {
+            "min_gap_atr_mult": 0.4,
+            "sl_atr_mult": 1.2,
+            "max_hold_bars": 3,
+            "total_trades": 218,
+            "pf": 1.3301,
+            "wr": 0.6193,
+            "avg_r": 0.0799,
+            "mdd_r": 8.15,
+            "sharpe": 0.9029
+          },
+          {
+            "min_gap_atr_mult": 0.4,
+            "sl_atr_mult": 1.5,
+            "max_hold_bars": 3,
+            "total_trades": 218,
+            "pf": 1.3225,
+            "wr": 0.6239,
+            "avg_r": 0.063,
+            "mdd_r": 7.22,
+            "sharpe": 0.8598
+          },
+          {
+            "min_gap_atr_mult": 0.5,
+            "sl_atr_mult": 1.5,
+            "max_hold_bars": 10,
+            "total_trades": 180,
+            "pf": 1.292,
+            "wr": 0.7056,
+            "avg_r": 0.0804,
+            "mdd_r": 9.47,
+            "sharpe": 0.8457
+          }
+        ]
+      },
+      "USDCAD": {
+        "best_params": {
+          "min_gap_atr_mult": 0.2,
+          "sl_atr_mult": 1.2,
+          "max_hold_bars": 3.0
+        },
+        "best_stats": {
+          "total_trades": 303.0,
+          "pf": 1.0733,
+          "wr": 0.6634,
+          "avg_r": 0.0177,
+          "mdd_r": 10.12,
+          "sharpe": 0.2137
+        },
+        "grid_top5": [
+          {
+            "min_gap_atr_mult": 0.2,
+            "sl_atr_mult": 1.2,
+            "max_hold_bars": 3,
+            "total_trades": 303,
+            "pf": 1.0733,
+            "wr": 0.6634,
+            "avg_r": 0.0177,
+            "mdd_r": 10.12,
+            "sharpe": 0.2137
+          },
+          {
+            "min_gap_atr_mult": 0.2,
+            "sl_atr_mult": 0.8,
+            "max_hold_bars": 3,
+            "total_trades": 303,
+            "pf": 1.0378,
+            "wr": 0.6205,
+            "avg_r": 0.0135,
+            "mdd_r": 13.78,
+            "sharpe": 0.1201
+          },
+          {
+            "min_gap_atr_mult": 0.2,
+            "sl_atr_mult": 1.5,
+            "max_hold_bars": 3,
+            "total_trades": 303,
+            "pf": 1.0285,
+            "wr": 0.6733,
+            "avg_r": 0.0058,
+            "mdd_r": 9.5,
+            "sharpe": 0.0817
+          },
+          {
+            "min_gap_atr_mult": 0.2,
+            "sl_atr_mult": 1.5,
+            "max_hold_bars": 10,
+            "total_trades": 303,
+            "pf": 1.0256,
+            "wr": 0.7228,
+            "avg_r": 0.0064,
+            "mdd_r": 7.57,
+            "sharpe": 0.0765
+          },
+          {
+            "min_gap_atr_mult": 0.4,
+            "sl_atr_mult": 0.8,
+            "max_hold_bars": 3,
+            "total_trades": 207,
+            "pf": 1.0211,
+            "wr": 0.5507,
+            "avg_r": 0.0088,
+            "mdd_r": 15.55,
+            "sharpe": 0.0702
+          }
+        ]
+      },
+      "GBPJPY": {
+        "best_params": {
+          "min_gap_atr_mult": 0.4,
+          "sl_atr_mult": 1.2,
+          "max_hold_bars": 3.0
+        },
+        "best_stats": {
+          "total_trades": 200.0,
+          "pf": 1.0115,
+          "wr": 0.63,
+          "avg_r": 0.0033,
+          "mdd_r": 9.52,
+          "sharpe": 0.0364
+        },
+        "grid_top5": [
+          {
+            "min_gap_atr_mult": 0.4,
+            "sl_atr_mult": 1.2,
+            "max_hold_bars": 3,
+            "total_trades": 200,
+            "pf": 1.0115,
+            "wr": 0.63,
+            "avg_r": 0.0033,
+            "mdd_r": 9.52,
+            "sharpe": 0.0364
+          },
+          {
+            "min_gap_atr_mult": 0.4,
+            "sl_atr_mult": 1.5,
+            "max_hold_bars": 3,
+            "total_trades": 200,
+            "pf": 0.9896,
+            "wr": 0.63,
+            "avg_r": -0.0025,
+            "mdd_r": 7.85,
+            "sharpe": -0.0321
+          },
+          {
+            "min_gap_atr_mult": 0.4,
+            "sl_atr_mult": 1.0,
+            "max_hold_bars": 3,
+            "total_trades": 200,
+            "pf": 0.9503,
+            "wr": 0.595,
+            "avg_r": -0.0173,
+            "mdd_r": 14.18,
+            "sharpe": -0.1668
+          },
+          {
+            "min_gap_atr_mult": 0.4,
+            "sl_atr_mult": 1.2,
+            "max_hold_bars": 5,
+            "total_trades": 200,
+            "pf": 0.9429,
+            "wr": 0.625,
+            "avg_r": -0.0187,
+            "mdd_r": 11.39,
+            "sharpe": -0.1911
+          },
+          {
+            "min_gap_atr_mult": 0.3,
+            "sl_atr_mult": 1.5,
+            "max_hold_bars": 3,
+            "total_trades": 244,
+            "pf": 0.9427,
+            "wr": 0.6352,
+            "avg_r": -0.0132,
+            "mdd_r": 8.69,
+            "sharpe": -0.1776
+          }
+        ]
+      },
+      "adversarial": {
+        "baseline": {
+          "total_trades": 180,
+          "wins": 111,
+          "losses": 69,
+          "pf": 1.4717,
+          "wr": 0.6167,
+          "avg_r": 0.1107,
+          "mdd_r": 6.77,
+          "sharpe": 1.2283,
+          "gross_profit": 62.17,
+          "gross_loss": 42.24
+        },
+        "year_by_year": {
+          "2004": {
+            "total_trades": 8,
+            "wins": 5,
+            "losses": 3,
+            "pf": 1.4027,
+            "wr": 0.625,
+            "avg_r": 0.1299,
+            "mdd_r": 2.08,
+            "sharpe": 1.0838,
+            "gross_profit": 3.62,
+            "gross_loss": 2.58
+          },
+          "2005": {
+            "total_trades": 6,
+            "wins": 4,
+            "losses": 2,
+            "pf": 1.6639,
+            "wr": 0.6667,
+            "avg_r": 0.1623,
+            "mdd_r": 0.41,
+            "sharpe": 1.7237,
+            "gross_profit": 2.44,
+            "gross_loss": 1.47
+          },
+          "2006": {
+            "total_trades": 7,
+            "wins": 4,
+            "losses": 3,
+            "pf": 0.7529,
+            "wr": 0.5714,
+            "avg_r": -0.1108,
+            "mdd_r": 2.09,
+            "sharpe": -0.968,
+            "gross_profit": 2.36,
+            "gross_loss": 3.14
+          },
+          "2007": {
+            "total_trades": 2,
+            "wins": 2,
+            "losses": 0,
+            "pf": 0,
+            "wr": 1.0,
+            "avg_r": 0.5048,
+            "mdd_r": 0.0,
+            "sharpe": 60.5121,
+            "gross_profit": 1.01,
+            "gross_loss": 0.0
+          },
+          "2008": {
+            "total_trades": 1,
+            "wins": 1,
+            "losses": 0,
+            "pf": 0,
+            "wr": 1.0,
+            "avg_r": 0.1463,
+            "mdd_r": 0.0,
+            "sharpe": 1.055,
+            "gross_profit": 0.15,
+            "gross_loss": 0.0
+          },
+          "2009": {
+            "total_trades": 3,
+            "wins": 2,
+            "losses": 1,
+            "pf": 15.0843,
+            "wr": 0.6667,
+            "avg_r": 0.3343,
+            "mdd_r": 0.07,
+            "sharpe": 8.0996,
+            "gross_profit": 1.07,
+            "gross_loss": 0.07
+          },
+          "2010": {
+            "total_trades": 3,
+            "wins": 2,
+            "losses": 1,
+            "pf": 3.5267,
+            "wr": 0.6667,
+            "avg_r": 0.2095,
+            "mdd_r": 0.25,
+            "sharpe": 4.2372,
+            "gross_profit": 0.88,
+            "gross_loss": 0.25
+          },
+          "2011": {
+            "total_trades": 8,
+            "wins": 4,
+            "losses": 4,
+            "pf": 0.5465,
+            "wr": 0.5,
+            "avg_r": -0.2318,
+            "mdd_r": 3.34,
+            "sharpe": -2.1041,
+            "gross_profit": 2.23,
+            "gross_loss": 4.09
+          },
+          "2012": {
+            "total_trades": 8,
+            "wins": 4,
+            "losses": 4,
+            "pf": 0.671,
+            "wr": 0.5,
+            "avg_r": -0.102,
+            "mdd_r": 1.02,
+            "sharpe": -1.2299,
+            "gross_profit": 1.66,
+            "gross_loss": 2.48
+          },
+          "2013": {
+            "total_trades": 11,
+            "wins": 5,
+            "losses": 6,
+            "pf": 0.7096,
+            "wr": 0.4545,
+            "avg_r": -0.1055,
+            "mdd_r": 2.57,
+            "sharpe": -1.1237,
+            "gross_profit": 2.83,
+            "gross_loss": 3.99
+          },
+          "2014": {
+            "total_trades": 11,
+            "wins": 8,
+            "losses": 3,
+            "pf": 1.5809,
+            "wr": 0.7273,
+            "avg_r": 0.1367,
+            "mdd_r": 1.56,
+            "sharpe": 1.5159,
+            "gross_profit": 4.09,
+            "gross_loss": 2.59
+          },
+          "2015": {
+            "total_trades": 11,
+            "wins": 8,
+            "losses": 3,
+            "pf": 2.2019,
+            "wr": 0.7273,
+            "avg_r": 0.2338,
+            "mdd_r": 1.64,
+            "sharpe": 2.5138,
+            "gross_profit": 4.71,
+            "gross_loss": 2.14
+          },
+          "2016": {
+            "total_trades": 13,
+            "wins": 7,
+            "losses": 6,
+            "pf": 1.7316,
+            "wr": 0.5385,
+            "avg_r": 0.1086,
+            "mdd_r": 0.51,
+            "sharpe": 1.8346,
+            "gross_profit": 3.34,
+            "gross_loss": 1.93
+          },
+          "2017": {
+            "total_trades": 7,
+            "wins": 6,
+            "losses": 1,
+            "pf": 17.9716,
+            "wr": 0.8571,
+            "avg_r": 0.4359,
+            "mdd_r": 0.18,
+            "sharpe": 11.9223,
+            "gross_profit": 3.23,
+            "gross_loss": 0.18
+          },
+          "2018": {
+            "total_trades": 12,
+            "wins": 10,
+            "losses": 2,
+            "pf": 4.5307,
+            "wr": 0.8333,
+            "avg_r": 0.3301,
+            "mdd_r": 1.03,
+            "sharpe": 4.7462,
+            "gross_profit": 5.08,
+            "gross_loss": 1.12
+          },
+          "2019": {
+            "total_trades": 9,
+            "wins": 3,
+            "losses": 6,
+            "pf": 0.4296,
+            "wr": 0.3333,
+            "avg_r": -0.2564,
+            "mdd_r": 2.14,
+            "sharpe": -2.8423,
+            "gross_profit": 1.74,
+            "gross_loss": 4.05
+          },
+          "2020": {
+            "total_trades": 11,
+            "wins": 7,
+            "losses": 4,
+            "pf": 1.6591,
+            "wr": 0.6364,
+            "avg_r": 0.1643,
+            "mdd_r": 1.17,
+            "sharpe": 1.6522,
+            "gross_profit": 4.55,
+            "gross_loss": 2.74
+          },
+          "2021": {
+            "total_trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "pf": 1.0366,
+            "wr": 0.4444,
+            "avg_r": 0.0108,
+            "mdd_r": 2.08,
+            "sharpe": 0.1129,
+            "gross_profit": 2.76,
+            "gross_loss": 2.66
+          },
+          "2022": {
+            "total_trades": 8,
+            "wins": 6,
+            "losses": 2,
+            "pf": 4.2355,
+            "wr": 0.75,
+            "avg_r": 0.2781,
+            "mdd_r": 0.38,
+            "sharpe": 4.9609,
+            "gross_profit": 2.91,
+            "gross_loss": 0.69
+          },
+          "2023": {
+            "total_trades": 10,
+            "wins": 7,
+            "losses": 3,
+            "pf": 13.7288,
+            "wr": 0.7,
+            "avg_r": 0.3502,
+            "mdd_r": 0.13,
+            "sharpe": 6.9946,
+            "gross_profit": 3.78,
+            "gross_loss": 0.28
+          },
+          "2024": {
+            "total_trades": 7,
+            "wins": 4,
+            "losses": 3,
+            "pf": 2.5186,
+            "wr": 0.5714,
+            "avg_r": 0.2269,
+            "mdd_r": 1.04,
+            "sharpe": 2.7168,
+            "gross_profit": 2.63,
+            "gross_loss": 1.05
+          },
+          "2025": {
+            "total_trades": 8,
+            "wins": 4,
+            "losses": 4,
+            "pf": 0.921,
+            "wr": 0.5,
+            "avg_r": -0.0322,
+            "mdd_r": 1.79,
+            "sharpe": -0.2739,
+            "gross_profit": 3.01,
+            "gross_loss": 3.27
+          },
+          "2026": {
+            "total_trades": 7,
+            "wins": 4,
+            "losses": 3,
+            "pf": 1.3874,
+            "wr": 0.5714,
+            "avg_r": 0.0826,
+            "mdd_r": 0.46,
+            "sharpe": 1.056,
+            "gross_profit": 2.07,
+            "gross_loss": 1.49
+          }
+        },
+        "years_pf_below_1_count": 6,
+        "walk_forward": [
+          {
+            "fold": 1,
+            "train_period": "2004-02-09 -> 2010-12-06",
+            "test_period": "2011-01-03 -> 2014-01-20",
+            "train_trades": 30,
+            "test_trades": 30,
+            "train_pf": 1.5361,
+            "train_wr": 0.6667,
+            "test_pf": 0.6248,
+            "test_wr": 0.5,
+            "test_avg_r": -0.145,
+            "degradation": 0.41
+          },
+          {
+            "fold": 2,
+            "train_period": "2011-01-03 -> 2014-01-20",
+            "test_period": "2014-01-27 -> 2016-11-14",
+            "train_trades": 30,
+            "test_trades": 30,
+            "train_pf": 0.6248,
+            "train_wr": 0.5,
+            "test_pf": 2.1618,
+            "test_wr": 0.6667,
+            "test_avg_r": 0.198,
+            "degradation": 3.46
+          },
+          {
+            "fold": 3,
+            "train_period": "2014-01-27 -> 2016-11-14",
+            "test_period": "2016-12-12 -> 2019-12-30",
+            "train_trades": 30,
+            "test_trades": 30,
+            "train_pf": 2.1618,
+            "train_wr": 0.6667,
+            "test_pf": 1.8139,
+            "test_wr": 0.6667,
+            "test_avg_r": 0.159,
+            "degradation": 0.84
+          },
+          {
+            "fold": 4,
+            "train_period": "2016-12-12 -> 2019-12-30",
+            "test_period": "2020-01-06 -> 2023-01-23",
+            "train_trades": 30,
+            "test_trades": 30,
+            "train_pf": 1.8139,
+            "train_wr": 0.6667,
+            "test_pf": 1.6594,
+            "test_wr": 0.6,
+            "test_avg_r": 0.1356,
+            "degradation": 0.91
+          },
+          {
+            "fold": 5,
+            "train_period": "2020-01-06 -> 2023-01-23",
+            "test_period": "2023-02-06 -> 2026-03-30",
+            "train_trades": 30,
+            "test_trades": 30,
+            "train_pf": 1.6594,
+            "train_wr": 0.6,
+            "test_pf": 1.9123,
+            "test_wr": 0.6,
+            "test_avg_r": 0.1824,
+            "degradation": 1.15
+          }
+        ],
+        "wf_avg_test_pf": 1.6344,
+        "wf_all_positive": false,
+        "spread_stress": {
+          "spread_1x": {
+            "total_trades": 180,
+            "wins": 113,
+            "losses": 67,
+            "pf": 1.6463,
+            "wr": 0.6278,
+            "avg_r": 0.1438,
+            "mdd_r": 6.23,
+            "sharpe": 1.5957,
+            "gross_profit": 65.94,
+            "gross_loss": 40.06
+          },
+          "spread_2x": {
+            "total_trades": 180,
+            "wins": 113,
+            "losses": 67,
+            "pf": 1.532,
+            "wr": 0.6278,
+            "avg_r": 0.1225,
+            "mdd_r": 6.58,
+            "sharpe": 1.3595,
+            "gross_profit": 63.51,
+            "gross_loss": 41.46
+          },
+          "spread_3x": {
+            "total_trades": 180,
+            "wins": 111,
+            "losses": 69,
+            "pf": 1.4249,
+            "wr": 0.6167,
+            "avg_r": 0.1012,
+            "mdd_r": 6.93,
+            "sharpe": 1.1233,
+            "gross_profit": 61.11,
+            "gross_loss": 42.89
+          },
+          "spread_5x": {
+            "total_trades": 180,
+            "wins": 108,
+            "losses": 72,
+            "pf": 1.2301,
+            "wr": 0.6,
+            "avg_r": 0.0587,
+            "mdd_r": 7.63,
+            "sharpe": 0.6507,
+            "gross_profit": 56.45,
+            "gross_loss": 45.89
+          }
+        },
+        "stress_survives_3x": true,
+        "monte_carlo": {
+          "n_simulations": 10000,
+          "prob_ruin": 0.0,
+          "mean_final_balance": 1215.74,
+          "median_final_balance": 1215.74,
+          "p5_final_balance": 1215.74,
+          "p95_final_balance": 1215.74,
+          "mean_max_dd_pct": 5.25,
+          "p95_max_dd_pct": 7.92,
+          "p99_max_dd_pct": 9.61,
+          "still_profitable_pct": 100.0
+        },
+        "mc_survives": true,
+        "bootstrap_mc": {
+          "n_simulations": 10000,
+          "pf_mean": 1.5014,
+          "pf_median": 1.4725,
+          "pf_p5": 1.1106,
+          "pf_p95": 1.987,
+          "pf_p1": 0.992,
+          "pf_p99": 2.2782,
+          "pf_below_1_pct": 1.1,
+          "avg_r_mean": 0.1104,
+          "avg_r_p5": 0.031,
+          "avg_r_p95": 0.1873,
+          "wr_mean": 0.6165,
+          "wr_p5": 0.5611
+        },
+        "bmc_survives": true,
+        "trade_removal": {
+          "base": {
+            "total_trades": 180,
+            "wins": 111,
+            "losses": 69,
+            "pf": 1.4717,
+            "wr": 0.6167,
+            "avg_r": 0.1107,
+            "mdd_r": 6.77,
+            "sharpe": 1.2283,
+            "gross_profit": 62.17,
+            "gross_loss": 42.24
+          },
+          "remove_10pct_winners": {
+            "mean_pf": 1.3251,
+            "median_pf": 1.325,
+            "pf_below_1_pct": 0.0,
+            "p5_pf": 1.2954,
+            "n_winners_removed": 11
+          },
+          "remove_20pct_winners": {
+            "mean_pf": 1.1804,
+            "median_pf": 1.1816,
+            "pf_below_1_pct": 0.0,
+            "p5_pf": 1.1418,
+            "n_winners_removed": 22
+          },
+          "remove_30pct_winners": {
+            "mean_pf": 1.0334,
+            "median_pf": 1.0344,
+            "pf_below_1_pct": 10.9,
+            "p5_pf": 0.9886,
+            "n_winners_removed": 33
+          }
+        },
+        "removal_survives_10pct": true,
+        "regime_analysis": {
+          "HIGH_VOL": {
+            "total_trades": 58,
+            "wins": 31,
+            "losses": 27,
+            "pf": 1.1331,
+            "wr": 0.5345,
+            "avg_r": 0.0344,
+            "mdd_r": 4.19,
+            "sharpe": 0.3863,
+            "gross_profit": 16.98,
+            "gross_loss": 14.98
+          },
+          "LOW_VOL": {
+            "total_trades": 39,
+            "wins": 26,
+            "losses": 13,
+            "pf": 1.2539,
+            "wr": 0.6667,
+            "avg_r": 0.0668,
+            "mdd_r": 4.27,
+            "sharpe": 0.71,
+            "gross_profit": 12.86,
+            "gross_loss": 10.25
+          },
+          "MIXED": {
+            "total_trades": 21,
+            "wins": 15,
+            "losses": 6,
+            "pf": 2.9235,
+            "wr": 0.7143,
+            "avg_r": 0.2749,
+            "mdd_r": 1.49,
+            "sharpe": 3.5948,
+            "gross_profit": 8.77,
+            "gross_loss": 3.0
+          },
+          "RANGING": {
+            "total_trades": 15,
+            "wins": 9,
+            "losses": 6,
+            "pf": 2.6725,
+            "wr": 0.6,
+            "avg_r": 0.2307,
+            "mdd_r": 0.54,
+            "sharpe": 3.1549,
+            "gross_profit": 5.53,
+            "gross_loss": 2.07
+          },
+          "TRENDING": {
+            "total_trades": 43,
+            "wins": 28,
+            "losses": 15,
+            "pf": 1.5381,
+            "wr": 0.6512,
+            "avg_r": 0.1301,
+            "mdd_r": 4.5,
+            "sharpe": 1.4186,
+            "gross_profit": 15.99,
+            "gross_loss": 10.4
+          },
+          "UNCLASSIFIED": {
+            "total_trades": 4,
+            "wins": 2,
+            "losses": 2,
+            "pf": 1.3258,
+            "wr": 0.5,
+            "avg_r": 0.1253,
+            "mdd_r": 1.04,
+            "sharpe": 0.9466,
+            "gross_profit": 2.04,
+            "gross_loss": 1.54
+          }
+        },
+        "gap_up": {
+          "total_trades": 86,
+          "wins": 51,
+          "losses": 35,
+          "pf": 1.1931,
+          "wr": 0.593,
+          "avg_r": 0.0526,
+          "mdd_r": 6.47,
+          "sharpe": 0.5562,
+          "gross_profit": 27.92,
+          "gross_loss": 23.4
+        },
+        "gap_down": {
+          "total_trades": 94,
+          "wins": 60,
+          "losses": 34,
+          "pf": 1.8178,
+          "wr": 0.6383,
+          "avg_r": 0.1639,
+          "mdd_r": 2.6,
+          "sharpe": 1.9221,
+          "gross_profit": 34.24,
+          "gross_loss": 18.84
+        }
+      },
+      "adversarial_pair": "NZDUSD",
+      "adversarial_params": {
+        "min_gap_atr_mult": 0.5,
+        "sl_atr_mult": 1.2,
+        "max_hold_bars": 3.0
+      },
+      "verdict": "PASS (5/6): PF>1.1, WF-, Spread+, MC+, Bootstrap+, Removal+"
+    },
+    "MM-012": {
+      "GBPUSD": {
+        "best_params": {
+          "min_gap_pct": 0.25,
+          "sl_atr_mult": 2.0,
+          "max_hold_bars": 5.0
+        },
+        "best_stats": {
+          "total_trades": 249.0,
+          "pf": 1.0629,
+          "wr": 0.6908,
+          "avg_r": 0.0107,
+          "mdd_r": 4.24,
+          "sharpe": 0.1766
+        },
+        "grid_top5": [
+          {
+            "min_gap_pct": 0.25,
+            "sl_atr_mult": 2.0,
+            "max_hold_bars": 5,
+            "total_trades": 249,
+            "pf": 1.0629,
+            "wr": 0.6908,
+            "avg_r": 0.0107,
+            "mdd_r": 4.24,
+            "sharpe": 0.1766
+          },
+          {
+            "min_gap_pct": 0.25,
+            "sl_atr_mult": 2.0,
+            "max_hold_bars": 10,
+            "total_trades": 249,
+            "pf": 1.0333,
+            "wr": 0.7229,
+            "avg_r": 0.0067,
+            "mdd_r": 8.71,
+            "sharpe": 0.0957
+          },
+          {
+            "min_gap_pct": 0.05,
+            "sl_atr_mult": 1.5,
+            "max_hold_bars": 3,
+            "total_trades": 412,
+            "pf": 1.0166,
+            "wr": 0.7476,
+            "avg_r": 0.0026,
+            "mdd_r": 7.64,
+            "sharpe": 0.0433
+          },
+          {
+            "min_gap_pct": 0.25,
+            "sl_atr_mult": 2.0,
+            "max_hold_bars": 3,
+            "total_trades": 249,
+            "pf": 1.0158,
+            "wr": 0.6426,
+            "avg_r": 0.0025,
+            "mdd_r": 4.88,
+            "sharpe": 0.0451
+          },
+          {
+            "min_gap_pct": 0.25,
+            "sl_atr_mult": 1.5,
+            "max_hold_bars": 5,
+            "total_trades": 249,
+            "pf": 1.0043,
+            "wr": 0.6747,
+            "avg_r": 0.001,
+            "mdd_r": 7.94,
+            "sharpe": 0.013
+          }
+        ]
+      },
+      "adversarial": {
+        "baseline": {
+          "total_trades": 249,
+          "wins": 172,
+          "losses": 77,
+          "pf": 1.0629,
+          "wr": 0.6908,
+          "avg_r": 0.0107,
+          "mdd_r": 4.24,
+          "sharpe": 0.1766,
+          "gross_profit": 45.0,
+          "gross_loss": 42.34
+        },
+        "year_by_year": {
+          "2004": {
+            "total_trades": 3,
+            "wins": 3,
+            "losses": 0,
+            "pf": 0,
+            "wr": 1.0,
+            "avg_r": 0.1123,
+            "mdd_r": 0.0,
+            "sharpe": 40.5184,
+            "gross_profit": 0.34,
+            "gross_loss": 0.0
+          },
+          "2005": {
+            "total_trades": 1,
+            "wins": 1,
+            "losses": 0,
+            "pf": 0,
+            "wr": 1.0,
+            "avg_r": 0.1917,
+            "mdd_r": 0.0,
+            "sharpe": 1.3824,
+            "gross_profit": 0.19,
+            "gross_loss": 0.0
+          },
+          "2006": {
+            "total_trades": 2,
+            "wins": 1,
+            "losses": 1,
+            "pf": 0.2265,
+            "wr": 0.5,
+            "avg_r": -0.3907,
+            "mdd_r": 1.01,
+            "sharpe": -4.548,
+            "gross_profit": 0.23,
+            "gross_loss": 1.01
+          },
+          "2007": {
+            "total_trades": 4,
+            "wins": 2,
+            "losses": 2,
+            "pf": 0.5709,
+            "wr": 0.5,
+            "avg_r": -0.1163,
+            "mdd_r": 1.01,
+            "sharpe": -1.5585,
+            "gross_profit": 0.62,
+            "gross_loss": 1.08
+          },
+          "2008": {
+            "total_trades": 8,
+            "wins": 7,
+            "losses": 1,
+            "pf": 1.056,
+            "wr": 0.875,
+            "avg_r": 0.0054,
+            "mdd_r": 0.78,
+            "sharpe": 0.1312,
+            "gross_profit": 0.82,
+            "gross_loss": 0.78
+          },
+          "2009": {
+            "total_trades": 14,
+            "wins": 13,
+            "losses": 1,
+            "pf": 1.9937,
+            "wr": 0.9286,
+            "avg_r": 0.0712,
+            "mdd_r": 0.0,
+            "sharpe": 1.6926,
+            "gross_profit": 2.0,
+            "gross_loss": 1.0
+          },
+          "2010": {
+            "total_trades": 9,
+            "wins": 3,
+            "losses": 6,
+            "pf": 0.2686,
+            "wr": 0.3333,
+            "avg_r": -0.2366,
+            "mdd_r": 1.62,
+            "sharpe": -3.767,
+            "gross_profit": 0.78,
+            "gross_loss": 2.91
+          },
+          "2011": {
+            "total_trades": 12,
+            "wins": 11,
+            "losses": 1,
+            "pf": 3.3677,
+            "wr": 0.9167,
+            "avg_r": 0.199,
+            "mdd_r": 1.01,
+            "sharpe": 3.8214,
+            "gross_profit": 3.4,
+            "gross_loss": 1.01
+          },
+          "2012": {
+            "total_trades": 17,
+            "wins": 10,
+            "losses": 7,
+            "pf": 0.5907,
+            "wr": 0.5882,
+            "avg_r": -0.0909,
+            "mdd_r": 1.99,
+            "sharpe": -1.4641,
+            "gross_profit": 2.23,
+            "gross_loss": 3.78
+          },
+          "2013": {
+            "total_trades": 13,
+            "wins": 9,
+            "losses": 4,
+            "pf": 2.6903,
+            "wr": 0.6923,
+            "avg_r": 0.1553,
+            "mdd_r": 0.49,
+            "sharpe": 3.4913,
+            "gross_profit": 3.21,
+            "gross_loss": 1.19
+          },
+          "2014": {
+            "total_trades": 12,
+            "wins": 7,
+            "losses": 5,
+            "pf": 0.8599,
+            "wr": 0.5833,
+            "avg_r": -0.0314,
+            "mdd_r": 1.34,
+            "sharpe": -0.4491,
+            "gross_profit": 2.32,
+            "gross_loss": 2.69
+          },
+          "2015": {
+            "total_trades": 12,
+            "wins": 9,
+            "losses": 3,
+            "pf": 1.3972,
+            "wr": 0.75,
+            "avg_r": 0.0698,
+            "mdd_r": 1.01,
+            "sharpe": 1.0457,
+            "gross_profit": 2.94,
+            "gross_loss": 2.11
+          },
+          "2016": {
+            "total_trades": 13,
+            "wins": 10,
+            "losses": 3,
+            "pf": 1.1319,
+            "wr": 0.7692,
+            "avg_r": 0.0211,
+            "mdd_r": 1.01,
+            "sharpe": 0.3332,
+            "gross_profit": 2.36,
+            "gross_loss": 2.08
+          },
+          "2017": {
+            "total_trades": 11,
+            "wins": 7,
+            "losses": 4,
+            "pf": 0.7576,
+            "wr": 0.6364,
+            "avg_r": -0.0479,
+            "mdd_r": 1.04,
+            "sharpe": -0.8691,
+            "gross_profit": 1.65,
+            "gross_loss": 2.17
+          },
+          "2018": {
+            "total_trades": 14,
+            "wins": 6,
+            "losses": 8,
+            "pf": 0.3995,
+            "wr": 0.4286,
+            "avg_r": -0.1571,
+            "mdd_r": 2.24,
+            "sharpe": -2.9213,
+            "gross_profit": 1.46,
+            "gross_loss": 3.66
+          },
+          "2019": {
+            "total_trades": 13,
+            "wins": 9,
+            "losses": 4,
+            "pf": 1.1485,
+            "wr": 0.6923,
+            "avg_r": 0.0256,
+            "mdd_r": 1.01,
+            "sharpe": 0.4018,
+            "gross_profit": 2.58,
+            "gross_loss": 2.24
+          },
+          "2020": {
+            "total_trades": 16,
+            "wins": 13,
+            "losses": 3,
+            "pf": 2.4991,
+            "wr": 0.8125,
+            "avg_r": 0.1384,
+            "mdd_r": 1.01,
+            "sharpe": 2.7745,
+            "gross_profit": 3.69,
+            "gross_loss": 1.48
+          },
+          "2021": {
+            "total_trades": 15,
+            "wins": 10,
+            "losses": 5,
+            "pf": 1.2593,
+            "wr": 0.6667,
+            "avg_r": 0.0422,
+            "mdd_r": 1.7,
+            "sharpe": 0.674,
+            "gross_profit": 3.08,
+            "gross_loss": 2.44
+          },
+          "2022": {
+            "total_trades": 11,
+            "wins": 5,
+            "losses": 6,
+            "pf": 0.1871,
+            "wr": 0.4545,
+            "avg_r": -0.3196,
+            "mdd_r": 3.23,
+            "sharpe": -4.6007,
+            "gross_profit": 0.81,
+            "gross_loss": 4.32
+          },
+          "2023": {
+            "total_trades": 16,
+            "wins": 11,
+            "losses": 5,
+            "pf": 1.3371,
+            "wr": 0.6875,
+            "avg_r": 0.0422,
+            "mdd_r": 1.14,
+            "sharpe": 0.8702,
+            "gross_profit": 2.68,
+            "gross_loss": 2.0
+          },
+          "2024": {
+            "total_trades": 13,
+            "wins": 9,
+            "losses": 4,
+            "pf": 0.6728,
+            "wr": 0.6923,
+            "avg_r": -0.0823,
+            "mdd_r": 1.59,
+            "sharpe": -1.1136,
+            "gross_profit": 2.2,
+            "gross_loss": 3.27
+          },
+          "2025": {
+            "total_trades": 9,
+            "wins": 9,
+            "losses": 0,
+            "pf": 0,
+            "wr": 1.0,
+            "avg_r": 0.3296,
+            "mdd_r": 0.0,
+            "sharpe": 13.9368,
+            "gross_profit": 2.97,
+            "gross_loss": 0.0
+          },
+          "2026": {
+            "total_trades": 11,
+            "wins": 7,
+            "losses": 4,
+            "pf": 2.246,
+            "wr": 0.6364,
+            "avg_r": 0.1239,
+            "mdd_r": 0.76,
+            "sharpe": 2.6237,
+            "gross_profit": 2.46,
+            "gross_loss": 1.09
+          }
+        },
+        "years_pf_below_1_count": 8,
+        "walk_forward": [
+          {
+            "fold": 1,
+            "train_period": "2004-03-01 -> 2010-12-20",
+            "test_period": "2011-01-03 -> 2013-11-25",
+            "train_trades": 41,
+            "test_trades": 41,
+            "train_pf": 0.7338,
+            "train_wr": 0.7317,
+            "test_pf": 1.4276,
+            "test_wr": 0.7073,
+            "test_avg_r": 0.0624,
+            "degradation": 1.95
+          },
+          {
+            "fold": 2,
+            "train_period": "2011-01-03 -> 2013-11-25",
+            "test_period": "2013-12-30 -> 2017-01-16",
+            "train_trades": 41,
+            "test_trades": 41,
+            "train_pf": 1.4276,
+            "train_wr": 0.7073,
+            "test_pf": 1.1253,
+            "test_wr": 0.7073,
+            "test_avg_r": 0.0235,
+            "degradation": 0.79
+          },
+          {
+            "fold": 3,
+            "train_period": "2013-12-30 -> 2017-01-16",
+            "test_period": "2017-01-23 -> 2020-02-24",
+            "train_trades": 41,
+            "test_trades": 41,
+            "train_pf": 1.1253,
+            "train_wr": 0.7073,
+            "test_pf": 0.9212,
+            "test_wr": 0.6341,
+            "test_avg_r": -0.014,
+            "degradation": 0.82
+          },
+          {
+            "fold": 4,
+            "train_period": "2017-01-23 -> 2020-02-24",
+            "test_period": "2020-03-02 -> 2023-02-20",
+            "train_trades": 41,
+            "test_trades": 41,
+            "train_pf": 0.9212,
+            "train_wr": 0.6341,
+            "test_pf": 0.765,
+            "test_wr": 0.6341,
+            "test_avg_r": -0.0491,
+            "degradation": 0.83
+          },
+          {
+            "fold": 5,
+            "train_period": "2020-03-02 -> 2023-02-20",
+            "test_period": "2023-02-27 -> 2026-03-09",
+            "train_trades": 41,
+            "test_trades": 41,
+            "train_pf": 0.765,
+            "train_wr": 0.6341,
+            "test_pf": 1.3436,
+            "test_wr": 0.7073,
+            "test_avg_r": 0.0506,
+            "degradation": 1.76
+          }
+        ],
+        "wf_avg_test_pf": 1.1165,
+        "wf_all_positive": false,
+        "spread_stress": {
+          "spread_1x": {
+            "total_trades": 249,
+            "wins": 172,
+            "losses": 77,
+            "pf": 1.1222,
+            "wr": 0.6908,
+            "avg_r": 0.0204,
+            "mdd_r": 3.68,
+            "sharpe": 0.3368,
+            "gross_profit": 46.65,
+            "gross_loss": 41.57
+          },
+          "spread_2x": {
+            "total_trades": 249,
+            "wins": 172,
+            "losses": 77,
+            "pf": 1.0864,
+            "wr": 0.6908,
+            "avg_r": 0.0146,
+            "mdd_r": 4.01,
+            "sharpe": 0.2408,
+            "gross_profit": 45.66,
+            "gross_loss": 42.03
+          },
+          "spread_3x": {
+            "total_trades": 249,
+            "wins": 172,
+            "losses": 77,
+            "pf": 1.0513,
+            "wr": 0.6908,
+            "avg_r": 0.0088,
+            "mdd_r": 4.36,
+            "sharpe": 0.1446,
+            "gross_profit": 44.67,
+            "gross_loss": 42.49
+          },
+          "spread_5x": {
+            "total_trades": 249,
+            "wins": 169,
+            "losses": 80,
+            "pf": 0.9835,
+            "wr": 0.6787,
+            "avg_r": -0.0029,
+            "mdd_r": 5.63,
+            "sharpe": -0.0476,
+            "gross_profit": 42.71,
+            "gross_loss": 43.42
+          }
+        },
+        "stress_survives_3x": true,
+        "monte_carlo": {
+          "n_simulations": 10000,
+          "prob_ruin": 0.0,
+          "mean_final_balance": 1024.55,
+          "median_final_balance": 1024.55,
+          "p5_final_balance": 1024.55,
+          "p95_final_balance": 1024.55,
+          "mean_max_dd_pct": 6.54,
+          "p95_max_dd_pct": 9.58,
+          "p99_max_dd_pct": 10.99,
+          "still_profitable_pct": 100.0
+        },
+        "mc_survives": true,
+        "bootstrap_mc": {
+          "n_simulations": 10000,
+          "pf_mean": 1.0827,
+          "pf_median": 1.0642,
+          "pf_p5": 0.8264,
+          "pf_p95": 1.4022,
+          "pf_p1": 0.7462,
+          "pf_p99": 1.5839,
+          "pf_below_1_pct": 34.5,
+          "avg_r_mean": 0.0107,
+          "avg_r_p5": -0.0351,
+          "avg_r_p95": 0.0562,
+          "wr_mean": 0.6908,
+          "wr_p5": 0.6426
+        },
+        "bmc_survives": false,
+        "trade_removal": {
+          "base": {
+            "total_trades": 249,
+            "wins": 172,
+            "losses": 77,
+            "pf": 1.0629,
+            "wr": 0.6908,
+            "avg_r": 0.0107,
+            "mdd_r": 4.24,
+            "sharpe": 0.1766,
+            "gross_profit": 45.0,
+            "gross_loss": 42.34
+          },
+          "remove_10pct_winners": {
+            "mean_pf": 0.9581,
+            "median_pf": 0.9587,
+            "pf_below_1_pct": 99.9,
+            "p5_pf": 0.9341,
+            "n_winners_removed": 17
+          },
+          "remove_20pct_winners": {
+            "mean_pf": 0.8534,
+            "median_pf": 0.8538,
+            "pf_below_1_pct": 100.0,
+            "p5_pf": 0.8245,
+            "n_winners_removed": 34
+          },
+          "remove_30pct_winners": {
+            "mean_pf": 0.7475,
+            "median_pf": 0.7482,
+            "pf_below_1_pct": 100.0,
+            "p5_pf": 0.7124,
+            "n_winners_removed": 51
+          }
+        },
+        "removal_survives_10pct": false,
+        "regime_analysis": {
+          "HIGH_VOL": {
+            "total_trades": 83,
+            "wins": 49,
+            "losses": 34,
+            "pf": 0.8784,
+            "wr": 0.5904,
+            "avg_r": -0.0241,
+            "mdd_r": 4.85,
+            "sharpe": -0.3823,
+            "gross_profit": 14.43,
+            "gross_loss": 16.43
+          },
+          "LOW_VOL": {
+            "total_trades": 55,
+            "wins": 41,
+            "losses": 14,
+            "pf": 1.0547,
+            "wr": 0.7455,
+            "avg_r": 0.0091,
+            "mdd_r": 2.45,
+            "sharpe": 0.1523,
+            "gross_profit": 9.6,
+            "gross_loss": 9.11
+          },
+          "MIXED": {
+            "total_trades": 35,
+            "wins": 29,
+            "losses": 6,
+            "pf": 1.3133,
+            "wr": 0.8286,
+            "avg_r": 0.0468,
+            "mdd_r": 2.02,
+            "sharpe": 0.7581,
+            "gross_profit": 6.86,
+            "gross_loss": 5.22
+          },
+          "RANGING": {
+            "total_trades": 17,
+            "wins": 11,
+            "losses": 6,
+            "pf": 0.7785,
+            "wr": 0.6471,
+            "avg_r": -0.0443,
+            "mdd_r": 2.24,
+            "sharpe": -0.7144,
+            "gross_profit": 2.65,
+            "gross_loss": 3.4
+          },
+          "TRENDING": {
+            "total_trades": 57,
+            "wins": 40,
+            "losses": 17,
+            "pf": 1.3773,
+            "wr": 0.7018,
+            "avg_r": 0.0541,
+            "mdd_r": 1.69,
+            "sharpe": 0.9484,
+            "gross_profit": 11.26,
+            "gross_loss": 8.17
+          },
+          "UNCLASSIFIED": {
+            "total_trades": 2,
+            "wins": 2,
+            "losses": 0,
+            "pf": 0,
+            "wr": 1.0,
+            "avg_r": 0.0988,
+            "mdd_r": 0.0,
+            "sharpe": 96.278,
+            "gross_profit": 0.2,
+            "gross_loss": 0.0
+          }
+        },
+        "gap_up": {
+          "total_trades": 117,
+          "wins": 80,
+          "losses": 37,
+          "pf": 0.9439,
+          "wr": 0.6838,
+          "avg_r": -0.0098,
+          "mdd_r": 4.14,
+          "sharpe": -0.1626,
+          "gross_profit": 19.31,
+          "gross_loss": 20.45
+        },
+        "gap_down": {
+          "total_trades": 132,
+          "wins": 92,
+          "losses": 40,
+          "pf": 1.1742,
+          "wr": 0.697,
+          "avg_r": 0.0289,
+          "mdd_r": 4.04,
+          "sharpe": 0.4752,
+          "gross_profit": 25.69,
+          "gross_loss": 21.88
+        }
+      },
+      "adversarial_pair": "GBPUSD",
+      "adversarial_params": {
+        "min_gap_pct": 0.25,
+        "sl_atr_mult": 2.0,
+        "max_hold_bars": 5.0
+      },
+      "verdict": "FAIL (2/6): PF<=1.1, WF-, Spread+, MC+, Bootstrap-, Removal-"
+    }
+  }
+}

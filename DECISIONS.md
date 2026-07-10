@@ -10,81 +10,56 @@
 
 - 11 files, fully working, standalone
 - Simpler than MarketMate (571 files) or jarvis (662 files)
-- Noventra-core has more gates but adds complexity without benefit yet
 - Decision: enhance this repo, not rebuild from noventra
 
-## Revenue Model: Subscription + Course
+## Revenue Model: Abandoned (Bot is now Free)
 
-- Free: 3 signals/day, 15 min delay (acquisition funnel)
-- Pro: $29/mo — unlimited signals, instant
-- VIP: $49/mo — signals + risk mgmt + course
-- Course: $39 one-time on Gumroad
-
-## Payment Processor: Stripe
-
-- Professional, subscription-native
-- Webhook-based — no polling
-- Supports recurring payments
-- Personal email acceptable for now
+- All strategies and signals are 100% free
+- No payment processor needed
+- Focus on building the best signal bot, not monetization
 
 ## Hosting: Render Free Tier
 
 - Free web service, auto-deploys from GitHub
 - Sleeps after 15 min inactivity — mitigated by UptimeRobot ping
 - Single-process deployment: Flask (webhooks) + Telegram (bot) in one process
-- Flask runs in background thread, Telegram polling on main thread
 
-## Data Source: yfinance (default)
+## Data Source: Twelve Data (primary) + yfinance (fallback)
 
-- Free, no API key needed, covers forex/gold
-- Fallback: CCXT for crypto, MetaAPI for live MT4/MT5 data
-- Decision: start with yfinance, add MetaAPI later for reliability
+- Twelve Data: 800 calls/day free tier
+- Auto-fallback to yfinance on rate limit / error
+- Symbol mapping for all 8 pairs on both sources
 
-## Subscription System: HMAC License Keys
+## Strategy Approach: Pipeline-Based, Not Indicator-Based
 
-- Server generates license keys with expiry embedded
-- Bot validates keys on each scan cycle
-- SQLite stores user/tier/key mappings
-- Decision: simpler than OAuth, works offline, no external service
+- All 8 indicator-based strategies deleted (MarketMate Graveyard)
+- Replaced by 2 validated strategies:
+  1. **SMC 8-Gate** — Sequential fail-fast pipeline (8 gates, PF 3.65)
+  2. **False Breakout Trap** — Failed breakout detection (PF 2.39 on GBPUSD)
 
-## Anti-Leak: Delayed Public Channel
+- False Breakout discovered via brainstorming (Jul 10, 2026)
+  - Simple rule: price exceeds swing high/low but closes back within 2 bars → reversal
+  - Survived 6/6 adversarial tests on all 5 validated pairs
+  - 0.0% bootstrap probability of PF < 1.0
+  - Complements SMC 8-Gate: works in RANGING where SMC is weaker
 
-- Private channel gets signals instantly
-- Public channel delayed 15 minutes
-- Decision: incentivizes paid subscriptions, prevents scraping
+## Symbols: 8 Pairs
 
-## Symbols: XAUUSD + GBPJPY + USDJPY
+- EURUSD, GBPUSD, USDJPY, XAUUSD, AUDUSD, NZDUSD, USDCAD, GBPJPY
+- All 8 actively scanned and traded
+- 20+ years of data per pair
 
-- Backtested all 5 symbols (XAUUSD, EURUSD, GBPUSD, USDJPY, GBPJPY) on 8 strategies
-- 3.5 years of daily data (Jan 2023 — Jul 2026)
-- XAUUSD, GBPJPY, USDJPY consistently profitable
-- EURUSD, GBPUSD excluded — unprofitable across all strategies
-- XAUUSD: PF 2.17 (EMA Crossover), ~18.9%/year
-- USDJPY: PF 1.82 (EMA Crossover), ~6.3%/year
-- GBPJPY: PF 1.69 (Stochastic Extreme), ~2.0%/year
+## Scoring Engine: Simplified
 
-## Strategy Parameters: Per-Pair Optimization
+- Strategy confluence score always 0 (no indicator strategies to confluate)
+- SMC 8-Gate gates determine signal quality directly
 
-- XAUUSD: 4h, MA 9/21, Breakout 10, RSI 30/70, EMA 9/21/100
-- GBPJPY: 4h, MA 50/200, Breakout 20, RSI 20/80, Stochastic
-- USDJPY: 4h, MA 9/21, Breakout 10, RSI 20/80, EMA 9/21/100
-- Day-of-week filters added from backtest research
-- Confluence score from strategies.py fed into scoring engine
+## False Breakout: Regime-Agnostic
 
-## Score Threshold: 11/20
+- Works in ALL market regimes (PF > 1.4 in every regime)
+- No regime filter needed — deploy as secondary scanner to SMC 8-Gate
 
-- Below 11 = no trade (hard gate)
-- Requires strategy confluence (min 2 strategies agreeing)
-- Tested threshold sensitivity: 11 balanced signal quality vs frequency
+## Repo Visibility: Public
 
-## Repo Visibility: Public (temporary)
-
-- Can't create private repo without GitHub org
 - Code isn't secret — strategy is in the execution
-- Make private later once org is created
-
-## NEWS_API_KEY: Optional
-
-- News filter only active when API key is configured
-- Without key, news_clear points not awarded (honest scoring)
-- Prevents 2 free points from always-true news check
+- Make private later once GitHub org is created

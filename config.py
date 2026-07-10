@@ -66,6 +66,16 @@ class BotConfig:
     BREAKOUT_LOOKBACK: int = 20
     BREAKOUT_VOLUME_MULT: float = 1.5
 
+    # ── False Breakout Trap ───────────────────────────────────────────────────
+    FALSE_BREAKOUT_ENABLED: bool = True
+    FALSE_BREAKOUT_LOOKBACK: int = 10
+    FALSE_BREAKOUT_SL_ATR: float = 1.0
+    FALSE_BREAKOUT_TP1_ATR: float = 1.5
+    FALSE_BREAKOUT_TP2_ATR: float = 2.5
+    FALSE_BREAKOUT_TP3_ATR: float = 3.5
+    FALSE_BREAKOUT_MIN_CONFIDENCE: float = 50.0
+    FALSE_BREAKOUT_MAX_CONFIDENCE: float = 75.0
+
     # ── Risk Management ──────────────────────────────────────────────────────
     ACCOUNT_BALANCE: float = float(os.getenv("ACCOUNT_BALANCE", "10000"))
     DEFAULT_RISK_PCT: float = 1.0
@@ -107,12 +117,6 @@ class BotConfig:
     CHART_TIMEFRAME: str = "1h"
     CHART_BLUR_ENABLED: bool = True
 
-    # ── Stripe ──────────────────────────────────────────────────────────────
-    STRIPE_SECRET_KEY: str = os.getenv("STRIPE_SECRET_KEY", "")
-    STRIPE_WEBHOOK_SECRET: str = os.getenv("STRIPE_WEBHOOK_SECRET", "")
-    STRIPE_PRICE_PRO: str = os.getenv("STRIPE_PRICE_PRO", "")
-    STRIPE_PRICE_VIP: str = os.getenv("STRIPE_PRICE_VIP", "")
-
     # ── License ─────────────────────────────────────────────────────────────
     LICENSE_SECRET: str = os.getenv("LICENSE_SECRET", "")
 
@@ -129,11 +133,7 @@ class BotConfig:
         if self.PRIVATE_CHANNEL_ID in ("-100XXXXXXXXX", ""):
             errors.append("PRIVATE_CHANNEL_ID is not set (required for signal delivery)")
 
-        # Stripe — required for payments
-        if not self.STRIPE_SECRET_KEY:
-            errors.append("STRIPE_SECRET_KEY is not set (required for payments)")
-        if not self.STRIPE_WEBHOOK_SECRET:
-            errors.append("STRIPE_WEBHOOK_SECRET is not set (required for webhook security)")
+        # Stripe — no longer enforced (bot is 100% free)
 
         # Numeric validation
         if self.ACCOUNT_BALANCE <= 0:

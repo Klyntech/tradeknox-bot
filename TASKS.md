@@ -7,7 +7,7 @@
 - [x] Select brand name: TradeKnox
 - [x] Identify base repo: trading_signal_bot
 - [x] Install and authenticate GitHub CLI
-- [x] Design revenue model (Free/Pro/VIP + Course)
+- [x] Design revenue model (Free/Pro/VIP + Course) — ABANDONED, bot is free
 - [x] Draft full execution plan
 - [x] Create GitHub repo Klyntech/tradeknox-bot
 - [x] Copy base code into new repo
@@ -20,7 +20,7 @@
 - [x] Add Telegram bot commands (/start, /subscribe, /status, /stats, /key, /help)
 - [x] Add Render deployment config (render.yaml, Procfile)
 
-### Phase 3: Research
+### Phase 3: Research — Old (Indicator Strategies)
 - [x] Download 6 months of historical data (5 symbols, 4 timeframes)
 - [x] Run market profile analysis
 - [x] Test 17 strategies across all symbols and timeframes
@@ -28,34 +28,35 @@
 - [x] Optimize per-pair parameters
 - [x] Add day-of-week filters
 
-### Phase 4: Deployment Fixes
+### Phase 4: Research — SMC 8-Gate
+- [x] Build SMC 8-Gate pipeline (market_structure.py, entry_logic.py, scoring_engine.py)
+- [x] Delete all 8 indicator-based strategies (MarketMate Graveyard)
+- [x] Download 20+ years of data for 8 pairs (32 CSV files)
+- [x] Build fast_backtest.py and pipeline_backtest.py
+- [x] Validate SMC 8-Gate (PF 3.65 on XAUUSD)
+
+### Phase 5: Deployment
 - [x] Fix scan loop (was dead code, never awaited)
 - [x] Fix subscribe callback (was giving free upgrades)
-- [x] Implement 4 Stripe webhook TODOs (key delivery, renewal, failure, cancellation)
 - [x] Combine Flask + Telegram into single process for Render free tier
-
-### Phase 5: Code Quality
+- [x] Deploy to Render
 - [x] Fix LICENSE_SECRET regeneration on restart
-- [x] Fix Flask debug mode (was True in production)
-- [x] Fix news filter scoring (was awarding free points)
-- [x] Update landing page stats to match backtest data
-- [x] Centralize DB paths via env vars
-- [x] Remove 12 unused imports
-- [x] Create root README.md
-- [x] Update stale docs (PROJECT.md, TASKS.md, DECISIONS.md)
+- [x] Add health endpoint
 
-## Blocked
-
-- [ ] Telegram bot token from @BotFather (phone unavailable)
-- [ ] Stripe account + API keys + Price IDs
-- [ ] Deploy to Render (needs above credentials)
+### Phase 6: Strategy Discovery (Brainstorm Batch)
+- [x] Test 5 fresh strategies (Jul 10, 2026)
+- [x] Discover False Breakout Trap (PF 2.39 on GBPUSD)
+- [x] Run full adversarial validation on False Breakout
+- [x] Result: 6/6 on all 5 pairs — production ready
+- [x] Reject 9EMA+RSI, BB Walk, Vol Disconnect, V-Shape
+- [x] Reject MM-012 Gap Fill (failed adversarial)
+- [x] Re-classify MM-002 as marginal (5/6 tests)
+- [x] Update all docs with current strategy state
 
 ## Next
 
-- [ ] Test bot locally with Telegram
-- [ ] Deploy to Render
+- [ ] Integrate False Breakout into bot.py as secondary scanner
+- [ ] Test dual-strategy (SMC + False Breakout) portfolio performance
+- [ ] Add regime-based strategy selection (SMC for trending, False Breakout for ranging)
 - [ ] Create public channel @TradeKnoxSignals
-- [ ] Launch publicly, post first signals
 - [ ] Write "SMC Trading Blueprint" PDF course
-- [ ] Publish course on Gumroad ($39)
-- [ ] Add UptimeRobot keep-alive ping

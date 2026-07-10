@@ -61,6 +61,7 @@ class TradingSignalBot:
         from scoring_engine import assess_indicators, score_signal, is_news_blackout, build_risk_profile
         from signal_output import TradeDatabase, format_signal_message, format_performance_report, should_send_monthly_report
         from strategies import assess_strategies
+        from false_breakout import detect_false_breakouts, pick_best_signal
 
         self._sync_timeframes = sync_timeframes
         self._add_indicators = add_indicators
@@ -75,6 +76,8 @@ class TradingSignalBot:
         self._format_report = format_performance_report
         self._should_report = should_send_monthly_report
         self._assess_strategies = assess_strategies
+        self._detect_fb = detect_false_breakouts
+        self._pick_fb = pick_best_signal
 
         self.db = TradeDatabase(config.TRADES_DB_PATH)
 
@@ -263,6 +266,9 @@ class TradingSignalBot:
         # ── Layer 2: Market Structure ────────────────────────────────────────
         structure = self._analyze_structure(df_primary, config)
 
+        # Detect regime once — used by both SMC and FB
+        regime = self._detect_regime(df_primary)
+
         # ── Layer 4: Indicator Assessment ────────────────────────────────────
         # Determine direction from structure first
         from market_structure import Trend
@@ -355,7 +361,7 @@ class TradingSignalBot:
                 "breakdown": score.breakdown,
                 # Strategy and regime tracking
                 "strategy_used": self._detect_primary_strategy(strategy_conv, symbol),
-                "regime_at_entry": self._detect_regime(df_primary),
+                "regime_at_entry": regime,
                 # Chart data
                 "_df": df_primary,
                 "_order_blocks": getattr(entry_setup, 'order_blocks', []),
@@ -363,11 +369,79 @@ class TradingSignalBot:
                 "_bos": structure.last_bos,
             })
 
-        if not signals_found:
-            return None
+        # ── False Breakout Trap scan (secondary strategy) ─────────────────
+        fb_signal = None
+        if self.config.FALSE_BREAKOUT_ENABLED:
+            try:
+                fb_raw = self._detect_fb(
+                    df_primary,
+                    lookback=self.config.FALSE_BREAKOUT_LOOKBACK,
+                    sl_atr_mult=self.config.FALSE_BREAKOUT_SL_ATR,
+                    tp1_atr_mult=self.config.FALSE_BREAKOUT_TP1_ATR,
+                    tp2_atr_mult=self.config.FALSE_BREAKOUT_TP2_ATR,
+                    tp3_atr_mult=self.config.FALSE_BREAKOUT_TP3_ATR,
+                    symbol=symbol,
+                )
+                fb_best = self._pick_fb(fb_raw)
+                if fb_best and fb_best["confidence"] >= self.config.FALSE_BREAKOUT_MIN_CONFIDENCE:
+                    risk = self._build_risk(
+                        fb_best["entry"], fb_best["stop_loss"],
+                        fb_best["tp1"], fb_best["tp2"], fb_best["tp3"],
+                        account_balance=self.config.ACCOUNT_BALANCE,
+                        config=self.config
+                    )
+                    if risk.valid:
+                        fb_signal = {
+                            "symbol": symbol,
+                            "direction": fb_best["direction"],
+                            "entry": fb_best["entry"],
+                            "stop_loss": fb_best["stop_loss"],
+                            "tp1": fb_best["tp1"],
+                            "tp2": fb_best["tp2"],
+                            "tp3": fb_best["tp3"],
+                            "rr_tp1": risk.rr_tp1,
+                            "rr_tp2": risk.rr_tp2,
+                            "rr_tp3": risk.rr_tp3,
+                            "confidence": fb_best["confidence"],
+                            "score": 14,
+                            "max_score": 20,
+                            "session": session,
+                            "reason": fb_best["reason"],
+                            "position_size": risk.position_size,
+                            "breakdown": {"false_breakout": 14},
+                            "strategy_used": "false_breakout",
+                            "regime_at_entry": regime,
+                            "_df": df_primary,
+                            "_order_blocks": [],
+                            "_fvgs": [],
+                            "_bos": None,
+                        }
+                        logger.info(f"{symbol}: FB signal {fb_best['direction'].upper()} "
+                                    f"@ {fb_best['entry']:.5f} (conf {fb_best['confidence']:.0f}%)")
+            except Exception as e:
+                logger.warning(f"{symbol}: FB scan error: {e}")
 
-        # Return the highest-confidence signal
-        return max(signals_found, key=lambda s: s["confidence"])
+        # ── Dual-Strategy Decision ──────────────────────────────────────────
+        smc_best = max(signals_found, key=lambda s: s["confidence"]) if signals_found else None
+
+        if smc_best and fb_signal:
+            # Regime-based routing
+            if regime in ("VOLATILE", "TRENDING"):
+                chosen = smc_best
+            elif regime in ("RANGING", "QUIET"):
+                chosen = fb_signal
+            else:
+                # MIXED, UNKNOWN — higher confidence wins
+                chosen = smc_best if smc_best["confidence"] >= fb_signal["confidence"] else fb_signal
+            logger.info(f"{symbol}: Regime {regime} → chosen {chosen['strategy_used']} "
+                        f"({chosen['direction'].upper()} conf {chosen['confidence']:.0f}%)")
+            return chosen
+
+        if smc_best:
+            return smc_best
+        if fb_signal:
+            return fb_signal
+        return None
 
     async def fire_signal(self, signal: Dict):
         """Send the signal to Telegram channels with anti-leak logic."""
