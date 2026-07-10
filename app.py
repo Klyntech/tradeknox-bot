@@ -6,23 +6,17 @@ Flask runs in a background thread; Telegram polling runs on main thread.
 """
 
 import logging
+import os
 import threading
-import time
 
-_start_time = time.time()
+_logger = logging.getLogger(__name__)
 
 
 def start_flask():
     """Run Flask in a background thread for Stripe webhooks."""
     from stripe_webhook import app
-
-    @app.route("/health")
-    def health():
-        from flask import jsonify
-        uptime = int(time.time() - _start_time)
-        return jsonify({"status": "ok", "uptime": uptime})
-
-    app.run(host="0.0.0.0", port=5000)
+    port = int(os.getenv("PORT", "5000"))
+    app.run(host="0.0.0.0", port=port)
 
 
 def main():
