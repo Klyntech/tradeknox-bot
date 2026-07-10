@@ -4,7 +4,7 @@ numpy>=1.24.0
 
 # Data sources
 yfinance>=0.2.40
-twelvedata>=2.0.0
+twelvedata>=1.0.0
 
 # Telegram bot
 python-telegram-bot[job-queue]>=21.0.0
