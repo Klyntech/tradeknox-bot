@@ -29,7 +29,8 @@ class BotConfig:
 
     # ── Instruments ─────────────────────────────────────────────────────────
     SYMBOLS: List[str] = field(default_factory=lambda: [
-        "XAUUSD", "GBPJPY"
+        "XAUUSD", "GBPJPY", "EURUSD", "GBPUSD", "USDJPY",
+        "AUDUSD", "NZDUSD", "USDCAD",
     ])
     PRIMARY_TIMEFRAME: str = "1h"
     CONFIRM_TIMEFRAME: str = "15m"
@@ -99,7 +100,7 @@ class BotConfig:
     LICENSES_DB_PATH: str = os.getenv("LICENSES_DB_PATH", "licenses.db")
 
     # ── Scan interval ────────────────────────────────────────────────────────
-    SCAN_INTERVAL_SECONDS: int = 300
+    SCAN_INTERVAL_SECONDS: int = 900
 
     # ── Chart Generation ───────────────────────────────────────────────────
     CHART_CANDLE_COUNT: int = 100

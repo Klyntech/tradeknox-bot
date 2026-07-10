@@ -568,12 +568,20 @@ class TradingSignalBot:
             self._last_report = datetime.now(timezone.utc)
 
     async def run_scan_cycle(self):
-        """Run one full scan across all configured symbols."""
-        logger.info(f"Scan cycle started — {len(self.config.SYMBOLS)} symbols")
-        tasks = [self.analyze_symbol(sym) for sym in self.config.SYMBOLS]
+        """Scan a subset of symbols each cycle (round-robin) to spread API load."""
+        all_symbols = self.config.SYMBOLS
+        batch_size = min(4, len(all_symbols))
+        offset = getattr(self, "_scan_offset", 0)
+        if offset >= len(all_symbols):
+            offset = 0
+        batch = all_symbols[offset:offset + batch_size]
+        self._scan_offset = offset + batch_size
+
+        logger.info(f"Scan cycle started — {len(batch)}/{len(all_symbols)} symbols")
+        tasks = [self.analyze_symbol(sym) for sym in batch]
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
-        for sym, result in zip(self.config.SYMBOLS, results):
+        for sym, result in zip(batch, results):
             if isinstance(result, Exception):
                 logger.error(f"Error analyzing {sym}: {result}")
             elif result is not None:

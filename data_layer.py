@@ -19,6 +19,10 @@ TD_SYMBOLS = {
     "GBPUSD": "GBP/USD",
     "USDJPY": "USD/JPY",
     "GBPJPY": "GBP/JPY",
+    "AUDUSD": "AUD/USD",
+    "NZDUSD": "NZD/USD",
+    "USDCAD": "USD/CAD",
+    "USDCHF": "USD/CHF",
 }
 
 TD_INTERVALS = {
@@ -158,6 +162,10 @@ def _fetch_yfinance(symbol: str, timeframe: str, limit: int) -> pd.DataFrame:
         "GBPUSD": "GBPUSD=X",
         "USDJPY": "USDJPY=X",
         "GBPJPY": "GBPJPY=X",
+        "AUDUSD": "AUDUSD=X",
+        "NZDUSD": "NZDUSD=X",
+        "USDCAD": "USDCAD=X",
+        "USDCHF": "USDCHF=X",
     }
     yf_symbol = YF_SYMBOLS.get(symbol, symbol)
 
