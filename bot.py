@@ -175,6 +175,64 @@ class TradingSignalBot:
         raw = f"{symbol}:{direction}:{round(entry, 2)}:{datetime.now(timezone.utc).strftime('%Y%m%d%H')}"
         return hashlib.md5(raw.encode()).hexdigest()[:12]
 
+    def _detect_primary_strategy(self, strategy_conv, symbol: str) -> str:
+        """Detect which strategy contributed most to the signal."""
+        from strategies import get_pair_config
+        pair_cfg = get_pair_config(symbol)
+        strat_dir = "bullish" if strategy_conv.ma_direction == "bullish" else "bearish"
+
+        if strategy_conv.ema_direction == strat_dir and strategy_conv.ema_aligned:
+            return "ema_crossover"
+        elif strategy_conv.breakout_direction == strat_dir:
+            return "breakout"
+        elif strategy_conv.ma_direction == strat_dir:
+            return "ma_crossover"
+        elif strategy_conv.rsi_direction == strat_dir:
+            return "rsi_extreme"
+        elif strategy_conv.session_active:
+            return "session_timing"
+        else:
+            return "unknown"
+
+    def _detect_regime(self, df) -> str:
+        """Detect current market regime based on ADX and ATR."""
+        try:
+            import numpy as np
+
+            # Calculate ADX (simplified)
+            high = df['high'].values
+            low = df['low'].values
+            close = df['close'].values
+
+            # True Range
+            tr = np.maximum(high[1:] - low[1:],
+                          np.maximum(abs(high[1:] - close[:-1]),
+                                   abs(low[1:] - close[:-1])))
+
+            # ATR
+            atr = np.mean(tr[-14:]) if len(tr) >= 14 else np.mean(tr)
+
+            # ATR average
+            atr_avg = np.mean(tr[-50:]) if len(tr) >= 50 else np.mean(tr)
+
+            # Volatility regime
+            if atr > atr_avg * 1.5:
+                return "VOLATILE"
+            elif atr < atr_avg * 0.7:
+                return "QUIET"
+
+            # Trend strength (simplified ADX proxy)
+            price_change = (close[-1] - close[-20]) / close[-20] * 100 if len(close) >= 20 else 0
+            abs_change = abs(price_change)
+
+            if abs_change > 3:
+                return "TRENDING"
+            else:
+                return "RANGING"
+
+        except Exception:
+            return "UNKNOWN"
+
     async def analyze_symbol(self, symbol: str) -> Optional[Dict]:
         """
         Full analysis pipeline for one symbol.
@@ -323,6 +381,9 @@ class TradingSignalBot:
                 "reason": full_reason,
                 "position_size": risk.position_size,
                 "breakdown": score.breakdown,
+                # Strategy and regime tracking
+                "strategy_used": self._detect_primary_strategy(strategy_conv, symbol),
+                "regime_at_entry": self._detect_regime(df_primary),
                 # Chart data
                 "_df": df_primary,
                 "_order_blocks": getattr(entry_setup, 'order_blocks', []),
@@ -384,7 +445,9 @@ class TradingSignalBot:
             confidence=signal["confidence"],
             score=signal["score"],
             session=signal["session"],
-            reason=signal["reason"]
+            reason=signal["reason"],
+            strategy_used=signal.get("strategy_used"),
+            regime_at_entry=signal.get("regime_at_entry")
         )
 
         # ── Generate chart if available ───────────────────────────────────────
@@ -551,7 +614,9 @@ def run_bot_with_commands():
     from config import CONFIG
     from commands import (
         start_command, subscribe_command, subscribe_callback,
-        status_command, stats_command, key_command, help_command
+        status_command, stats_command, key_command, help_command,
+        portfolio_command, strategies_command, pairs_command,
+        regimes_command, drawdown_command
     )
 
     # Validate config at startup
@@ -575,6 +640,11 @@ def run_bot_with_commands():
     application.add_handler(CommandHandler("stats", stats_command))
     application.add_handler(CommandHandler("key", key_command))
     application.add_handler(CommandHandler("help", help_command))
+    application.add_handler(CommandHandler("portfolio", portfolio_command))
+    application.add_handler(CommandHandler("strategies", strategies_command))
+    application.add_handler(CommandHandler("pairs", pairs_command))
+    application.add_handler(CommandHandler("regimes", regimes_command))
+    application.add_handler(CommandHandler("drawdown", drawdown_command))
     application.add_handler(CallbackQueryHandler(subscribe_callback, pattern="^subscribe_"))
 
     # Create bot instance for signal scanning

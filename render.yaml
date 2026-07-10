@@ -13,7 +13,9 @@ services:
       - key: PUBLIC_CHANNEL_ID
         sync: false
       - key: DATA_SOURCE
-        value: yfinance
+        value: twelvedata
+      - key: TWELVEDATA_API_KEY
+        sync: false
       - key: LICENSE_SECRET
         generateValue: true
       - key: STRIPE_SECRET_KEY

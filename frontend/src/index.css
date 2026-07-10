@@ -1,0 +1,196 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
+}
+
+body {
+  background-color: #0a0a0a;
+  color: #e5e5e5;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+::selection {
+  background-color: #D4A843;
+  color: #0a0a0a;
+}
+
+/* ── Scroll Progress Bar ─────────────────────────────────────────────────── */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #D4A843, #E8C564);
+  z-index: 100;
+  transform-origin: left;
+}
+
+/* ── Floating Particles ──────────────────────────────────────────────────── */
+@keyframes float-up {
+  0% {
+    transform: translateY(0) scale(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.3;
+    transform: translateY(0) scale(1);
+  }
+  90% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(-100vh) scale(0.5);
+    opacity: 0;
+  }
+}
+
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  background: #D4A843;
+  pointer-events: none;
+  animation: float-up linear infinite;
+}
+
+/* ── Shimmer Effect (Badge) ──────────────────────────────────────────────── */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer-badge {
+  background: linear-gradient(
+    90deg,
+    rgba(212, 168, 67, 0.05) 0%,
+    rgba(212, 168, 67, 0.15) 50%,
+    rgba(212, 168, 67, 0.05) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+/* ── Pulse Glow (Signal Cards) ───────────────────────────────────────────── */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(212, 168, 67, 0); }
+  50% { box-shadow: 0 0 20px 4px rgba(212, 168, 67, 0.12); }
+}
+
+.signal-pulse {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* ── Glow Orbit (Hero) ───────────────────────────────────────────────────── */
+@keyframes glow-orbit {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.05;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.15);
+    opacity: 0.08;
+  }
+}
+
+.glow-orb {
+  animation: glow-orbit 6s ease-in-out infinite;
+}
+
+/* ── Grid Pulse (Hero) ───────────────────────────────────────────────────── */
+@keyframes grid-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.grid-pulse {
+  animation: grid-pulse 4s ease-in-out infinite;
+}
+
+/* ── Typing Cursor ───────────────────────────────────────────────────────── */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.typing-cursor {
+  animation: blink 1s step-end infinite;
+}
+
+/* ── Card Hover Lift ─────────────────────────────────────────────────────── */
+.card-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(212, 168, 67, 0.08);
+  border-color: rgba(212, 168, 67, 0.3) !important;
+}
+
+/* ── Nav Link Underline ──────────────────────────────────────────────────── */
+.nav-link {
+  position: relative;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: #D4A843;
+  transition: width 0.3s ease;
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* ── Button Ripple ───────────────────────────────────────────────────────── */
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-ripple::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  transform: translate(-50%, -50%);
+  transition: width 0.4s ease, height 0.4s ease;
+}
+
+.btn-ripple:active::after {
+  width: 300px;
+  height: 300px;
+}
+
+/* ── FAQ Accordion ───────────────────────────────────────────────────────── */
+.faq-content {
+  overflow: hidden;
+}
+
+/* ── Reduced Motion ──────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .particle,
+  .shimmer-badge,
+  .signal-pulse,
+  .glow-orb,
+  .grid-pulse,
+  .typing-cursor {
+    animation: none !important;
+  }
+
+  .card-hover:hover {
+    transform: none;
+  }
+}

@@ -42,20 +42,21 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Hey {user.first_name}! I deliver Smart Money Concept-based signals for forex and gold.
 
 *What I scan:*
-- XAUUSD, EURUSD, GBPUSD, USDJPY, GBPJPY
+- XAUUSD, GBPJPY
 - Market structure, order blocks, FVGs, Fibonacci
 - London, NY, and Overlap sessions only
 
-*Your plan:* `{tier.upper()}`
-- Signals per day: {limits['signals_per_day']}
-- Delivery delay: {limits['delay_minutes']} minutes
+*Your plan:* `FREE`
+- Signals: Unlimited
+- Delivery: Instant
+- Price: $0
 
 *Commands:*
-/subscribe — Upgrade to Pro or VIP
 /status — Check your account
 /stats — Bot performance
-/key — Activate a license key
-/help — Show this message"""
+/help — Show this message
+
+_Every signal is tracked. Full transparency._"""
 
     await update.message.reply_text(welcome, parse_mode="Markdown")
 
@@ -147,12 +148,12 @@ async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = f"""*Account Status*
 
 *User:* @{stats['username'] or 'N/A'}
-*Plan:* `{tier.upper()}`
-*Signals today:* {stats['signals_used_today']}/{stats['signals_limit']}
-*Delivery delay:* {stats['delay_minutes']} minutes
+*Plan:* `FREE`
+*Signals today:* Unlimited
+*Delivery:* Instant
 *Joined:* {stats['joined_at'][:10] if stats['joined_at'] else 'N/A'}
 
-Use /subscribe to upgrade."""
+_Every signal is tracked._"""
 
     await update.message.reply_text(text, parse_mode="Markdown")
 
@@ -210,15 +211,160 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = """*TradeKnox Commands*
 
 /start — Register and see welcome
-/subscribe — View plans and upgrade
 /status — Your account status
 /stats — Bot performance stats
-/key — Activate a license key
+/portfolio — Equity curve and stats
+/strategies — Performance by strategy
+/pairs — Performance by pair
+/regimes — Performance by market regime
+/drawdown — Max drawdown info
 /help — This message
 
 *About TradeKnox:*
 We use Smart Money Concepts (market structure, order blocks, fair value gaps, Fibonacci) to generate high-confidence trading signals for forex and gold.
 
+*100% Free. 100% Transparent.*
+Every signal is tracked. Full track record available.
+
 _Signals are not financial advice. Trade at your own risk._"""
+
+    await update.message.reply_text(text, parse_mode="Markdown")
+
+
+async def portfolio_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /portfolio — show equity curve and stats."""
+    from config import CONFIG
+    from signal_output import TradeDatabase
+
+    db = TradeDatabase(CONFIG.TRADES_DB_PATH)
+    history = db.get_portfolio_history(days=30)
+    stats = db.get_performance_stats(days=30)
+
+    if not history and stats["total_trades"] == 0:
+        await update.message.reply_text("No portfolio data yet. Signals will be tracked as they execute.")
+        return
+
+    if history:
+        latest = history[-1]
+        equity = latest["equity"]
+        drawdown = latest["drawdown_pct"]
+    else:
+        equity = CONFIG.ACCOUNT_BALANCE
+        drawdown = 0
+
+    text = f"""*Portfolio Dashboard*
+
+*Current Equity:* ${equity:,.2f}
+*Drawdown:* {drawdown:.2f}%
+*Starting Balance:* ${CONFIG.ACCOUNT_BALANCE:,.2f}
+
+*Performance (30 days):*
+- Total signals: {stats['total_trades']}
+- Wins: {stats['wins']}
+- Losses: {stats['losses']}
+- Win rate: {stats['win_rate']}%
+- Avg R:R: 1:{stats['avg_rr']}
+
+_Equity curve updated with each trade._"""
+
+    await update.message.reply_text(text, parse_mode="Markdown")
+
+
+async def strategies_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /strategies — show performance by strategy."""
+    from config import CONFIG
+    from signal_output import TradeDatabase
+
+    db = TradeDatabase(CONFIG.TRADES_DB_PATH)
+    stats = db.get_strategy_stats(days=30)
+
+    if not stats:
+        await update.message.reply_text("No strategy data yet. Signals will be tracked as they execute.")
+        return
+
+    text = "*Strategy Performance (30 days)*\n\n"
+
+    for strat, data in sorted(stats.items(), key=lambda x: x[1]["win_rate"], reverse=True):
+        emoji = "🔥" if data["win_rate"] >= 65 else ("✅" if data["win_rate"] >= 55 else "⚠️")
+        text += f"{emoji} *{strat}*: {data['wins']}W / {data['losses']}L ({data['win_rate']}%)\n"
+
+    text += "\n_Strategies ranked by win rate._"
+
+    await update.message.reply_text(text, parse_mode="Markdown")
+
+
+async def pairs_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /pairs — show performance by pair."""
+    from config import CONFIG
+    from signal_output import TradeDatabase
+
+    db = TradeDatabase(CONFIG.TRADES_DB_PATH)
+    stats = db.get_pair_stats(days=30)
+
+    if not stats:
+        await update.message.reply_text("No pair data yet. Signals will be tracked as they execute.")
+        return
+
+    text = "*Pair Performance (30 days)*\n\n"
+
+    for pair, data in sorted(stats.items(), key=lambda x: x[1]["win_rate"], reverse=True):
+        emoji = "🔥" if data["win_rate"] >= 65 else ("✅" if data["win_rate"] >= 55 else "⚠️")
+        text += f"{emoji} *{pair}*: {data['wins']}W / {data['losses']}L ({data['win_rate']}%)\n"
+
+    text += "\n_Pairs ranked by win rate._"
+
+    await update.message.reply_text(text, parse_mode="Markdown")
+
+
+async def regimes_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /regimes — show performance by market regime."""
+    from config import CONFIG
+    from signal_output import TradeDatabase
+
+    db = TradeDatabase(CONFIG.TRADES_DB_PATH)
+    stats = db.get_regime_stats(days=30)
+
+    if not stats:
+        await update.message.reply_text("No regime data yet. Signals will be tracked as they execute.")
+        return
+
+    text = "*Regime Performance (30 days)*\n\n"
+
+    regime_emojis = {
+        "TRENDING": "📈",
+        "RANGING": "📊",
+        "VOLATILE": "⚡",
+        "QUIET": "😴",
+        "UNKNOWN": "❓"
+    }
+
+    for regime, data in sorted(stats.items(), key=lambda x: x[1]["win_rate"], reverse=True):
+        emoji = regime_emojis.get(regime, "❓")
+        text += f"{emoji} *{regime}*: {data['wins']}W / {data['losses']}L ({data['win_rate']}%)\n"
+
+    text += "\n_Regimes ranked by win rate._"
+
+    await update.message.reply_text(text, parse_mode="Markdown")
+
+
+async def drawdown_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /drawdown — show max drawdown info."""
+    from config import CONFIG
+    from signal_output import TradeDatabase
+
+    db = TradeDatabase(CONFIG.TRADES_DB_PATH)
+    dd = db.get_max_drawdown(days=30)
+
+    if dd["peak_equity"] == 0:
+        await update.message.reply_text("No drawdown data yet. Signals will be tracked as they execute.")
+        return
+
+    text = f"""*Drawdown Report*
+
+*Peak Equity:* ${dd['peak_equity']:,.2f}
+*Max Drawdown:* {dd['max_drawdown']:.2f}%
+*Current Drawdown:* {dd['current_drawdown']:.2f}%
+
+_Drawdown = distance from peak equity._"""
 
     await update.message.reply_text(text, parse_mode="Markdown")

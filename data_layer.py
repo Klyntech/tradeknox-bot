@@ -12,6 +12,20 @@ import numpy as np
 
 logger = logging.getLogger(__name__)
 
+# Twelve Data symbol mapping
+TD_SYMBOLS = {
+    "XAUUSD": "XAU/USD",
+    "EURUSD": "EUR/USD",
+    "GBPUSD": "GBP/USD",
+    "USDJPY": "USD/JPY",
+    "GBPJPY": "GBP/JPY",
+}
+
+TD_INTERVALS = {
+    "1m": "1min", "5m": "5min", "15m": "15min",
+    "30m": "30min", "1h": "1h", "4h": "4h", "1d": "1day",
+}
+
 
 def get_current_session(config) -> str:
     """Return the active trading session name or 'dead_zone'."""
@@ -38,22 +52,92 @@ def is_session_allowed(config) -> bool:
 
 
 def fetch_ohlcv(symbol: str, timeframe: str, limit: int = 300,
-                source: str = "yfinance") -> Optional[pd.DataFrame]:
+                source: str = "twelvedata") -> Optional[pd.DataFrame]:
     """
     Fetch OHLCV data. Returns a DataFrame with columns:
     [open, high, low, close, volume] indexed by datetime (UTC).
     """
     try:
-        if source == "yfinance":
+        if source == "twelvedata":
+            return _fetch_twelvedata(symbol, timeframe, limit)
+        elif source == "yfinance":
             return _fetch_yfinance(symbol, timeframe, limit)
         elif source == "ccxt":
             return _fetch_ccxt(symbol, timeframe, limit)
         else:
-            logger.warning(f"Unknown source '{source}', falling back to yfinance")
-            return _fetch_yfinance(symbol, timeframe, limit)
+            logger.warning(f"Unknown source '{source}', falling back to twelvedata")
+            return _fetch_twelvedata(symbol, timeframe, limit)
     except Exception as e:
         logger.error(f"Data fetch failed for {symbol} {timeframe}: {e}")
         return None
+
+
+def _fetch_twelvedata(symbol: str, timeframe: str, limit: int) -> Optional[pd.DataFrame]:
+    """Fetch via Twelve Data — reliable forex/gold data with free tier."""
+    from config import CONFIG
+
+    apikey = CONFIG.TWELVEDATA_API_KEY
+    if not apikey:
+        logger.warning("TWELVEDATA_API_KEY not set, falling back to yfinance")
+        return _fetch_yfinance(symbol, timeframe, limit)
+
+    td_symbol = TD_SYMBOLS.get(symbol, symbol)
+    td_interval = TD_INTERVALS.get(timeframe, "1h")
+    real_limit = limit
+
+    # 4h isn't a native interval — fetch 1h and resample
+    if timeframe == "4h":
+        td_interval = "1h"
+        real_limit = limit * 4
+
+    try:
+        from twelvedata import TDClient
+        td = TDClient(apikey=apikey)
+        ts = td.time_series(
+            symbol=td_symbol,
+            interval=td_interval,
+            outputsize=min(real_limit, 5000),
+            timezone="UTC",
+        )
+        df = ts.as_pandas()
+    except Exception as e:
+        logger.warning(f"Twelve Data fetch error for {symbol}: {e}, falling back to yfinance")
+        return _fetch_yfinance(symbol, timeframe, limit)
+
+    if df is None or df.empty:
+        logger.warning(f"Twelve Data empty for {symbol}, falling back to yfinance")
+        return _fetch_yfinance(symbol, timeframe, limit)
+
+    # Standardize columns
+    col_map = {}
+    for c in df.columns:
+        cl = c.lower()
+        if cl in ("open", "high", "low", "close", "volume"):
+            col_map[c] = cl
+
+    df = df.rename(columns=col_map)
+    df = df[[c for c in col_map.values() if c in df.columns]]
+
+    # Ensure required columns
+    for col in ["open", "high", "low", "close"]:
+        if col not in df.columns:
+            logger.error(f"Twelve Data missing '{col}' for {symbol}")
+            return _fetch_yfinance(symbol, timeframe, limit)
+
+    if "volume" not in df.columns:
+        df["volume"] = 0
+
+    df.index = pd.to_datetime(df.index, utc=True)
+    df = df.dropna().tail(real_limit)
+
+    # Resample to 4h if needed
+    if timeframe == "4h":
+        df = df.resample("4h").agg({
+            "open": "first", "high": "max",
+            "low": "min", "close": "last", "volume": "sum"
+        }).dropna().tail(limit)
+
+    return df
 
 
 def _fetch_yfinance(symbol: str, timeframe: str, limit: int) -> pd.DataFrame:

@@ -18,10 +18,11 @@ class BotConfig:
     TELEGRAM_TOKEN: str = os.getenv("TELEGRAM_TOKEN", "YOUR_BOT_TOKEN")
     PRIVATE_CHANNEL_ID: str = os.getenv("PRIVATE_CHANNEL_ID", "-100XXXXXXXXX")
     PUBLIC_CHANNEL_ID: str = os.getenv("PUBLIC_CHANNEL_ID", "")     # optional
-    PUBLIC_DELAY_MINUTES: int = 15                                    # anti-leak delay
+    PUBLIC_DELAY_MINUTES: int = 0                                     # no delay (free for all)
 
     # ── Data Source ─────────────────────────────────────────────────────────
-    DATA_SOURCE: str = os.getenv("DATA_SOURCE", "yfinance")          # yfinance | ccxt | metaapi
+    DATA_SOURCE: str = os.getenv("DATA_SOURCE", "twelvedata")          # twelvedata | yfinance | ccxt | metaapi
+    TWELVEDATA_API_KEY: str = os.getenv("TWELVEDATA_API_KEY", "")
     METAAPI_TOKEN: str = os.getenv("METAAPI_TOKEN", "")
     METAAPI_ACCOUNT_ID: str = os.getenv("METAAPI_ACCOUNT_ID", "")
     NEWS_API_KEY: str = os.getenv("NEWS_API_KEY", "")
@@ -146,7 +147,7 @@ class BotConfig:
             errors.append(f"MAX_TRADES_PER_DAY must be >= 1, got {self.MAX_TRADES_PER_DAY}")
 
         # Data source validation
-        valid_sources = ("yfinance", "ccxt", "metaapi")
+        valid_sources = ("twelvedata", "yfinance", "ccxt", "metaapi")
         if self.DATA_SOURCE not in valid_sources:
             errors.append(f"DATA_SOURCE must be one of {valid_sources}, got '{self.DATA_SOURCE}'")
 
