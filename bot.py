@@ -549,6 +549,11 @@ class TradingSignalBot:
         Layer 7: Trade Management
         Check open trades against current prices and send TP/SL alerts.
         """
+        # Skip trade monitoring outside market hours (prevents false TP/SL from stale weekend data)
+        from data_layer import is_session_allowed
+        if not is_session_allowed(self.config):
+            return
+
         open_trades = self.db.get_open_trades()
         if not open_trades:
             return
