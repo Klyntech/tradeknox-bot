@@ -52,6 +52,7 @@ class TradingSignalBot:
         self.db = None
         self.bot = None
         self._fired_signals: Set[str] = set()   # prevent duplicate signals
+        self._alerted_tp: Set[str] = set()       # prevent duplicate TP/SL alerts
         self._last_report: Optional[datetime] = None
 
         # Lazy imports (so each module can be tested independently)
@@ -575,7 +576,11 @@ class TradingSignalBot:
 
             # Check TP hits
             for tp_num in [1, 2, 3]:
+                alert_key = f"{trade['id']}_tp{tp_num}"
+                if alert_key in self._alerted_tp:
+                    continue
                 if trade.get(f"tp{tp_num}_hit"):
+                    self._alerted_tp.add(alert_key)
                     continue
                 tp_price = trade[f"tp{tp_num}"]
 
@@ -583,6 +588,7 @@ class TradingSignalBot:
                    (direction == "sell" and current_price <= tp_price):
 
                     self.db.update_tp_hit(trade["id"], tp_num)
+                    self._alerted_tp.add(alert_key)
                     alert = format_tp_hit_alert(symbol, direction, tp_num, tp_price, trade["id"])
                     await self.send_telegram(self.config.PRIVATE_CHANNEL_ID, alert)
 
@@ -592,8 +598,12 @@ class TradingSignalBot:
                     break
 
             # Check SL hit
-            if (direction == "buy" and current_price <= sl) or \
-               (direction == "sell" and current_price >= sl):
+            sl_key = f"{trade['id']}_sl"
+            if sl_key not in self._alerted_tp and \
+               ((direction == "buy" and current_price <= sl) or \
+                (direction == "sell" and current_price >= sl)):
+
+                self._alerted_tp.add(sl_key)
 
                 # Determine if BE was set (trade was partially profitable)
                 if trade.get("be_moved"):

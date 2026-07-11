@@ -51,6 +51,10 @@ def get_current_session(config) -> str:
 
 
 def is_session_allowed(config) -> bool:
+    now_utc = datetime.now(timezone.utc)
+    # Forex markets closed on weekends (Saturday=5, Sunday=6)
+    if now_utc.weekday() >= 5:
+        return False
     session = get_current_session(config)
     return session in config.ALLOWED_SESSIONS
 
