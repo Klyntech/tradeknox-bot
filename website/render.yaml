@@ -4,10 +4,9 @@ services:
     runtime: node
     rootDir: website
     buildCommand: npm install && npm run build
-    startCommand: node .next/standalone/server.js
+    startCommand: npm run start
     envVars:
       - key: TWELVEDATA_API_KEY
         sync: false
       - key: NODE_ENV
         value: production
-    healthCheckPath: /
