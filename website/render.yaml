@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: tradeknox-website
+    runtime: node
+    rootDir: website
+    buildCommand: npm install && npm run build
+    startCommand: node .next/standalone/server.js
+    envVars:
+      - key: TWELVEDATA_API_KEY
+        sync: false
+      - key: NODE_ENV
+        value: production
+    healthCheckPath: /
