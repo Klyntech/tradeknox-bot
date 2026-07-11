@@ -39,8 +39,8 @@ class BotConfig:
 
     # ── Market Sessions (UTC) ────────────────────────────────────────────────
     SESSIONS = {
-        "asia":    {"start": 0,  "end": 8},
         "london":  {"start": 7,  "end": 16},
+        "asia":    {"start": 0,  "end": 8},
         "new_york":{"start": 12, "end": 21},
         "overlap": {"start": 12, "end": 16},
     }

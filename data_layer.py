@@ -210,16 +210,24 @@ def _fetch_ccxt(symbol: str, timeframe: str, limit: int) -> pd.DataFrame:
 
 def sync_timeframes(symbol: str, config) -> Dict[str, pd.DataFrame]:
     """
-    Fetch primary, confirmation, and HTF timeframes in one call.
-    Returns dict keyed by timeframe name.
+    Fetch primary timeframe only. HTF is computed by resampling.
+    This cuts API calls from 3× to 1× per symbol (stays within Twelve Data free tier).
     """
     frames = {}
-    for tf in [config.HTF_TIMEFRAME, config.PRIMARY_TIMEFRAME, config.CONFIRM_TIMEFRAME]:
-        df = fetch_ohlcv(symbol, tf, limit=300, source=config.DATA_SOURCE)
-        if df is not None and len(df) >= 50:
-            frames[tf] = df
-        else:
-            logger.warning(f"Insufficient data for {symbol} {tf}")
+    df = fetch_ohlcv(symbol, config.PRIMARY_TIMEFRAME, limit=300, source=config.DATA_SOURCE)
+    if df is not None and len(df) >= 50:
+        frames[config.PRIMARY_TIMEFRAME] = df
+
+        # Compute HTF by resampling primary (1h → 4h)
+        if config.HTF_TIMEFRAME != config.PRIMARY_TIMEFRAME:
+            htf = df.resample(config.HTF_TIMEFRAME).agg({
+                "open": "first", "high": "max", "low": "min",
+                "close": "last", "volume": "sum"
+            }).dropna()
+            if len(htf) >= 50:
+                frames[config.HTF_TIMEFRAME] = htf
+    else:
+        logger.warning(f"Insufficient data for {symbol} {config.PRIMARY_TIMEFRAME}")
 
     return frames
 
