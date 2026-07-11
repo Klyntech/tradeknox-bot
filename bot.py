@@ -668,7 +668,7 @@ def run_bot_with_commands():
         start_command, subscribe_command,
         status_command, stats_command, help_command,
         portfolio_command, strategies_command, pairs_command,
-        regimes_command, drawdown_command
+        regimes_command, drawdown_command, history_command
     )
 
     # Validate config at startup
