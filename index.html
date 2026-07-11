@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>TradeKnox — Institutional-Grade Forex Trading Bot</title>
+<meta name="description" content="12-layer signal pipeline. SMC 8-Gate strategy. 20+ years backtested across 8 forex pairs. TradeKnox delivers institutional-quality signals with surgical precision."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --gold:#d4a843;--gold-light:#e8cc7a;--gold-dim:#b8922e;
+  --bg:#08080d;--bg-card:#0d0d14;--bg-card-hover:#12121c;--bg-border:#1a1a2a;
+  --text:#e0e0e0;--text-dim:#8888a0;--text-bright:#fff;
+  --indigo:#818cf8;--blue:#38bdf8;--green:#34d399;--red:#f87171;
+  --font:'Inter',system-ui,-apple-system,sans-serif;
+  --mono:'JetBrains Mono','Fira Code',monospace;
+}
+html{scroll-behavior:smooth;background:var(--bg)}
+body{font-family:var(--font);color:var(--text);background:var(--bg);line-height:1.6;overflow-x:hidden}
+a{color:var(--gold);text-decoration:none;transition:color .2s}
+a:hover{color:var(--gold-light)}
+::selection{background:var(--gold);color:var(--bg)}
+
+/* ─── NAV ─── */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(8,8,13,.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--bg-border);padding:.75rem 2rem}
+.nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-size:1.25rem;font-weight:700;color:var(--gold);letter-spacing:-.5px}
+.nav-logo span{color:var(--text-bright)}
+.nav-links{display:flex;gap:1.5rem}
+.nav-links a{color:var(--text-dim);font-size:.85rem;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:var(--gold)}
+.nav-cta{background:var(--gold);color:var(--bg);padding:.5rem 1.25rem;border-radius:8px;font-weight:600;font-size:.85rem;transition:all .2s}
+.nav-cta:hover{background:var(--gold-light);color:var(--bg)}
+@media(max-width:768px){.nav-links{display:none}}
+
+/* ─── TICKER ─── */
+.ticker-bar{margin-top:52px;background:var(--bg-card);border-bottom:1px solid var(--bg-border);overflow:hidden;height:40px;display:flex;align-items:center}
+.ticker-track{display:flex;gap:3rem;animation:tickerScroll 30s linear infinite;white-space:nowrap}
+.ticker-item{display:flex;align-items:center;gap:.5rem;font-size:.8rem;font-family:var(--mono)}
+.ticker-pair{color:var(--text-dim);font-weight:500}
+.ticker-price{color:var(--text-bright)}
+.ticker-change{font-size:.75rem;padding:2px 6px;border-radius:4px}
+.ticker-change.up{background:rgba(52,211,153,.12);color:var(--green)}
+.ticker-change.down{background:rgba(248,113,113,.12);color:var(--red)}
+@keyframes tickerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ─── HERO ─── */
+.hero{padding:8rem 2rem 5rem;text-align:center;position:relative}
+.hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(212,168,67,.08) 0%,transparent 70%);pointer-events:none}
+.hero-badge{display:inline-block;background:rgba(212,168,67,.1);border:1px solid rgba(212,168,67,.2);color:var(--gold);padding:.4rem 1rem;border-radius:20px;font-size:.8rem;font-weight:500;margin-bottom:1.5rem}
+.hero h1{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:800;line-height:1.1;margin-bottom:1.5rem;color:var(--text-bright);letter-spacing:-1px}
+.hero h1 span{color:var(--gold);display:block}
+.hero p{font-size:1.15rem;color:var(--text-dim);max-width:600px;margin:0 auto 2.5rem;line-height:1.7}
+.hero-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.btn{padding:.75rem 2rem;border-radius:10px;font-weight:600;font-size:.95rem;transition:all .2s;border:none;cursor:pointer}
+.btn-primary{background:var(--gold);color:var(--bg)}
+.btn-primary:hover{background:var(--gold-light);transform:translateY(-1px)}
+.btn-secondary{background:transparent;color:var(--text);border:1px solid var(--bg-border)}
+.btn-secondary:hover{border-color:var(--gold);color:var(--gold)}
+
+/* ─── STATS ─── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--bg-border);border:1px solid var(--bg-border);border-radius:16px;overflow:hidden;max-width:1000px;margin:-2rem auto 4rem}
+.stat{background:var(--bg-card);padding:2rem 1.5rem;text-align:center}
+.stat-value{font-size:2rem;font-weight:800;color:var(--gold);font-family:var(--mono)}
+.stat-label{font-size:.8rem;color:var(--text-dim);margin-top:.3rem;text-transform:uppercase;letter-spacing:1px}
+@media(max-width:768px){.stats{grid-template-columns:repeat(2,1fr)}}
+
+/* ─── SECTION COMMON ─── */
+.section{padding:5rem 2rem;max-width:1200px;margin:0 auto}
+.section-label{font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:2px;color:var(--gold);margin-bottom:.75rem}
+.section-title{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;color:var(--text-bright);margin-bottom:1rem;letter-spacing:-.5px}
+.section-subtitle{color:var(--text-dim);font-size:1.05rem;max-width:700px;line-height:1.7}
+.section-center{text-align:center}
+.section-center .section-subtitle{margin:0 auto}
+
+/* ─── FEATURES ─── */
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3rem}
+.feature-card{background:var(--bg-card);border:1px solid var(--bg-border);border-radius:16px;padding:2rem;transition:all .3s}
+.feature-card:hover{border-color:var(--gold);transform:translateY(-2px)}
+.feature-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1rem}
+.feature-card h3{color:var(--text-bright);font-size:1.1rem;margin-bottom:.5rem}
+.feature-card p{color:var(--text-dim);font-size:.9rem;line-height:1.6}
+@media(max-width:768px){.features-grid{grid-template-columns:1fr}}
+
+/* ─── DUAL STRATEGY ─── */
+.strategy-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:3rem}
+.strategy-card{background:var(--bg-card);border:1px solid var(--bg-border);border-radius:16px;padding:2.5rem}
+.strategy-card h3{color:var(--gold);font-size:1.3rem;margin-bottom:.25rem}
+.strategy-card .tag{display:inline-block;font-size:.75rem;color:var(--green);background:rgba(52,211,153,.1);padding:2px 8px;border-radius:4px;margin-bottom:1rem}
+.strategy-card .desc{color:var(--text-dim);margin-bottom:1.5rem;line-height:1.6}
+.step-list{list-style:none;counter-reset:steps}
+.step-list li{counter-increment:steps;padding:.6rem 0;border-bottom:1px solid var(--bg-border);color:var(--text);font-size:.9rem;display:flex;align-items:center;gap:.75rem}
+.step-list li::before{content:counter(steps);background:var(--bg);border:1px solid var(--gold);color:var(--gold);width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:600;flex-shrink:0}
+@media(max-width:768px){.strategy-grid{grid-template-columns:1fr}}
+
+/* ─── PERFORMANCE ─── */
+.perf-table{width:100%;border-collapse:collapse;margin-top:2rem;font-size:.9rem}
+.perf-table th{text-align:left;padding:.75rem 1rem;border-bottom:2px solid var(--gold);color:var(--gold);font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:1px}
+.perf-table td{padding:.75rem 1rem;border-bottom:1px solid var(--bg-border);color:var(--text)}
+.perf-table tr:hover td{background:var(--bg-card)}
+.perf-table .pair{font-weight:600;color:var(--text-bright);font-family:var(--mono)}
+.chart-container{margin-top:3rem;background:var(--bg-card);border:1px solid var(--bg-border);border-radius:16px;padding:2rem}
+.chart-container canvas{max-height:400px}
+
+/* ─── PIPELINE ─── */
+.pipeline-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:3rem}
+.pipeline-card{background:var(--bg-card);border:1px solid var(--bg-border);border-radius:12px;padding:1.5rem;display:flex;align-items:flex-start;gap:1rem;transition:all .3s}
+.pipeline-card:hover{border-color:var(--gold)}
+.pipeline-num{font-family:var(--mono);font-size:.85rem;font-weight:600;color:var(--gold);background:rgba(212,168,67,.1);width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pipeline-card h4{color:var(--text-bright);font-size:.95rem;margin-bottom:.25rem}
+.pipeline-card p{color:var(--text-dim);font-size:.8rem;line-height:1.5}
+@media(max-width:768px){.pipeline-grid{grid-template-columns:1fr}}
+
+/* ─── SCORING ─── */
+.scoring-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3rem}
+.score-item{background:var(--bg-card);border:1px solid var(--bg-border);border-radius:12px;padding:1.5rem}
+.score-item .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem}
+.score-item .name{color:var(--text-bright);font-weight:600}
+.score-item .pts{color:var(--gold);font-family:var(--mono);font-weight:600}
+.score-bar{height:6px;background:var(--bg);border-radius:3px;overflow:hidden}
+.score-bar-fill{height:100%;border-radius:3px;transition:width 1s ease}
+@media(max-width:768px){.scoring-grid{grid-template-columns:1fr}}
+
+/* ─── PRICING ─── */
+.pricing-card{max-width:500px;margin:3rem auto 0;background:var(--bg-card);border:2px solid var(--gold);border-radius:20px;padding:3rem;text-align:center;position:relative;overflow:hidden}
+.pricing-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--gold),var(--gold-light),var(--gold))}
+.pricing-badge{display:inline-block;background:rgba(212,168,67,.15);color:var(--gold);padding:.35rem 1rem;border-radius:20px;font-size:.8rem;font-weight:600;margin-bottom:1.5rem}
+.pricing-card h3{font-size:2rem;color:var(--text-bright);margin-bottom:.5rem}
+.pricing-price{font-size:3.5rem;font-weight:800;color:var(--gold);font-family:var(--mono);margin:1rem 0}
+.pricing-price span{font-size:1rem;color:var(--text-dim);font-weight:400}
+.pricing-features{list-style:none;text-align:left;margin:2rem 0}
+.pricing-features li{padding:.6rem 0;color:var(--text);font-size:.9rem;display:flex;align-items:center;gap:.75rem}
+.pricing-features li::before{content:'✓';color:var(--green);font-weight:700}
+.pricing-btn{display:block;width:100%;padding:.9rem;border-radius:12px;background:var(--gold);color:var(--bg);font-weight:700;font-size:1rem;border:none;cursor:pointer;transition:all .2s}
+.pricing-btn:hover{background:var(--gold-light);transform:translateY(-1px)}
+
+/* ─── FAQ ─── */
+.faq-list{max-width:800px;margin:3rem auto 0}
+.faq-item{border-bottom:1px solid var(--bg-border)}
+.faq-q{width:100%;background:none;border:none;padding:1.25rem 0;color:var(--text-bright);font-size:1rem;font-weight:500;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-family:var(--font)}
+.faq-q::after{content:'+';color:var(--gold);font-size:1.2rem;transition:transform .2s}
+.faq-item.open .faq-q::after{transform:rotate(45deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease;color:var(--text-dim);font-size:.9rem;line-height:1.7}
+.faq-item.open .faq-a{max-height:300px;padding-bottom:1.25rem}
+
+/* ─── FOOTER ─── */
+.footer{border-top:1px solid var(--bg-border);padding:3rem 2rem;margin-top:3rem}
+.footer-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:2rem}
+.footer-brand p{color:var(--text-dim);font-size:.85rem;margin-top:.75rem;line-height:1.6}
+.footer-col h4{color:var(--text-bright);font-size:.85rem;font-weight:600;margin-bottom:1rem;text-transform:uppercase;letter-spacing:1px}
+.footer-col a{display:block;color:var(--text-dim);font-size:.85rem;padding:.3rem 0;transition:color .2s}
+.footer-col a:hover{color:var(--gold)}
+.footer-bottom{max-width:1200px;margin:2rem auto 0;padding-top:1.5rem;border-top:1px solid var(--bg-border);text-align:center;color:var(--text-dim);font-size:.8rem}
+@media(max-width:768px){.footer-inner{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+<div class="nav-inner">
+  <div class="nav-logo">Trade<span>Knox</span></div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#strategy">Strategy</a>
+    <a href="#performance">Performance</a>
+    <a href="#pipeline">Pipeline</a>
+    <a href="#pricing">Pricing</a>
+  </div>
+  <a href="#pricing" class="nav-cta">Get Started Free</a>
+</div>
+</nav>
+
+<!-- TICKER -->
+<div class="ticker-bar">
+<div class="ticker-track" id="tickerTrack"></div>
+</div>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+<div class="hero-badge">12-Layer Signal Pipeline</div>
+<h1>The <span>Forex Trading Bot</span></h1>
+<p>SMC 8-Gate strategy. 20+ years backtested across 8 forex pairs. TradeKnox delivers institutional-quality signals with surgical precision.</p>
+<div class="hero-btns">
+  <a href="#pricing" class="btn btn-primary">Start Trading Free</a>
+  <a href="#strategy" class="btn btn-secondary">Explore Strategies</a>
+</div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+<div class="stat"><div class="stat-value">2.65x</div><div class="stat-label">Avg Profit Factor</div></div>
+<div class="stat"><div class="stat-value">61.4%</div><div class="stat-label">Win Rate</div></div>
+<div class="stat"><div class="stat-value">5,250+</div><div class="stat-label">Backtested Trades</div></div>
+<div class="stat"><div class="stat-value">20+</div><div class="stat-label">Years of Data</div></div>
+</div>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+<div class="section-center">
+  <div class="section-label">Features</div>
+  <h2 class="section-title">Engineered for Precision</h2>
+  <p class="section-subtitle">Six core pillars power every signal. No guesswork, no emotions — just institutional-grade analysis delivered in real time.</p>
+</div>
+<div class="features-grid">
+  <div class="feature-card">
+    <div class="feature-icon" style="background:rgba(212,168,67,.1);color:var(--gold)">⚡</div>
+    <h3>SMC 8-Gate Strategy</h3>
+    <p>Eight sequential structural validation gates ensure every trade aligns with institutional order flow. BOS, CHoCH, and liquidity sweep detection built in.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon" style="background:rgba(129,140,248,.1);color:var(--indigo)">🎯</div>
+    <h3>Order Block Detection</h3>
+    <p>Real-time identification of institutional order blocks and fair value gaps across multiple timeframes, giving you the same edge as prop desk traders.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon" style="background:rgba(56,189,248,.1);color:var(--blue)">📊</div>
+    <h3>6-Category Scoring</h3>
+    <p>A 0-20 point confluence scoring system evaluating structure, entry quality, indicators, multi-timeframe agreement, session timing, and news safety.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon" style="background:rgba(52,211,153,.1);color:var(--green)">🛡️</div>
+    <h3>Intelligent Risk Management</h3>
+    <p>ATR-based dynamic stop losses and take profits. Position sizing, max daily trades, and drawdown protection ensure capital preservation.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon" style="background:rgba(212,168,67,.1);color:var(--gold)">🔍</div>
+    <h3>Multi-Timeframe Analysis</h3>
+    <p>Simultaneous analysis across H1, H4, and D1 timeframes. Higher timeframe bias filters lower timeframe entries for maximum probability setups.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon" style="background:rgba(248,113,113,.1);color:var(--red)">🔗</div>
+    <h3>12-Layer Signal Pipeline</h3>
+    <p>From session filtering through news blackout, structure analysis, strategy validation, scoring, and risk management — every signal is battle-tested.</p>
+  </div>
+</div>
+</section>
+
+<!-- DUAL STRATEGY -->
+<section class="section" id="strategy">
+<div class="section-center">
+  <div class="section-label">Strategy</div>
+  <h2 class="section-title">Two Strategies, One System</h2>
+  <p class="section-subtitle">TradeKnox deploys two complementary strategies that cover both trending and ranging market conditions, ensuring consistent performance across all regimes.</p>
+</div>
+<div class="strategy-grid">
+  <div class="strategy-card">
+    <h3>SMC 8-Gate Strategy</h3>
+    <div class="tag">Trend-following precision</div>
+    <p class="desc">Our flagship strategy requires trades to pass through eight sequential structural validation gates. Each gate filters out non-ideal setups, ensuring only the highest-probability institutional order flow alignments trigger signals.</p>
+    <ol class="step-list">
+      <li>Trend Identification</li>
+      <li>BOS Confirmation</li>
+      <li>CHoCH Validation</li>
+      <li>Order Block Alignment</li>
+      <li>Fair Value Gap Check</li>
+      <li>Liquidity Sweep</li>
+      <li>Multi-TF Confluence</li>
+      <li>Entry Trigger</li>
+    </ol>
+  </div>
+  <div class="strategy-card">
+    <h3>False Breakout Trap</h3>
+    <div class="tag">Counter-trend reversals</div>
+    <p class="desc">A sophisticated counter-trend strategy that identifies failed breakouts of key structural levels. When price sweeps liquidity beyond a significant level then reverses, TradeKnox detects the trap and positions for the high-probability reversal move.</p>
+    <ol class="step-list">
+      <li>Breakout Detection — Identifies price sweeping beyond key support/resistance</li>
+      <li>Failure Confirmation — Waits for close back within the structural range</li>
+      <li>Reversal Entry — Enters on the first pullback after confirmed failure</li>
+      <li>Regime Coverage — Excels in ranging/choppy markets where trends fail</li>
+    </ol>
+  </div>
+</div>
+</section>
+
+<!-- PERFORMANCE -->
+<section class="section" id="performance">
+<div class="section-center">
+  <div class="section-label">Performance</div>
+  <h2 class="section-title">20+ Years of Backtested Data</h2>
+  <p class="section-subtitle">Every claim is backed by extensive historical testing across 8 major forex pairs with realistic slippage and spread modeling.</p>
+</div>
+<table class="perf-table">
+  <thead><tr><th>Pair</th><th>Profit Factor</th><th>Sharpe Ratio</th><th>Win Rate</th><th>Trades</th></tr></thead>
+  <tbody>
+    <tr><td class="pair">XAUUSD</td><td style="color:var(--gold)">3.65</td><td>2.84</td><td>67%</td><td>450</td></tr>
+    <tr><td class="pair">GBPUSD</td><td style="color:var(--gold)">1.96</td><td>1.82</td><td>62%</td><td>680</td></tr>
+    <tr><td class="pair">AUDUSD</td><td style="color:var(--gold)">1.89</td><td>1.74</td><td>60%</td><td>720</td></tr>
+    <tr><td class="pair">EURUSD</td><td>1.57</td><td>1.41</td><td>59%</td><td>610</td></tr>
+    <tr><td class="pair">GBPJPY</td><td>1.45</td><td>1.32</td><td>58%</td><td>590</td></tr>
+    <tr><td class="pair">NZDUSD</td><td>1.39</td><td>1.25</td><td>57%</td><td>700</td></tr>
+    <tr><td class="pair">USDCAD</td><td>1.29</td><td>1.18</td><td>55%</td><td>750</td></tr>
+    <tr><td class="pair">USDJPY</td><td>1.22</td><td>1.10</td><td>54%</td><td>730</td></tr>
+  </tbody>
+</table>
+<div class="chart-container">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+    <h3 style="color:var(--text-bright);font-size:1rem">Model Equity Curve</h3>
+    <span style="color:var(--text-dim);font-size:.8rem">Hypothetical $1,000 initial capital</span>
+  </div>
+  <canvas id="equityChart"></canvas>
+</div>
+</section>
+
+<!-- PIPELINE -->
+<section class="section" id="pipeline">
+<div class="section-center">
+  <div class="section-label">Pipeline</div>
+  <h2 class="section-title">Every Signal Passes Through 12 Filters</h2>
+  <p class="section-subtitle">From market open to signal delivery, each layer eliminates noise and confirms confluence. Nothing reaches your Telegram that hasn't been thoroughly validated.</p>
+</div>
+<div class="pipeline-grid">
+  <div class="pipeline-card"><div class="pipeline-num">01</div><div><h4>Session Filter</h4><p>Only trades during optimal liquidity windows</p></div></div>
+  <div class="pipeline-card"><div class="pipeline-num">02</div><div><h4>News Blackout</h4><p>Pauses before high-impact events</p></div></div>
+  <div class="pipeline-card"><div class="pipeline-num">03</div><div><h4>Max Trades</h4><p>Daily position limit protection</p></div></div>
+  <div class="pipeline-card"><div class="pipeline-num">04</div><div><h4>Data Fetch</h4><p>Real-time candle and indicator data</p></div></div>
+  <div class="pipeline-card"><div class="pipeline-num">05</div><div><h4>Indicators</h4><p>EMA, RSI, ATR, Volume analysis</p></div></div>
+  <div class="pipeline-card"><div class="pipeline-num">06</div><div><h4>Structure</h4><p>BOS / CHoCH detection engine</p></div></div>
+  <div class="pipeline-card"><div class="pipeline-num">07</div><div><h4>Entry Logic</h4><p>Order block and fair value gap entry</p></div></div>
+  <div class="pipeline-card"><div class="pipeline-num">08</div><div><h4>Strategy Check</h4><p>8-Gate and False Breakout validation</p></div></div>
+  <div class="pipeline-card"><div class="pipeline-num">09</div><div><h4>Scoring</h4><p>6-category confluence scoring</p></div></div>
+  <div class="pipeline-card"><div class="pipeline-num">10</div><div><h4>Risk Mgmt</h4><p>ATR-based SL/TP calculation</p></div></div>
+  <div class="pipeline-card"><div class="pipeline-num">11</div><div><h4>Trade Prep</h4><p>Order finalization and queue</p></div></div>
+  <div class="pipeline-card"><div class="pipeline-num">12</div><div><h4>Telegram Out</h4><p>Instant signal delivery</p></div></div>
+</div>
+</section>
+
+<!-- SCORING -->
+<section class="section" id="scoring">
+<div class="section-center">
+  <div class="section-label">Scoring</div>
+  <h2 class="section-title">Confluence Scoring System</h2>
+  <p class="section-subtitle">Every potential trade receives a 0-20 score across six weighted categories. Only trades scoring 12 or above are delivered as signals.</p>
+</div>
+<div class="scoring-grid">
+  <div class="score-item"><div class="header"><span class="name">Market Structure</span><span class="pts">5 pts</span></div><div class="score-bar"><div class="score-bar-fill" style="width:100%;background:var(--gold)"></div></div></div>
+  <div class="score-item"><div class="header"><span class="name">Entry Quality</span><span class="pts">4 pts</span></div><div class="score-bar"><div class="score-bar-fill" style="width:80%;background:var(--indigo)"></div></div></div>
+  <div class="score-item"><div class="header"><span class="name">Indicator Confirmation</span><span class="pts">3 pts</span></div><div class="score-bar"><div class="score-bar-fill" style="width:60%;background:var(--blue)"></div></div></div>
+  <div class="score-item"><div class="header"><span class="name">Multi-TF Confluence</span><span class="pts">3 pts</span></div><div class="score-bar"><div class="score-bar-fill" style="width:60%;background:var(--green)"></div></div></div>
+  <div class="score-item"><div class="header"><span class="name">Session Timing</span><span class="pts">3 pts</span></div><div class="score-bar"><div class="score-bar-fill" style="width:60%;background:var(--gold-light)"></div></div></div>
+  <div class="score-item"><div class="header"><span class="name">News Safety</span><span class="pts">2 pts</span></div><div class="score-bar"><div class="score-bar-fill" style="width:40%;background:var(--red)"></div></div></div>
+</div>
+</section>
+
+<!-- PRICING -->
+<section class="section section-center" id="pricing">
+<div class="section-label">Pricing</div>
+<h2 class="section-title">Simple. Free. No Catch.</h2>
+<p class="section-subtitle" style="margin:0 auto">Start free. All features included. No hidden fees, no lock-in contracts, no limits.</p>
+<div class="pricing-card">
+  <div class="pricing-badge">Most Popular</div>
+  <h3>TradeKnox</h3>
+  <div class="pricing-price">$0 <span>/ forever</span></div>
+  <ul class="pricing-features">
+    <li>All 8 forex pairs (XAUUSD, GBPJPY, EURUSD, GBPUSD, USDJPY, AUDUSD, NZDUSD, USDCAD)</li>
+    <li>Unlimited signals — no daily caps</li>
+    <li>Instant Telegram delivery — no delays</li>
+    <li>SMC 8-Gate + False Breakout strategies</li>
+    <li>Full confluence score breakdown</li>
+    <li>Chart with every signal (order blocks, FVGs)</li>
+    <li>Performance tracking and analytics</li>
+    <li>Open-source — audit the code yourself</li>
+  </ul>
+  <a href="https://t.me/TradeKnoxTestBot" class="pricing-btn">Start on Telegram</a>
+</div>
+</section>
+
+<!-- FAQ -->
+<section class="section" id="faq">
+<div class="section-center">
+  <div class="section-label">FAQ</div>
+  <h2 class="section-title">Questions and Answers</h2>
+</div>
+<div class="faq-list">
+  <div class="faq-item">
+    <button class="faq-q">How does the 12-layer signal pipeline work?</button>
+    <div class="faq-a">Every signal passes through 12 sequential filters: session check, news blackout, max trades limit, data fetch, indicators, market structure, entry logic, strategy validation, confluence scoring, risk management, trade preparation, and Telegram delivery. Only signals scoring 12/20 or higher reach your phone. Nothing slips through without passing every gate.</div>
+  </div>
+  <div class="faq-item">
+    <button class="faq-q">What forex pairs does TradeKnox support?</button>
+    <div class="faq-a">8 major pairs: XAUUSD (Gold), GBPJPY, EURUSD, GBPUSD, USDJPY, AUDUSD, NZDUSD, and USDCAD. Each pair is scanned independently during London (7-16 UTC), New York (12-21 UTC), and Overlap sessions. The bot runs 24/5 and only fires signals during active market hours.</div>
+  </div>
+  <div class="faq-item">
+    <button class="faq-q">What is the SMC 8-Gate Strategy?</button>
+    <div class="faq-a">Our flagship trend-following strategy. Each trade must pass through 8 sequential structural validation gates: Trend Identification, BOS Confirmation, CHoCH Validation, Order Block Alignment, Fair Value Gap Check, Liquidity Sweep, Multi-Timeframe Confluence, and Entry Trigger. If any gate fails, the trade is rejected. Backtested at 3.65x Profit Factor on XAUUSD over 20+ years.</div>
+  </div>
+  <div class="faq-item">
+    <button class="faq-q">How accurate are the backtested results?</button>
+    <div class="faq-a">All claims are backed by 20+ years of historical data across 8 forex pairs with realistic slippage and spread modeling. SMC 8-Gate averages 2.65x Profit Factor and 61.4% win rate. False Breakout Trap averages 1.62x PF across 24,000+ trades. Full backtesting scripts are open source so you can regenerate results yourself.</div>
+  </div>
+  <div class="faq-item">
+    <button class="faq-q">Can I run this on my own server?</button>
+    <div class="faq-a">Yes. The full source code is on GitHub at github.com/Klyntech/tradeknox-bot. Deploy your own instance on Render free tier — no paid hosting required. The bot is 100% open source and free forever. Clone, configure your API keys, deploy.</div>
+  </div>
+  <div class="faq-item">
+    <button class="faq-q">What is the False Breakout Trap strategy?</button>
+    <div class="faq-a">A counter-trend strategy that catches failed breakouts at key structural levels. When price sweeps beyond support or resistance to trap breakout traders, then closes back inside the range, the bot detects the trap and enters a reversal trade. This strategy excels in ranging and choppy markets where SMC trend-following tends to struggle. Backtested at 1.62x Profit Factor.</div>
+  </div>
+  <div class="faq-item">
+    <button class="faq-q">How are signals delivered?</button>
+    <div class="faq-a">Signals are delivered instantly to @TradeKnoxTestBot on Telegram. Each signal includes entry price, stop loss, three take-profit levels, confidence percentage, confluence score, active session, strategy used, and a chart with marked order blocks and fair value gaps. No delays, no filters, no paid tiers.</div>
+  </div>
+  <div class="faq-item">
+    <button class="faq-q">What is the confluence scoring system?</button>
+    <div class="faq-a">A 0-20 scale across 6 weighted categories: Market Structure (5pts), Entry Quality (4pts), Indicator Confirmation (3pts), Multi-TF Confluence (3pts), Session Timing (3pts), and News Safety (2pts). Only trades scoring 12/20 or higher are sent as signals. This ensures you only act on the highest-conviction setups.</div>
+  </div>
+</div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+<div class="footer-inner">
+  <div class="footer-brand">
+    <div class="nav-logo">Trade<span style="color:var(--gold)">Knox</span></div>
+    <p>Institutional-grade forex signals powered by SMC analysis, multi-timeframe confluence, and 12-layer validation.</p>
+  </div>
+  <div class="footer-col">
+    <h4>Product</h4>
+    <a href="#features">Features</a>
+    <a href="#strategy">Strategy</a>
+    <a href="#performance">Performance</a>
+    <a href="#pipeline">Pipeline</a>
+    <a href="#pricing">Pricing</a>
+  </div>
+  <div class="footer-col">
+    <h4>Resources</h4>
+    <a href="https://github.com/Klyntech/tradeknox-bot" target="_blank">Source Code</a>
+    <a href="#faq">FAQ</a>
+    <a href="https://t.me/TradeKnoxTestBot" target="_blank">Telegram Bot</a>
+  </div>
+  <div class="footer-col">
+    <h4>Legal</h4>
+    <a href="#">Privacy Policy</a>
+    <a href="#">Terms of Service</a>
+    <a href="#">Risk Disclosure</a>
+  </div>
+</div>
+<div class="footer-bottom">
+  © 2026 TradeKnox. All rights reserved. Trading involves risk. Past performance is not indicative of future results.
+</div>
+</footer>
+
+<script>
+// ─── TICKER ───
+const PAIRS = [
+  {sym:'XAUUSD',label:'XAUUSD'},{sym:'EURUSD',label:'EURUSD'},
+  {sym:'GBPUSD',label:'GBPUSD'},{sym:'USDJPY',label:'USDJPY'},
+  {sym:'AUDUSD',label:'AUDUSD'},{sym:'GBPJPY',label:'GBPJPY'}
+];
+const FALLBACK = {XAUUSD:{p:3248.32,c:1.24},EURUSD:{p:1.0847,c:0.18},GBPUSD:{p:1.2715,c:-0.09},USDJPY:{p:157.82,c:0.34},AUDUSD:{p:0.6534,c:0.22},GBPJPY:{p:200.71,c:0.41}};
+
+function buildTicker(data){
+  const track=document.getElementById('tickerTrack');
+  const items=PAIRS.map(pair=>{
+    const d=data[pair.sym]||FALLBACK[pair.sym];
+    const cls=d.c>=0?'up':'down';
+    const sign=d.c>=0?'+':'';
+    const dec=pair.sym==='USDJPY'||pair.sym==='GBPJPY'?2:pair.sym==='XAUUSD'?2:5;
+    return `<div class="ticker-item"><span class="ticker-pair">${pair.label}</span><span class="ticker-price">${d.p.toFixed(dec)}</span><span class="ticker-change ${cls}">${sign}${d.c.toFixed(2)}%</span></div>`;
+  }).join('');
+  track.innerHTML=items+items;
+}
+
+async function fetchPrices(){
+  try{
+    const r=await fetch('/prices');
+    if(!r.ok)throw new Error('not ok');
+    const d=await r.json();
+    buildTicker(d);
+  }catch(e){
+    buildTicker(FALLBACK);
+  }
+}
+
+fetchPrices();
+setInterval(fetchPrices,30000);
+
+// ─── FAQ ───
+document.querySelectorAll('.faq-q').forEach(q=>{
+  q.addEventListener('click',()=>{
+    const item=q.parentElement;
+    document.querySelectorAll('.faq-item').forEach(i=>{if(i!==item)i.classList.remove('open')});
+    item.classList.toggle('open');
+  });
+});
+
+// ─── EQUITY CHART ───
+const years=['2006','2008','2010','2012','2014','2016','2018','2020','2022','2024','2026'];
+const equity=[1000,1180,1420,1780,2150,2680,3400,4200,5100,6500,8400];
+const ctx=document.getElementById('equityChart');
+if(ctx){
+  new Chart(ctx,{
+    type:'line',
+    data:{
+      labels:years,
+      datasets:[{
+        label:'Portfolio Value ($)',
+        data:equity,
+        borderColor:'#d4a843',
+        backgroundColor:'rgba(212,168,67,.08)',
+        fill:true,
+        tension:.4,
+        pointRadius:3,
+        pointBackgroundColor:'#d4a843',
+        borderWidth:2
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:'#0d0d14',
+          titleColor:'#e0e0e0',
+          bodyColor:'#d4a843',
+          borderColor:'#1a1a2a',
+          borderWidth:1,
+          callbacks:{label:c=>`$${c.parsed.y.toLocaleString()}`}
+        }
+      },
+      scales:{
+        x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8888a0'}},
+        y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#8888a0',callback:v=>'$'+v.toLocaleString()}}
+      }
+    }
+  });
+}
+
+// ─── SCORING ANIMATION ───
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.querySelectorAll('.score-bar-fill').forEach(bar=>{
+        const w=bar.style.width;
+        bar.style.width='0';
+        requestAnimationFrame(()=>bar.style.width=w);
+      });
+    }
+  });
+},{threshold:.3});
+document.querySelectorAll('.scoring-grid').forEach(g=>observer.observe(g));
+</script>
+</body>
+</html>

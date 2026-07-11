@@ -1,28 +1,67 @@
 """
-TradeKnox Web Service — Flask app for health checks.
+TradeKnox Web Service — Flask app for health checks and landing page.
 
 The bot is 100% free. No Stripe, no subscriptions, no license keys.
-This Flask app exists only to serve the /health endpoint for uptime monitoring.
+This Flask app serves the landing page, health check, and price proxy.
 The Telegram bot runs on the main thread.
 """
 
 import logging
 import os
 import sqlite3
+import time
 from datetime import datetime, timezone
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_from_directory
 
 logger = logging.getLogger(__name__)
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder=None)
 
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN", "")
+TWELVEDATA_API_KEY = os.getenv("TWELVEDATA_API_KEY", "")
+
+_price_cache = {"data": None, "ts": 0}
 
 
 @app.route("/")
 def index():
-    return jsonify({"status": "ok", "service": "TradeKnox Signal Bot"})
+    return send_from_directory(os.path.dirname(os.path.abspath(__file__)), "index.html")
+
+
+@app.route("/prices")
+def prices():
+    """Proxy Twelve Data batch quote — cached 30s, no API key exposed."""
+    now = time.time()
+    if _price_cache["data"] and now - _price_cache["ts"] < 30:
+        return jsonify(_price_cache["data"])
+
+    if not TWELVEDATA_API_KEY:
+        return jsonify({"error": "no api key"}), 503
+
+    try:
+        import requests
+        symbols = "XAUUSD,EURUSD,GBPUSD,USDJPY,AUDUSD,GBPJPY"
+        r = requests.get(
+            f"https://api.twelvedata.com/quote",
+            params={"symbol": symbols, "apikey": TWELVEDATA_API_KEY},
+            timeout=5,
+        )
+        raw = r.json()
+        out = {}
+        for sym, val in raw.items():
+            if isinstance(val, dict) and "percent_change" in val:
+                out[sym] = {
+                    "p": float(val.get("close", 0)),
+                    "c": float(val.get("percent_change", 0)),
+                }
+        if out:
+            _price_cache["data"] = out
+            _price_cache["ts"] = now
+        return jsonify(out)
+    except Exception as e:
+        logger.warning(f"Price fetch failed: {e}")
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/health")
@@ -34,7 +73,6 @@ def health():
         "checks": {}
     }
 
-    # Database check
     try:
         db_path = os.getenv("TRADES_DB_PATH", "trades.db")
         with sqlite3.connect(db_path, timeout=5) as conn:
@@ -44,7 +82,6 @@ def health():
         checks["checks"]["database"] = f"error: {e}"
         checks["status"] = "degraded"
 
-    # Telegram check
     if TELEGRAM_TOKEN and TELEGRAM_TOKEN != "YOUR_BOT_TOKEN":
         checks["checks"]["telegram"] = "ok"
     else:
