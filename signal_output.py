@@ -110,8 +110,9 @@ def format_tp_hit_alert(symbol: str, direction: str, tp_num: int,
 
 def format_sl_hit_alert(symbol: str, direction: str, sl_price: float) -> str:
     """Alert when SL is hit."""
+    dir_upper = direction.upper()
     return (
-        f"🛑 *SL HIT* {symbol}\n"
+        f"🛑 *SL HIT* {dir_upper} {symbol}\n"
         f"Stopped out at `{format_price(sl_price, symbol)}`\n\n"
         f"_Review the setup\\. Next signal incoming when conditions realign\\._"
     )
@@ -504,6 +505,23 @@ class TradeDatabase:
         except sqlite3.Error as e:
             logger.error(f"Failed to get max drawdown: {e}")
             return {"max_drawdown": 0, "current_drawdown": 0, "peak_equity": 0}
+
+    def get_recent_trades(self, limit: int = 10) -> List[Dict]:
+        """Get most recent trades (open and closed) for /history command."""
+        try:
+            with sqlite3.connect(self.db_path, timeout=10) as conn:
+                conn.row_factory = sqlite3.Row
+                rows = conn.execute("""
+                    SELECT symbol, direction, entry, stop_loss, tp1, status, result,
+                           opened_at, closed_at, strategy_used, confidence, score
+                    FROM trades
+                    ORDER BY opened_at DESC
+                    LIMIT ?
+                """, (limit,)).fetchall()
+                return [dict(r) for r in rows]
+        except sqlite3.Error as e:
+            logger.error(f"Failed to get recent trades: {e}")
+            return []
 
 
 # ──────────────────────────────────────────────────────────────────────────────

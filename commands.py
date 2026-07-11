@@ -11,6 +11,7 @@ Commands:
 - /pairs     — Performance by pair
 - /regimes   — Performance by market regime
 - /drawdown  — Max drawdown info
+- /history   — Recent trade history
 """
 
 import logging
@@ -128,6 +129,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 /start — Register and see welcome
 /status — Your account info
 /stats — Bot performance stats
+/history — Recent trade history
 /portfolio — Equity curve and stats
 /strategies — Performance by strategy
 /pairs — Performance by pair
@@ -281,5 +283,46 @@ async def drawdown_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 *Current Drawdown:* {dd['current_drawdown']:.2f}%
 
 _Drawdown = distance from peak equity._"""
+
+    await update.message.reply_text(text, parse_mode="Markdown")
+
+
+async def history_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /history — show recent trade history."""
+    from config import CONFIG
+    from signal_output import TradeDatabase
+    from signal_output import format_price
+
+    db = TradeDatabase(CONFIG.TRADES_DB_PATH)
+    trades = db.get_recent_trades(limit=10)
+
+    if not trades:
+        await update.message.reply_text("No trade history yet. Signals will appear here as they execute.")
+        return
+
+    text = "*Recent Trades*\n\n"
+
+    for t in trades:
+        symbol = t["symbol"]
+        direction = t["direction"].upper()
+        entry = format_price(t["entry"], symbol)
+        sl = format_price(t["stop_loss"], symbol)
+        opened = t["opened_at"][:16].replace("T", " ") if t["opened_at"] else "?"
+
+        if t["status"] == "open":
+            status = "OPEN"
+        elif t["result"] == "win":
+            status = "WIN"
+        elif t["result"] == "loss":
+            status = "LOSS"
+        else:
+            status = "CLOSED"
+
+        strat = t.get("strategy_used") or "smc"
+        text += f"*{symbol}* {direction} — {status}\n"
+        text += f"Entry: `{entry}` SL: `{sl}` | {strat.upper()}\n"
+        text += f"Opened: {opened}\n\n"
+
+    text += "_Showing last 10 trades._"
 
     await update.message.reply_text(text, parse_mode="Markdown")

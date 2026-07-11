@@ -511,14 +511,12 @@ class TradingSignalBot:
                 logger.warning(f"Chart generation failed: {e}")
 
         # ── Layer 13: Security — Private channel first ─────────────────────
+        # Text always goes through — chart is optional follow-up
+        await self.send_telegram(config.PRIVATE_CHANNEL_ID, msg)
         if chart_path:
-            # Send chart with caption (Pro/VIP get full chart, free get blurred)
-            await self.send_telegram_with_chart(
+            asyncio.create_task(self.send_telegram_with_chart(
                 config.PRIVATE_CHANNEL_ID, msg, chart_path, is_pro=True
-            )
-        else:
-            # Text-only fallback
-            await self.send_telegram(config.PRIVATE_CHANNEL_ID, msg)
+            ))
 
         # Public channel with delay (anti-leak)
         if config.PUBLIC_CHANNEL_ID:
@@ -698,6 +696,7 @@ def run_bot_with_commands():
     application.add_handler(CommandHandler("pairs", pairs_command))
     application.add_handler(CommandHandler("regimes", regimes_command))
     application.add_handler(CommandHandler("drawdown", drawdown_command))
+    application.add_handler(CommandHandler("history", history_command))
 
     # Create bot instance for signal scanning
     bot = TradingSignalBot(CONFIG)
