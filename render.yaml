@@ -31,9 +31,8 @@ services:
       - key: ACCOUNT_BALANCE
         value: "10000"
 
-  - type: web
+  - type: static_site
     name: tradeknox-website
-    runtime: static
     buildCommand: cd website && npm install && npm run build
     staticPublishPath: website/dist
     routes:
