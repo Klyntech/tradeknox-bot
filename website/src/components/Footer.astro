@@ -1,0 +1,25 @@
+---
+---
+<footer class="border-t border-white/5 py-12 px-6">
+  <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+    <div class="flex items-center gap-2">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-[var(--gold)]">
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+      </svg>
+      <span class="text-sm font-semibold text-white">TradeKnox</span>
+    </div>
+    <div class="flex items-center gap-6">
+      {['Features', 'Strategy', 'Performance', 'Pipeline', 'FAQ'].map(l => (
+        <a href={`#${l.toLowerCase()}`} class="text-xs text-white/30 hover:text-white/60 transition-colors no-underline">{l}</a>
+      ))}
+    </div>
+    <div class="text-center md:text-right">
+      <p class="text-xs text-[var(--text-dim)]">
+        &copy; 2025 TradeKnox. All rights reserved. Trading involves risk.
+      </p>
+      <p class="text-xs text-[var(--text-dim)]">
+        Past performance is not indicative of future results.
+      </p>
+    </div>
+  </div>
+</footer>

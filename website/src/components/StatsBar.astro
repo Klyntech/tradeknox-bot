@@ -1,0 +1,49 @@
+---
+const STATS = [
+  { label: 'Backtested Period', value: '20+', unit: ' Years', sub: '2003–2025' },
+  { label: 'Average Win Rate', value: '58', unit: '%', sub: 'Across all pairs' },
+  { label: 'Avg Profit Factor', value: '2.07', unit: 'x', sub: 'Net of spreads' },
+  { label: 'Total Trades', value: '5630', unit: '', sub: '8 pairs combined' },
+];
+---
+<section class="py-16 px-6">
+  <div class="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
+    {STATS.map((s, i) => (
+      <div class="glass-card p-6 text-center reveal-up" style={`transition-delay: ${i * 80}ms`}>
+        <div class="text-2xl md:text-3xl font-bold stat-value mb-1">
+          <span class="counter" data-target={s.value}>0</span>{s.unit}
+        </div>
+        <div class="text-sm text-white/70 font-medium">{s.label}</div>
+        <div class="text-xs text-white/30 mt-1">{s.sub}</div>
+      </div>
+    ))}
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  document.querySelectorAll('.counter').forEach(el => {
+    const target = parseFloat(el.getAttribute('data-target') || '0');
+    const isDecimal = target % 1 !== 0;
+
+    ScrollTrigger.create({
+      trigger: el,
+      start: 'top 85%',
+      once: true,
+      onEnter: () => {
+        gsap.to({ val: 0 }, {
+          val: target,
+          duration: 2,
+          ease: 'power2.out',
+          onUpdate: function() {
+            el.textContent = isDecimal
+              ? this.targets()[0].val.toFixed(2)
+              : Math.round(this.targets()[0].val).toLocaleString();
+          }
+        });
+      }
+    });
+  });
+</script>

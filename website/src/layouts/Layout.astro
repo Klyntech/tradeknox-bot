@@ -1,0 +1,67 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'TradeKnox — Institutional-Grade Forex Trading Bot',
+  description = '12-layer signal pipeline. SMC 8-Gate strategy. 20+ years backtested across 8 forex pairs.',
+} = Astro.props;
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:type" content="website" />
+  <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;450;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body class="noise">
+  <div class="scroll-progress" id="scrollProgress"></div>
+  <slot />
+  <script>
+    import Lenis from 'lenis';
+    import { gsap } from 'gsap';
+    import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+    });
+
+    function raf(time: number) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add((time) => { lenis.raf(time * 1000); });
+    gsap.ticker.lagSmoothing(0);
+
+    // Scroll progress bar
+    const progressBar = document.getElementById('scrollProgress');
+    if (progressBar) {
+      window.addEventListener('scroll', () => {
+        const total = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = total > 0 ? window.scrollY / total : 0;
+        progressBar.style.transform = `scaleX(${progress})`;
+      }, { passive: true });
+    }
+  </script>
+</body>
+</html>
+<style is:global>
+  @import '../styles/global.css';
+</style>

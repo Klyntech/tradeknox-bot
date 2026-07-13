@@ -18,15 +18,14 @@ services:
         sync: false
       - key: LICENSE_SECRET
         generateValue: true
-      - key: STRIPE_SECRET_KEY
-        sync: false
-      - key: STRIPE_WEBHOOK_SECRET
-        sync: false
-      - key: STRIPE_PRO_PRICE_ID
-        sync: false
-      - key: STRIPE_VIP_PRICE_ID
-        sync: false
-      - key: DOMAIN
-        sync: false
       - key: ACCOUNT_BALANCE
         value: "10000"
+
+  - type: static_site
+    name: tradeknox-website
+    runtime: static
+    buildCommand: cd website && npm install && npm run build
+    staticPublishPath: website/dist
+    envVars:
+      - key: NODE_VERSION
+        value: "20"

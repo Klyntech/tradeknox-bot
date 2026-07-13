@@ -1,0 +1,21 @@
+---
+const TICKER = [
+  { pair: 'XAUUSD', price: '3,245.80', change: '+0.42%', up: true },
+  { pair: 'EURUSD', price: '1.0892', change: '-0.15%', up: false },
+  { pair: 'GBPUSD', price: '1.2734', change: '+0.28%', up: true },
+  { pair: 'USDJPY', price: '157.42', change: '-0.31%', up: false },
+  { pair: 'AUDUSD', price: '0.6534', change: '+0.18%', up: true },
+  { pair: 'GBPJPY', price: '200.45', change: '+0.12%', up: true },
+];
+---
+<div class="fixed top-0 left-0 right-0 z-[60] h-8 bg-black/80 backdrop-blur-sm border-b border-white/5 overflow-hidden">
+  <div class="marquee-track h-full items-center">
+    {[...TICKER, ...TICKER, ...TICKER].map((t, i) => (
+      <span class="flex items-center gap-2 px-6 text-xs font-mono whitespace-nowrap">
+        <span class="text-white/60">{t.pair}</span>
+        <span class="text-white">{t.price}</span>
+        <span class={t.up ? 'text-emerald-400' : 'text-red-400'}>{t.change}</span>
+      </span>
+    ))}
+  </div>
+</div>

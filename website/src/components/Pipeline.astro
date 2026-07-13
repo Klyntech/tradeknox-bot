@@ -1,0 +1,53 @@
+---
+const PIPELINE_STEPS = [
+  { icon: 'bar-chart', label: 'Data Ingestion', desc: 'Real-time OHLCV across 8 pairs', layer: 1 },
+  { icon: 'grid', label: 'Structure Mapping', desc: 'BOS, CHoCH, Order Blocks', layer: 2 },
+  { icon: 'target', label: 'POI Detection', desc: 'Premium/Discount zones', layer: 3 },
+  { icon: 'trending-up', label: 'Trend Alignment', desc: 'Multi-timeframe confluence', layer: 4 },
+  { icon: 'filter', label: '8-Gate Filter', desc: 'Sequential fail-fast pipeline', layer: 5 },
+  { icon: 'brain', label: 'Entry Logic', desc: 'Optimal entry within ±5 pips', layer: 6 },
+  { icon: 'shield', label: 'Risk Module', desc: '1% risk per trade, dynamic RR', layer: 7 },
+  { icon: 'bell', label: 'Signal Dispatch', desc: 'Instant Telegram delivery', layer: 8 },
+  { icon: 'clock', label: 'Session Filter', desc: 'London/NY only execution', layer: 9 },
+  { icon: 'activity', label: 'Volume Confirmation', desc: 'Tick volume spike detection', layer: 10 },
+  { icon: 'sparkles', label: 'FB Trap Detection', desc: 'False breakout pattern capture', layer: 11 },
+  { icon: 'globe', label: 'Regime Routing', desc: 'Adaptive strategy selection', layer: 12 },
+];
+
+const ICONS: Record<string, string> = {
+  'bar-chart': `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="12" width="4" height="9"/><rect x="10" y="7" width="4" height="14"/><rect x="17" y="3" width="4" height="18"/></svg>`,
+  'grid': `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>`,
+  'target': `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`,
+  'trending-up': `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>`,
+  'filter': `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>`,
+  'brain': `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a7 7 0 017 7c0 2.38-1.19 4.47-3 5.74V17a2 2 0 01-2 2h-4a2 2 0 01-2-2v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 017-7z"/><path d="M9 22h6"/></svg>`,
+  'shield': `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+  'bell': `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>`,
+  'clock': `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>`,
+  'activity': `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`,
+  'sparkles': `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z"/></svg>`,
+  'globe': `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>`,
+};
+---
+<section id="pipeline" class="py-24 px-6">
+  <div class="max-w-7xl mx-auto">
+    <div class="reveal-up mb-4">
+      <span class="section-tag">Signal Pipeline</span>
+    </div>
+    <h2 class="section-heading mb-3 reveal-up">12 Layers Deep</h2>
+    <p class="section-sub mb-16 reveal-up">Each signal must survive 12 sequential quality gates before delivery.</p>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {PIPELINE_STEPS.map((s, i) => (
+        <div class="glass-card p-5 flex items-start gap-4 reveal-up" style={`transition-delay: ${i * 60}ms`}>
+          <div class="icon-container flex-shrink-0" set:html={ICONS[s.icon]} />
+          <div>
+            <div class="text-xs text-[var(--gold)]/60 font-mono mb-1">Layer {s.layer}</div>
+            <div class="text-white font-medium text-sm">{s.label}</div>
+            <div class="text-xs text-white/40 mt-1">{s.desc}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

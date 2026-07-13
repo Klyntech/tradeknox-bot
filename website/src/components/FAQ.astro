@@ -1,0 +1,54 @@
+---
+const FAQ_DATA = [
+  { q: 'What pairs does TradeKnox trade?', a: 'XAUUSD, GBPUSD, AUDUSD, EURUSD, GBPJPY, NZDUSD, USDCAD, and USDJPY — all major and cross pairs with tight spreads.' },
+  { q: 'How fast are signals delivered?', a: 'Signals are dispatched within 100ms of entry criteria being met. You receive them instantly via Telegram with full entry, SL, and TP levels.' },
+  { q: 'What is the 8-Gate system?', a: 'Each signal must pass 8 sequential quality gates — structure, momentum, volume, sentiment, volatility, timing, risk, and entry precision. A single failure rejects the trade.' },
+  { q: 'Is there a subscription fee?', a: 'No. TradeKnox is 100% free. Unlimited signals, instant delivery, no hidden costs. Connect your Telegram bot and start receiving signals immediately.' },
+  { q: 'How does the bot handle news events?', a: 'The session filter restricts trading to London and New York sessions. Volatility regimes are detected in real-time, routing to the appropriate strategy.' },
+  { q: 'Can I customize risk settings?', a: 'Risk is fixed at 1% per trade for consistency. TP targets are set at 1.5R (TP1), 2.5R (TP2), and 3.5R (TP3) with dynamic trailing.' },
+];
+---
+<section id="faq" class="py-24 px-6">
+  <div class="max-w-3xl mx-auto">
+    <div class="reveal-up mb-4">
+      <span class="section-tag">FAQ</span>
+    </div>
+    <h2 class="section-heading mb-12 reveal-up">Common Questions</h2>
+
+    <div>
+      {FAQ_DATA.map((f, i) => (
+        <div class="faq-item reveal-up" style={`transition-delay: ${i * 60}ms`}>
+          <button
+            class="w-full py-5 flex items-center justify-between text-left bg-transparent border-none cursor-pointer faq-toggle"
+            data-index={i}
+          >
+            <span class="text-sm text-white font-medium pr-4">{f.q}</span>
+            <svg class="faq-chevron w-4 h-4 text-white/40 flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="faq-answer px-0 pb-0">
+            <p class="pb-5 text-sm text-white/45 leading-relaxed">{f.a}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll('.faq-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const answer = btn.nextElementSibling;
+      const chevron = btn.querySelector('.faq-chevron');
+      const isOpen = answer?.classList.contains('open');
+
+      // Close all
+      document.querySelectorAll('.faq-answer').forEach(a => a.classList.remove('open'));
+      document.querySelectorAll('.faq-chevron').forEach(c => c.classList.remove('open'));
+
+      if (!isOpen) {
+        answer?.classList.add('open');
+        chevron?.classList.add('open');
+      }
+    });
+  });
+</script>

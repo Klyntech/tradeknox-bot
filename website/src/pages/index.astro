@@ -1,0 +1,112 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+import Ticker from '../components/Ticker.astro';
+import Hero from '../components/Hero.astro';
+import StatsBar from '../components/StatsBar.astro';
+import Features from '../components/Features.astro';
+import Strategy from '../components/Strategy.astro';
+import Performance from '../components/Performance.astro';
+import Pipeline from '../components/Pipeline.astro';
+import Pricing from '../components/Pricing.astro';
+import FAQ from '../components/FAQ.astro';
+import CTA from '../components/CTA.astro';
+import Footer from '../components/Footer.astro';
+---
+<Layout>
+  <Ticker />
+  <Navbar />
+  <main>
+    <Hero />
+    <StatsBar />
+    <div class="divider max-w-7xl mx-auto" />
+    <Features />
+    <div class="divider max-w-7xl mx-auto" />
+    <Strategy />
+    <div class="divider max-w-7xl mx-auto" />
+    <Performance />
+    <div class="divider max-w-7xl mx-auto" />
+    <Pipeline />
+    <div class="divider max-w-7xl mx-auto" />
+    <Pricing />
+    <div class="divider max-w-7xl mx-auto" />
+    <FAQ />
+    <CTA />
+  </main>
+  <Footer />
+</Layout>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  // Reveal-up animations
+  gsap.utils.toArray<HTMLElement>('.reveal-up').forEach(el => {
+    gsap.fromTo(el,
+      { opacity: 0, y: 60 },
+      {
+        opacity: 1, y: 0,
+        duration: 1,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 88%',
+          once: true,
+        }
+      }
+    );
+  });
+
+  // Reveal-left animations
+  gsap.utils.toArray<HTMLElement>('.reveal-left').forEach(el => {
+    gsap.fromTo(el,
+      { opacity: 0, x: -60 },
+      {
+        opacity: 1, x: 0,
+        duration: 1,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 85%',
+          once: true,
+        }
+      }
+    );
+  });
+
+  // Reveal-right animations
+  gsap.utils.toArray<HTMLElement>('.reveal-right').forEach(el => {
+    gsap.fromTo(el,
+      { opacity: 0, x: 60 },
+      {
+        opacity: 1, x: 0,
+        duration: 1,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 85%',
+          once: true,
+        }
+      }
+    );
+  });
+
+  // Reveal-scale animations
+  gsap.utils.toArray<HTMLElement>('.reveal-scale').forEach(el => {
+    gsap.fromTo(el,
+      { opacity: 0, scale: 0.9 },
+      {
+        opacity: 1, scale: 1,
+        duration: 1,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 85%',
+          once: true,
+        }
+      }
+    );
+  });
+</script>

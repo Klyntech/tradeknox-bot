@@ -1,0 +1,59 @@
+---
+const FEATURES = [
+  {
+    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><path d="M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12"/></svg>`,
+    title: 'SMC Structure',
+    desc: 'Order blocks, BOS, CHoCH mapped in real-time across multiple timeframes',
+    color: 'icon-container',
+  },
+  {
+    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>`,
+    title: 'False Breakout Trap',
+    desc: 'Captures liquidity grabs before the real move — net 1.62x profit factor',
+    color: 'icon-container-emerald',
+  },
+  {
+    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>`,
+    title: 'Regime Routing',
+    desc: 'Adaptive strategy selection — SMC for trending, FB Trap for ranging markets',
+    color: 'icon-container-violet',
+  },
+  {
+    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></svg>`,
+    title: '8-Gate Filter',
+    desc: 'Sequential fail-fast pipeline — a single gate failure rejects the trade instantly',
+    color: 'icon-container-sky',
+  },
+  {
+    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+    title: 'Risk Control',
+    desc: '1% risk per trade, dynamic trailing stop, breakeven move after TP1',
+    color: 'icon-container',
+  },
+  {
+    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>`,
+    title: 'Instant Delivery',
+    desc: 'Telegram signals with entry, SL, and 3 TP levels — delivered in under 100ms',
+    color: 'icon-container-emerald',
+  },
+];
+---
+<section id="features" class="py-24 px-6">
+  <div class="max-w-7xl mx-auto">
+    <div class="reveal-up mb-4">
+      <span class="section-tag">Core Capabilities</span>
+    </div>
+    <h2 class="section-heading mb-3 reveal-up">Built for Precision</h2>
+    <p class="section-sub mb-16 reveal-up">Every component engineered for one outcome: consistent, risk-managed entries.</p>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+      {FEATURES.map((f, i) => (
+        <div class="glass-card p-7 reveal-up" style={`transition-delay: ${i * 80}ms`}>
+          <div class={f.color} set:html={f.icon} />
+          <h3 class="text-white font-semibold mt-5 mb-2">{f.title}</h3>
+          <p class="text-sm text-white/45 leading-relaxed">{f.desc}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

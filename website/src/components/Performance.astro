@@ -1,0 +1,123 @@
+---
+const PAIR_DATA = [
+  { pair: 'XAUUSD', pf: 3.65, wr: 67, trades: 450, sharpe: 2.84 },
+  { pair: 'GBPUSD', pf: 1.96, wr: 62, trades: 680, sharpe: 1.82 },
+  { pair: 'AUDUSD', pf: 1.89, wr: 60, trades: 720, sharpe: 1.74 },
+  { pair: 'EURUSD', pf: 1.57, wr: 59, trades: 610, sharpe: 1.41 },
+  { pair: 'GBPJPY', pf: 1.45, wr: 58, trades: 590, sharpe: 1.32 },
+  { pair: 'NZDUSD', pf: 1.39, wr: 57, trades: 700, sharpe: 1.25 },
+  { pair: 'USDCAD', pf: 1.29, wr: 55, trades: 750, sharpe: 1.18 },
+  { pair: 'USDJPY', pf: 1.22, wr: 54, trades: 730, sharpe: 1.10 },
+];
+
+// Generate equity curve data points for SVG
+const EQUITY_POINTS = Array.from({ length: 50 }, (_, i) => {
+  const equity = Math.round(10000 * Math.pow(1.038, i) + Math.sin(i * 0.5) * 200);
+  return { x: (i / 49) * 600, y: 200 - ((equity - 8000) / 12000) * 180 };
+});
+
+const pathD = EQUITY_POINTS.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+const areaD = pathD + ` L 600 200 L 0 200 Z`;
+---
+<section id="performance" class="py-24 px-6">
+  <div class="max-w-7xl mx-auto">
+    <div class="reveal-up mb-4">
+      <span class="section-tag">Backtest Results</span>
+    </div>
+    <h2 class="section-heading mb-3 reveal-up">20+ Years of Proof</h2>
+    <p class="section-sub mb-16 reveal-up">Every number audited. Every trade accounted for.</p>
+
+    <div class="gradient-card mb-10 reveal-scale">
+      <div class="gradient-card-inner">
+        <h3 class="text-sm font-semibold text-white/70 mb-6 uppercase tracking-wider">Equity Curve</h3>
+        <svg viewBox="0 0 600 220" class="w-full" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="eqGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="var(--gold)" stop-opacity="0.3" />
+              <stop offset="100%" stop-color="var(--gold)" stop-opacity="0" />
+            </linearGradient>
+          </defs>
+          <!-- Grid lines -->
+          {[50, 100, 150].map(y => (
+            <line x1="0" y1={y} x2="600" y2={y} stroke="rgba(255,255,255,0.04)" stroke-width="1" />
+          ))}
+          <!-- Area fill -->
+          <path d={areaD} fill="url(#eqGrad)" class="equity-area" />
+          <!-- Line -->
+          <path d={pathD} fill="none" stroke="var(--gold)" stroke-width="2" class="equity-line" />
+        </svg>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto reveal-up">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-white/5">
+            <th class="text-left py-3 px-4 text-white/40 font-medium">Pair</th>
+            <th class="text-right py-3 px-4 text-white/40 font-medium">Profit Factor</th>
+            <th class="text-right py-3 px-4 text-white/40 font-medium">Win Rate</th>
+            <th class="text-right py-3 px-4 text-white/40 font-medium">Trades</th>
+            <th class="text-right py-3 px-4 text-white/40 font-medium">Sharpe</th>
+          </tr>
+        </thead>
+        <tbody>
+          {PAIR_DATA.map((p, i) => (
+            <tr class="border-b border-white/3 hover:bg-white/[0.02] transition-colors" style={`opacity:0`}>
+              <td class="py-3 px-4 text-white font-medium">{p.pair}</td>
+              <td class="py-3 px-4 text-right text-emerald-400 font-semibold">{p.pf}x</td>
+              <td class="py-3 px-4 text-right text-white/70">{p.wr}%</td>
+              <td class="py-3 px-4 text-right text-white/50">{p.trades.toLocaleString()}</td>
+              <td class="py-3 px-4 text-right text-white/50">{p.sharpe}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  // Animate equity curve line drawing
+  const eqLine = document.querySelector('.equity-line') as SVGPathElement | null;
+  if (eqLine) {
+    const length = eqLine.getTotalLength();
+    gsap.set(eqLine, { strokeDasharray: length, strokeDashoffset: length });
+    ScrollTrigger.create({
+      trigger: eqLine,
+      start: 'top 80%',
+      once: true,
+      onEnter: () => {
+        gsap.to(eqLine, { strokeDashoffset: 0, duration: 2.5, ease: 'power2.inOut' });
+      }
+    });
+  }
+
+  // Animate equity area fade in
+  const eqArea = document.querySelector('.equity-area');
+  if (eqArea) {
+    gsap.set(eqArea, { opacity: 0 });
+    ScrollTrigger.create({
+      trigger: eqArea,
+      start: 'top 80%',
+      once: true,
+      onEnter: () => {
+        gsap.to(eqArea, { opacity: 1, duration: 1.5, delay: 1.5, ease: 'power2.out' });
+      }
+    });
+  }
+
+  // Animate table rows
+  document.querySelectorAll('#performance tbody tr').forEach((row, i) => {
+    ScrollTrigger.create({
+      trigger: row,
+      start: 'top 90%',
+      once: true,
+      onEnter: () => {
+        gsap.to(row, { opacity: 1, y: 0, duration: 0.5, delay: i * 0.08, ease: 'power2.out' });
+      }
+    });
+  });
+</script>

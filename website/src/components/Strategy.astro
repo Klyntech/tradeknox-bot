@@ -1,0 +1,93 @@
+---
+const SCORING_RADAR = [
+  { score: 95, label: 'Structure' },
+  { score: 88, label: 'Momentum' },
+  { score: 92, label: 'Volume' },
+  { score: 85, label: 'Sentiment' },
+  { score: 90, label: 'Volatility' },
+  { score: 87, label: 'Timing' },
+];
+
+const REGIMES = [
+  { label: 'Trending Markets', strategy: 'SMC 8-Gate', color: 'text-[var(--gold)]' },
+  { label: 'Ranging Markets', strategy: 'False Breakout Trap', color: 'text-emerald-400' },
+  { label: 'Mixed Conditions', strategy: 'Higher Confidence Wins', color: 'text-violet-400' },
+];
+
+function getRadarPoint(index: number, total: number, radius: number, cx: number, cy: number) {
+  const angle = (Math.PI * 2 * index) / total - Math.PI / 2;
+  return {
+    x: cx + radius * Math.cos(angle),
+    y: cy + radius * Math.sin(angle),
+  };
+}
+
+const cx = 150, cy = 150, r = 120;
+const total = SCORING_RADAR.length;
+const polygonPoints = SCORING_RADAR.map((s, i) => {
+  const p = getRadarPoint(i, total, (s.score / 100) * r, cx, cy);
+  return `${p.x},${p.y}`;
+}).join(' ');
+
+const gridPolygons = [0.25, 0.5, 0.75, 1].map(scale =>
+  SCORING_RADAR.map((_, i) => {
+    const p = getRadarPoint(i, total, r * scale, cx, cy);
+    return `${p.x},${p.y}`;
+  }).join(' ')
+);
+---
+<section id="strategy" class="py-24 px-6">
+  <div class="max-w-7xl mx-auto">
+    <div class="grid lg:grid-cols-2 gap-16 items-center">
+      <div class="reveal-left">
+        <div class="section-tag mb-4">Dual Strategy</div>
+        <h2 class="section-heading mb-6">Two Edges,<br/>One System</h2>
+        <p class="text-white/45 leading-relaxed mb-8">
+          TradeKnox doesn't rely on a single edge. It dynamically routes between the SMC 8-Gate pipeline
+          and the False Breakout Trap — selecting the optimal strategy based on real-time regime detection.
+        </p>
+        <div class="space-y-4">
+          {REGIMES.map((r, i) => (
+            <div class="flex items-center justify-between py-3 border-b border-white/5">
+              <span class="text-sm text-white/60">{r.label}</span>
+              <span class={`text-sm font-semibold ${r.color}`}>{r.strategy}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div class="reveal-right">
+        <div class="gradient-card">
+          <div class="gradient-card-inner">
+            <h3 class="text-sm font-semibold text-white/70 mb-6 uppercase tracking-wider">Scoring Radar</h3>
+            <svg viewBox="0 0 300 300" class="w-full max-w-[300px] mx-auto">
+              <!-- Grid -->
+              {gridPolygons.map((pts, i) => (
+                <polygon points={pts} fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1" />
+              ))}
+              <!-- Axes -->
+              {SCORING_RADAR.map((_, i) => {
+                const p = getRadarPoint(i, total, r, cx, cy);
+                return <line x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="rgba(255,255,255,0.04)" stroke-width="1" />;
+              })}
+              <!-- Data -->
+              <polygon points={polygonPoints} fill="rgba(212,168,67,0.15)" stroke="var(--gold)" stroke-width="2" class="radar-polygon" />
+              <!-- Points & Labels -->
+              {SCORING_RADAR.map((s, i) => {
+                const p = getRadarPoint(i, total, (s.score / 100) * r, cx, cy);
+                const lp = getRadarPoint(i, total, r + 20, cx, cy);
+                return (
+                  <g>
+                    <circle cx={p.x} cy={p.y} r="4" fill="var(--gold)" />
+                    <text x={lp.x} y={lp.y} text-anchor="middle" dominant-baseline="central"
+                      fill="#7a7a90" font-size="11" font-family="Inter, sans-serif">{s.label}</text>
+                  </g>
+                );
+              })}
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
