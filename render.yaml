@@ -36,9 +36,5 @@ services:
     runtime: node
     plan: free
     buildCommand: cd website && npm install && npm run build
-    startCommand: npx serve dist -l $PORT
+    startCommand: npx serve dist -l $PORT --single
     workingDir: website
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
