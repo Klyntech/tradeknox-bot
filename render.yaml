@@ -35,6 +35,5 @@ services:
     name: tradeknox-website
     runtime: node
     plan: free
-    buildCommand: npm install && npm run build
-    startCommand: npx serve dist -l $PORT --single
-    workingDir: website
+    buildCommand: cd website && npm install && npm run build
+    startCommand: npx serve website/dist -l $PORT --single
