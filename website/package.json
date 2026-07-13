@@ -10,7 +10,8 @@
   "dependencies": {
     "astro": "^5.12.0",
     "gsap": "^3.13.0",
-    "lenis": "^1.2.0"
+    "lenis": "^1.2.0",
+    "serve": "^14.2.0"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4",

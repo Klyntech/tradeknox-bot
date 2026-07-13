@@ -31,10 +31,13 @@ services:
       - key: ACCOUNT_BALANCE
         value: "10000"
 
-  - type: static_site
+  - type: web
     name: tradeknox-website
+    runtime: node
+    plan: free
     buildCommand: cd website && npm install && npm run build
-    staticPublishPath: website/dist
+    startCommand: npx serve dist -l $PORT
+    workingDir: website
     routes:
       - type: rewrite
         source: /*
