@@ -729,14 +729,16 @@ def run_bot_with_commands():
         await bot.run_scan_cycle()
 
     job_queue = application.job_queue
-    job_queue.run_repeating(
-        scheduled_scan,
-        interval=CONFIG.SCAN_INTERVAL_SECONDS,
-        first=10,
-        name="signal_scan",
-    )
+    if job_queue is not None:
+        job_queue.run_repeating(
+            scheduled_scan,
+            interval=CONFIG.SCAN_INTERVAL_SECONDS,
+            first=10,
+            name="signal_scan",
+        )
+    else:
+        logger.warning("Job queue not available (APScheduler not installed). Scan loop disabled.")
 
-    # Start the bot
     logger.info("TradeKnox bot starting with command handlers")
     application.run_polling(
         allowed_updates=Update.ALL_TYPES,

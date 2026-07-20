@@ -6,9 +6,11 @@ This Flask app serves the landing page, health check, and price proxy.
 The Telegram bot runs on the main thread.
 """
 
+import json
 import logging
 import os
 import sqlite3
+import urllib.request
 from datetime import datetime, timezone
 
 from flask import Flask, jsonify
@@ -44,7 +46,21 @@ def health():
         checks["status"] = "degraded"
 
     if TELEGRAM_TOKEN and TELEGRAM_TOKEN != "YOUR_BOT_TOKEN":
-        checks["checks"]["telegram"] = "ok"
+        try:
+            req = urllib.request.Request(
+                f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/getMe",
+                headers={"User-Agent": "TradeKnox/1.0"}
+            )
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                data = json.loads(resp.read().decode())
+                if data.get("ok"):
+                    checks["checks"]["telegram"] = "ok"
+                else:
+                    checks["checks"]["telegram"] = "error: API returned not ok"
+                    checks["status"] = "degraded"
+        except Exception as e:
+            checks["checks"]["telegram"] = f"error: {e}"
+            checks["status"] = "degraded"
     else:
         checks["checks"]["telegram"] = "not_configured"
         checks["status"] = "degraded"
@@ -55,5 +71,4 @@ def health():
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    # Never allow debug mode in production (security risk)
     app.run(host="0.0.0.0", port=5000, debug=False)
