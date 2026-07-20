@@ -16,20 +16,10 @@ services:
         value: twelvedata
       - key: TWELVEDATA_API_KEY
         sync: false
-      - key: LICENSE_SECRET
-        generateValue: true
-      - key: STRIPE_SECRET_KEY
-        sync: false
-      - key: STRIPE_WEBHOOK_SECRET
-        sync: false
-      - key: STRIPE_PRO_PRICE_ID
-        sync: false
-      - key: STRIPE_VIP_PRICE_ID
-        sync: false
-      - key: DOMAIN
-        sync: false
       - key: ACCOUNT_BALANCE
         value: "10000"
+      - key: SENTRY_DSN
+        sync: false
 
   - type: web
     name: tradeknox-website

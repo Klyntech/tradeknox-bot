@@ -157,6 +157,28 @@ class TradeDatabase:
         self.db_path = db_path
         self._init_db()
 
+    def backup(self, backup_dir: str = "backups") -> bool:
+        """Create a backup of the database. Returns True on success."""
+        try:
+            import shutil
+            import os
+            from pathlib import Path
+
+            # Create backup directory if it doesn't exist
+            Path(backup_dir).mkdir(parents=True, exist_ok=True)
+
+            # Generate backup filename with timestamp
+            timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+            backup_path = os.path.join(backup_dir, f"trades_{timestamp}.db")
+
+            # Copy database file
+            shutil.copy2(self.db_path, backup_path)
+            logger.info(f"Database backup created: {backup_path}")
+            return True
+        except Exception as e:
+            logger.error(f"Database backup failed: {e}")
+            return False
+
     def _init_db(self):
         try:
             with sqlite3.connect(self.db_path, timeout=10) as conn:
@@ -185,29 +207,7 @@ class TradeDatabase:
                         tp3_hit     INTEGER DEFAULT 0,
                         be_moved    INTEGER DEFAULT 0,
                         strategy_used TEXT,
-                        regime_at_entry TEXT,
-                        equity_after REAL,
-                        drawdown_pct REAL
-                    )
-                """)
-                conn.execute("""
-                    CREATE TABLE IF NOT EXISTS user_signals (
-                        id          INTEGER PRIMARY KEY AUTOINCREMENT,
-                        user_id     TEXT NOT NULL,
-                        signal_id   TEXT NOT NULL,
-                        received_at TEXT NOT NULL,
-                        tier_at_time TEXT DEFAULT 'free'
-                    )
-                """)
-                conn.execute("""
-                    CREATE TABLE IF NOT EXISTS portfolio (
-                        id          INTEGER PRIMARY KEY AUTOINCREMENT,
-                        date        TEXT NOT NULL,
-                        equity      REAL NOT NULL,
-                        drawdown_pct REAL,
-                        trades_today INTEGER DEFAULT 0,
-                        wins_today  INTEGER DEFAULT 0,
-                        losses_today INTEGER DEFAULT 0
+                        regime_at_entry TEXT
                     )
                 """)
                 conn.commit()
@@ -237,7 +237,12 @@ class TradeDatabase:
 
     def update_tp_hit(self, signal_id: str, tp_num: int):
         try:
-            col = f"tp{tp_num}_hit"
+            # Use allowlist to prevent SQL injection
+            allowed_cols = {1: "tp1_hit", 2: "tp2_hit", 3: "tp3_hit"}
+            col = allowed_cols.get(tp_num)
+            if not col:
+                logger.error(f"Invalid tp_num: {tp_num}")
+                return
             with sqlite3.connect(self.db_path, timeout=10) as conn:
                 conn.execute(f"UPDATE trades SET {col}=1 WHERE id=?", (signal_id,))
                 if tp_num == 1:
@@ -327,47 +332,6 @@ class TradeDatabase:
         except sqlite3.Error as e:
             logger.error(f"Failed to count trades today: {e}")
             return 0
-
-    def record_user_signal(self, user_id: str, signal_id: str, tier: str = "free"):
-        """Record that a user received a specific signal."""
-        try:
-            with sqlite3.connect(self.db_path, timeout=10) as conn:
-                conn.execute("""
-                    INSERT INTO user_signals (user_id, signal_id, received_at, tier_at_time)
-                    VALUES (?, ?, ?, ?)
-                """, (user_id, signal_id, datetime.now(timezone.utc).isoformat(), tier))
-                conn.commit()
-        except sqlite3.Error as e:
-            logger.error(f"Failed to record user signal: {e}")
-
-    def update_portfolio(self, equity: float, drawdown_pct: float = 0.0,
-                        trades_today: int = 0, wins_today: int = 0, losses_today: int = 0):
-        """Update daily portfolio snapshot."""
-        try:
-            today = datetime.now(timezone.utc).date().isoformat()
-            with sqlite3.connect(self.db_path, timeout=10) as conn:
-                conn.execute("""
-                    INSERT OR REPLACE INTO portfolio (date, equity, drawdown_pct, trades_today, wins_today, losses_today)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                """, (today, equity, drawdown_pct, trades_today, wins_today, losses_today))
-                conn.commit()
-        except sqlite3.Error as e:
-            logger.error(f"Failed to update portfolio: {e}")
-
-    def get_portfolio_history(self, days: int = 30) -> List[Dict]:
-        """Get portfolio equity curve over time."""
-        try:
-            cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).date().isoformat()
-            with sqlite3.connect(self.db_path, timeout=10) as conn:
-                conn.row_factory = sqlite3.Row
-                rows = conn.execute(
-                    "SELECT * FROM portfolio WHERE date >= ? ORDER BY date ASC",
-                    (cutoff,)
-                ).fetchall()
-                return [dict(r) for r in rows]
-        except sqlite3.Error as e:
-            logger.error(f"Failed to get portfolio history: {e}")
-            return []
 
     def get_strategy_stats(self, days: int = 30) -> Dict:
         """Get performance breakdown by strategy."""
@@ -478,28 +442,41 @@ class TradeDatabase:
             return {}
 
     def get_max_drawdown(self, days: int = 30) -> Dict:
-        """Calculate maximum drawdown from portfolio history."""
+        """Calculate maximum drawdown from trade history."""
         try:
-            history = self.get_portfolio_history(days)
-            if not history:
+            # Calculate drawdown from closed trades
+            cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+            with sqlite3.connect(self.db_path, timeout=10) as conn:
+                conn.row_factory = sqlite3.Row
+                rows = conn.execute("""
+                    SELECT entry, stop_loss, tp1, tp2, tp3, result, actual_rr
+                    FROM trades
+                    WHERE status='closed' AND opened_at >= ?
+                    ORDER BY opened_at ASC
+                """, (cutoff,)).fetchall()
+
+            if not rows:
                 return {"max_drawdown": 0, "current_drawdown": 0, "peak_equity": 0}
 
-            peak = 0
+            # Simple drawdown calculation based on R:R results
+            peak = 10000  # Starting equity
             max_dd = 0
-            for entry in history:
-                equity = entry["equity"]
-                if equity > peak:
-                    peak = equity
-                dd = ((peak - equity) / peak * 100) if peak > 0 else 0
+            current = peak
+
+            for row in rows:
+                if row["result"] == "win":
+                    current += current * 0.01 * abs(row["actual_rr"])
+                else:
+                    current -= current * 0.01
+                if current > peak:
+                    peak = current
+                dd = ((peak - current) / peak * 100) if peak > 0 else 0
                 if dd > max_dd:
                     max_dd = dd
 
-            current_equity = history[-1]["equity"] if history else 0
-            current_dd = ((peak - current_equity) / peak * 100) if peak > 0 else 0
-
             return {
                 "max_drawdown": round(max_dd, 2),
-                "current_drawdown": round(current_dd, 2),
+                "current_drawdown": round(((peak - current) / peak * 100) if peak > 0 else 0, 2),
                 "peak_equity": round(peak, 2)
             }
         except sqlite3.Error as e:

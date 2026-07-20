@@ -107,7 +107,6 @@ class BotConfig:
 
     # ── Database ───────────────────────────────────────────────────────────
     TRADES_DB_PATH: str = os.getenv("TRADES_DB_PATH", "trades.db")
-    LICENSES_DB_PATH: str = os.getenv("LICENSES_DB_PATH", "licenses.db")
 
     # ── Scan interval ────────────────────────────────────────────────────────
     SCAN_INTERVAL_SECONDS: int = 900
@@ -116,9 +115,6 @@ class BotConfig:
     CHART_CANDLE_COUNT: int = 100
     CHART_TIMEFRAME: str = "1h"
     CHART_BLUR_ENABLED: bool = True
-
-    # ── License ─────────────────────────────────────────────────────────────
-    LICENSE_SECRET: str = os.getenv("LICENSE_SECRET", "")
 
     def validate(self) -> List[str]:
         """

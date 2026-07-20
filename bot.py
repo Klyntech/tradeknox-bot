@@ -54,6 +54,7 @@ class TradingSignalBot:
         self._fired_signals: Set[str] = set()   # prevent duplicate signals
         self._alerted_tp: Set[str] = set()       # prevent duplicate TP/SL alerts
         self._last_report: Optional[datetime] = None
+        self._last_backup: Optional[datetime] = None
 
         # Lazy imports (so each module can be tested independently)
         from data_layer import sync_timeframes, add_indicators, get_current_session
@@ -252,7 +253,9 @@ class TradingSignalBot:
             return None
 
         # ── Layer 1: Fetch & Prepare Data ────────────────────────────────────
-        frames = self._sync_timeframes(symbol, config)
+        # Run synchronous data fetch in executor to avoid blocking event loop
+        loop = asyncio.get_event_loop()
+        frames = await loop.run_in_executor(None, self._sync_timeframes, symbol, config)
         if config.PRIMARY_TIMEFRAME not in frames:
             logger.warning(f"{symbol}: Primary TF data unavailable")
             return None
@@ -649,6 +652,12 @@ class TradingSignalBot:
         await self.monitor_open_trades()
         await self.check_monthly_report()
 
+        # Daily backup check
+        now = datetime.now(timezone.utc)
+        if self._last_backup is None or (now - self._last_backup).days >= 1:
+            self.db.backup()
+            self._last_backup = now
+
     async def run(self):
         """Main loop — runs forever, scanning on interval."""
         logger.info("🤖 Trading Signal Bot started")
@@ -680,7 +689,7 @@ def run_bot_with_commands():
     """Run the bot with both signal scanning and command handlers."""
     from config import CONFIG
     from commands import (
-        start_command, subscribe_command,
+        start_command,
         status_command, stats_command, help_command,
         portfolio_command, strategies_command, pairs_command,
         regimes_command, drawdown_command, history_command
@@ -702,7 +711,6 @@ def run_bot_with_commands():
 
     # Register command handlers
     application.add_handler(CommandHandler("start", start_command))
-    application.add_handler(CommandHandler("subscribe", subscribe_command))
     application.add_handler(CommandHandler("status", status_command))
     application.add_handler(CommandHandler("stats", stats_command))
     application.add_handler(CommandHandler("help", help_command))

@@ -20,18 +20,24 @@ import os
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from user_manager import UserManager
-
 logger = logging.getLogger(__name__)
 
-# Initialize user manager
-user_mgr = UserManager()
+# Shared database instance
+_db = None
+
+def get_db():
+    """Get or create shared database instance."""
+    global _db
+    if _db is None:
+        from config import CONFIG
+        from signal_output import TradeDatabase
+        _db = TradeDatabase(CONFIG.TRADES_DB_PATH)
+    return _db
 
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handle /start — register user and show welcome."""
+    """Handle /start — show welcome message."""
     user = update.effective_user
-    user_mgr.register_user(str(user.id), user.username)
 
     welcome = f"""Welcome to *TradeKnox* — SMC + False Breakout Signals
 
@@ -55,32 +61,10 @@ _Every signal is tracked. Full transparency._"""
     await update.message.reply_text(welcome, parse_mode="Markdown")
 
 
-async def subscribe_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handle /subscribe — bot is 100% free."""
-    text = """*TradeKnox is 100% Free*
-
-No subscriptions. No paid tiers. No license keys.
-
-Unlimited signals • Instant delivery • 8 pairs • SMC + False Breakout
-
-Just /start and you're in. All features unlocked.
-
-Use /stats to see performance or /status for your account."""
-
-    await update.message.reply_text(text, parse_mode="Markdown")
-
-
 async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /status — show user's current status."""
-    user_id = str(update.effective_user.id)
-    stats = user_mgr.get_user_stats(user_id)
-
-    if not stats.get("registered"):
-        await update.message.reply_text("Send /start to register first.")
-        return
-
-    joined = stats['joined_at'][:10] if stats['joined_at'] else 'N/A'
-    username = stats['username'] or 'not set'
+    user = update.effective_user
+    username = user.username or 'not set'
 
     text = f"""*Account Status*
 
@@ -88,7 +72,6 @@ async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 *Plan:* Unlimited (Free)
 *Signals today:* Unlimited
 *Delivery:* Instant
-*Joined:* {joined}
 
 _Every signal is tracked._"""
 
@@ -97,10 +80,7 @@ _Every signal is tracked._"""
 
 async def stats_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /stats — show bot performance (public)."""
-    from config import CONFIG
-    from signal_output import TradeDatabase
-
-    db = TradeDatabase(CONFIG.TRADES_DB_PATH)
+    db = get_db()
     stats = db.get_performance_stats(days=30)
 
     if stats["total_trades"] == 0:
@@ -126,7 +106,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /help — show help message."""
     text = """*TradeKnox Commands*
 
-/start — Register and see welcome
+/start — See welcome message
 /status — Your account info
 /stats — Bot performance stats
 /history — Recent trade history
@@ -149,31 +129,16 @@ _Signals are not financial advice. Trade at your own risk._"""
 
 
 async def portfolio_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handle /portfolio — show equity curve and stats."""
+    """Handle /portfolio — show performance stats."""
     from config import CONFIG
-    from signal_output import TradeDatabase
-
-    db = TradeDatabase(CONFIG.TRADES_DB_PATH)
-    history = db.get_portfolio_history(days=30)
+    db = get_db()
     stats = db.get_performance_stats(days=30)
 
-    if not history and stats["total_trades"] == 0:
+    if stats["total_trades"] == 0:
         await update.message.reply_text("No portfolio data yet. Signals will be tracked as they execute.")
         return
 
-    if history:
-        latest = history[-1]
-        equity = latest["equity"]
-        drawdown = latest["drawdown_pct"]
-    else:
-        equity = CONFIG.ACCOUNT_BALANCE
-        drawdown = 0
-
     text = f"""*Portfolio Dashboard*
-
-*Current Equity:* ${equity:,.2f}
-*Drawdown:* {drawdown:.2f}%
-*Starting Balance:* ${CONFIG.ACCOUNT_BALANCE:,.2f}
 
 *Performance (30 days):*
 - Total signals: {stats['total_trades']}
@@ -182,17 +147,16 @@ async def portfolio_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 - Win rate: {stats['win_rate']}%
 - Avg R:R: 1:{stats['avg_rr']}
 
-_Equity curve updated with each trade._"""
+*Starting Balance:* ${CONFIG.ACCOUNT_BALANCE:,.2f}
+
+_Every signal is tracked. Full transparency._"""
 
     await update.message.reply_text(text, parse_mode="Markdown")
 
 
 async def strategies_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /strategies — show performance by strategy."""
-    from config import CONFIG
-    from signal_output import TradeDatabase
-
-    db = TradeDatabase(CONFIG.TRADES_DB_PATH)
+    db = get_db()
     stats = db.get_strategy_stats(days=30)
 
     if not stats:
@@ -212,10 +176,7 @@ async def strategies_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 async def pairs_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /pairs — show performance by pair."""
-    from config import CONFIG
-    from signal_output import TradeDatabase
-
-    db = TradeDatabase(CONFIG.TRADES_DB_PATH)
+    db = get_db()
     stats = db.get_pair_stats(days=30)
 
     if not stats:
@@ -235,10 +196,7 @@ async def pairs_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def regimes_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /regimes — show performance by market regime."""
-    from config import CONFIG
-    from signal_output import TradeDatabase
-
-    db = TradeDatabase(CONFIG.TRADES_DB_PATH)
+    db = get_db()
     stats = db.get_regime_stats(days=30)
 
     if not stats:
@@ -266,10 +224,7 @@ async def regimes_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def drawdown_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /drawdown — show max drawdown info."""
-    from config import CONFIG
-    from signal_output import TradeDatabase
-
-    db = TradeDatabase(CONFIG.TRADES_DB_PATH)
+    db = get_db()
     dd = db.get_max_drawdown(days=30)
 
     if dd["peak_equity"] == 0:
@@ -289,11 +244,9 @@ _Drawdown = distance from peak equity._"""
 
 async def history_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /history — show recent trade history."""
-    from config import CONFIG
-    from signal_output import TradeDatabase
     from signal_output import format_price
 
-    db = TradeDatabase(CONFIG.TRADES_DB_PATH)
+    db = get_db()
     trades = db.get_recent_trades(limit=10)
 
     if not trades:

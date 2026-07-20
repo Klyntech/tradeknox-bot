@@ -9,13 +9,10 @@ twelvedata>=1.0.0
 # Telegram bot
 python-telegram-bot[job-queue]>=21.0.0
 
-# Web server (for Stripe webhooks)
+# Web server (health checks)
 flask>=3.0.0
 
-# Payment processing
-stripe>=7.0.0
-
-# HTTP requests (Stripe checkout, Telegram API)
+# HTTP requests (Telegram API)
 requests>=2.31.0
 
 # Chart generation
@@ -25,8 +22,8 @@ Pillow>=10.0.0
 # Testing
 pytest>=7.0.0
 
-# Monitoring (optional — uncomment for production)
-# sentry-sdk[flask]>=2.0.0  # error tracking
+# Monitoring
+sentry-sdk[flask]>=2.0.0  # error tracking
 
 # Optional — uncomment as needed
 # ccxt>=4.0.0            # for crypto data via exchange APIs

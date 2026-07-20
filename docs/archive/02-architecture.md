@@ -2,14 +2,7 @@
 
 ## System Overview
 
-TradeKnox is a single-process application that runs both a Flask health check server and a Telegram bot polling loop. It scans forex pairs for trading signals, scores them against a weighted system, and sends formatted signals to a Telegram channel.
-
-**Key Changes from Previous Version:**
-- Removed subscription/payment infrastructure (bot is 100% free)
-- Reduced from 8 strategies to 2 (day-of-week filter + false breakout)
-- Simplified database schema (removed unused tables)
-- Added Sentry error tracking
-- Added database backup strategy
+TradeKnox is a single-process application that runs both a Flask webhook server and a Telegram bot polling loop. It scans forex pairs for trading signals, scores them against a weighted system, and sends formatted signals to a Telegram channel.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -18,7 +11,7 @@ TradeKnox is a single-process application that runs both a Flask health check se
 ├─────────────────────────────────────────────────────────────┤
 │  ┌──────────────────┐    ┌──────────────────┐              │
 │  │  Flask Server     │    │  Telegram Bot     │              │
-│  │  (Health Check)   │    │  (Polling)        │              │
+│  │  (Webhooks)       │    │  (Polling)        │              │
 │  │  Port 5000        │    │  Main Thread      │              │
 │  └────────┬─────────┘    └────────┬─────────┘              │
 │           │                       │                         │
@@ -41,61 +34,78 @@ tradeknox-bot/
 ├── bot.py                    # Orchestrator — scan loop, signal pipeline
 │
 ├── data_layer.py             # Price feeds, indicator calculations
-│   ├── fetch_ohlcv()         # Get candle data from TwelveData/yfinance
-│   ├── add_indicators()      # ATR, RSI, EMA, RVOL
-│   └── sync_timeframes()     # Multi-timeframe data management
+│   ├── fetch_ohlcv()         # Get candle data from yfinance
+│   ├── calculate_indicators() # ATR, RSI, EMA, RVOL
+│   └── DataFeed class        # Multi-timeframe data management
 │
 ├── market_structure.py       # Market structure analysis
-│   ├── detect_trend()        # BULLISH / BEARISH / RANGING
-│   ├── detect_structure_breaks()  # BOS / CHoCH
-│   ├── detect_liquidity_zones()   # Liquidity zones
-│   └── analyze_market_structure() # Full analysis
+│   ├── classify_trend()      # BULLISH / BEARISH / FLAT
+│   ├── detect_bos()          # Break of Structure
+│   ├── detect_choch()        # Change of Character
+│   ├── detect_liquidity()    # Liquidity zones
+│   └── Structure dataclass   # Trend, BOS, CHoCH, zones
 │
 ├── entry_logic.py            # Entry zone detection
 │   ├── detect_order_blocks() # Order blocks (OB)
 │   ├── detect_fvg()          # Fair Value Gaps (FVG)
-│   ├── compute_fibonacci_zones()  # Fibonacci levels
-│   └── find_best_entry()     # Best entry setup
+│   ├── detect_fib()          # Fibonacci levels
+│   ├── detect_candle()       # Candlestick patterns
+│   └── EntrySetup dataclass  # Complete entry analysis
 │
-├── strategies.py             # Day-of-week filter
-│   └── assess_strategies()   # Per-pair day filtering
-│
-├── false_breakout.py         # False Breakout Trap strategy
-│   ├── detect_false_breakouts()  # Pattern detection
-│   └── pick_best_signal()    # Best signal selection
+├── strategies.py             # 8 backtested strategies
+│   ├── detect_ma_crossover() # MA 9/21, 50/200
+│   ├── detect_breakout()     # N-bar breakout
+│   ├── detect_rsi_extremes() # RSI 20/80 reversal
+│   ├── detect_ema_crossover() # EMA crossover (MM-008)
+│   ├── detect_heikin_ashi_trend() # Heikin Ashi (MM-017)
+│   ├── detect_stochastic_extreme() # Stochastic (MM-016)
+│   ├── detect_session_entry() # Session timing
+│   ├── detect_ema_alignment() # EMA alignment
+│   └── PAIR_STRATEGIES dict  # Per-pair configs
 │
 ├── scoring_engine.py         # Signal scoring (0-20 points)
 │   ├── score_signal()        # Main scoring function
 │   ├── assess_indicators()   # Indicator confluence
-│   └── build_risk_profile()  # Position sizing
+│   ├── build_risk_profile()  # Position sizing
+│   └── SignalScore dataclass # Score breakdown
 │
-├── signal_output.py          # Telegram signal formatting + database
-│   ├── TradeDatabase class   # SQLite trade log
-│   ├── format_signal_message()  # Build signal text
-│   └── backup()              # Database backup
+├── signal_output.py          # Telegram signal formatting
+│   ├── format_signal_message() # Build signal text
+│   ├── format_price()        # Price formatting per pair
+│   └── send_signal()         # Send to Telegram channel
 │
 ├── charts.py                 # Chart generation
 │   ├── render_signal_chart() # Candlestick + indicators
-│   └── render_blurred_chart() # Free tier preview
+│   ├── render_blurred_chart() # Free tier preview
+│   └── draw_order_blocks()   # OB/FVG overlays
 │
 ├── commands.py               # Bot command handlers
 │   ├── /start                # Welcome message
-│   ├── /status               # Account info
+│   ├── /subscribe            # Payment link
+│   ├── /status               # Bot status
 │   ├── /stats                # Performance stats
-│   ├── /portfolio            # Performance dashboard
-│   ├── /strategies           # Strategy performance
-│   ├── /pairs                # Pair performance
-│   ├── /regimes              # Regime performance
-│   ├── /drawdown             # Max drawdown
-│   ├── /history              # Recent trades
+│   ├── /key                  # License key management
 │   └── /help                 # Command list
 │
-├── health_server.py          # Flask health check server
-│   ├── /                     # Status endpoint
-│   └── /health               # Health check endpoint
+├── stripe_webhook.py         # Stripe integration
+│   ├── create_checkout()     # Start payment
+│   ├── handle_webhook()      # Process events
+│   └── WebhookEvent enum     # checkout.completed, etc.
+│
+├── subscriptions.py          # License key system
+│   ├── generate_key()        # HMAC license generation
+│   ├── validate_key()        # Key validation
+│   └── LicenseKey dataclass  # Key structure
+│
+├── user_manager.py           # User management
+│   ├── register_user()       # New user registration
+│   ├── check_tier()          # Get user tier
+│   ├── can_receive_signal()  # Tier + limit check
+│   └── User dataclass        # User structure
 │
 ├── config.py                 # Configuration
 │   ├── BotConfig dataclass   # All env vars + defaults
+│   ├── validate()            # Config validation
 │   └── CONFIG singleton      # Global config instance
 │
 ├── requirements.txt          # Python dependencies
@@ -103,11 +113,27 @@ tradeknox-bot/
 ├── Procfile                  # Process definition
 │
 ├── tests/                    # Unit tests
+│   ├── test_charts.py        # Chart generation tests
+│   ├── test_entry_logic.py   # Entry logic tests
+│   ├── test_scoring.py       # Scoring engine tests
+│   ├── test_signal_output.py # Signal formatting tests
+│   └── test_subscriptions.py # License key tests
+│
 ├── scripts/                  # Utility scripts
-├── research/                 # Backtesting research
+│   ├── download_data.py      # Download historical data
+│   ├── cross_validate.py     # Validate data across sources
+│   └── backtest_strategies.py # Backtest strategies
+│
 ├── data/                     # Historical data
-├── frontend/                 # Landing page (React)
-└── docs/                     # Documentation
+│   ├── yfinance/             # Daily data from yfinance
+│   └── dukascopy/            # Hourly data from Dukascopy
+│
+├── frontend/                 # Landing page
+│   ├── src/                  # React components
+│   ├── index.html            # Entry point
+│   └── package.json          # Dependencies
+│
+└── docs/                     # This documentation
 ```
 
 ## Data Flow
@@ -115,8 +141,8 @@ tradeknox-bot/
 ### Signal Generation Flow
 
 ```
-1. Scan Loop (every 15 min)
-   └── For each batch of symbols
+1. Scan Loop (every 5 min)
+   └── For each pair (XAUUSD, GBPJPY, USDJPY)
        │
        ├── 2. Session Filter
        │   └── Is it London/NY/Overlap? → Skip if not
@@ -127,8 +153,8 @@ tradeknox-bot/
        ├── 4. Max Trades Check
        │   └── Already hit daily limit? → Skip if yes
        │
-       ├── 5. Data Fetch (async)
-       │   └── Get OHLCV from TwelveData/yfinance (1h, 4h)
+       ├── 5. Data Fetch
+       │   └── Get OHLCV from yfinance (15m, 1h, 4h)
        │
        ├── 6. Calculate Indicators
        │   └── ATR, RSI, EMA, RVOL
@@ -140,7 +166,7 @@ tradeknox-bot/
        │   └── Order blocks, FVGs, Fibonacci, candle patterns
        │
        ├── 9. Strategy Confluence
-       │   └── Day-of-week filter
+       │   └── Run 8 strategies, check alignment
        │
        ├── 10. Scoring
        │   └── Score 0-20, check threshold (11/20)
@@ -148,21 +174,26 @@ tradeknox-bot/
        ├── 11. Risk Management
        │   └── Position size, SL/TP, R:R validation
        │
-       ├── 12. False Breakout Scan
-       │   └── Secondary strategy for ranging markets
-       │
-       └── 13. Output
+       └── 12. Output
            └── Format signal, render chart, send to Telegram
 ```
 
-### Health Check Flow
+### Webhook Flow
 
 ```
-1. GET /health
+1. Stripe sends webhook to /webhook
    │
-   ├── Check database connectivity
-   ├── Check Telegram token presence
-   └── Return status (200 ok / 503 degraded)
+   ├── 2. Verify signature
+   │   └── Reject if invalid
+   │
+   ├── 3. Parse event type
+   │   ├── checkout.session.completed → Activate subscription
+   │   ├── customer.subscription.updated → Handle renewal
+   │   ├── customer.subscription.deleted → Deactivate
+   │   └── invoice.payment_failed → Handle failure
+   │
+   └── 4. Update database
+       └── Write to licenses.db
 ```
 
 ## Dependencies
@@ -171,48 +202,44 @@ tradeknox-bot/
 
 | Package | Version | Purpose |
 |---------|---------|---------|
-| python-telegram-bot | 21+ | Telegram API |
-| Flask | 3.0+ | Health check server |
-| yfinance | 0.2+ | Market data (fallback) |
-| twelvedata | 1.0+ | Market data (primary) |
+| python-telegram-bot | 20+ | Telegram API |
+| Flask | 3.0+ | Webhook server |
+| yfinance | 0.2+ | Market data |
 | pandas | 2.0+ | Data processing |
 | numpy | 1.24+ | Numerical computing |
 | matplotlib | 3.7+ | Chart generation |
 | Pillow | 10.0+ | Image processing |
 | requests | 2.31+ | HTTP client |
-| sentry-sdk | 2.0+ | Error tracking |
 
 ### External Services
 
 | Service | Purpose | Required? |
 |---------|---------|-----------|
 | Telegram Bot API | Signal delivery | Yes |
-| TwelveData | Market data (primary) | Yes |
-| yfinance | Market data (fallback) | No |
-| Render | Hosting | Yes |
-| Sentry | Error tracking | Optional |
+| yfinance | Market data | Yes (default) |
+| Stripe | Payments | Yes (for monetization) |
+| Render | Hosting | Yes (for deployment) |
+| ForexFactory API | News filter | Optional |
 
 ## Module Responsibilities
 
 ### app.py (Entry Point)
 - Initializes Flask and Telegram
-- Initializes Sentry for error tracking
 - Starts the scan loop in a background thread
 - Handles graceful shutdown
 
 ### bot.py (Orchestrator)
-- Manages the scan loop (every 15 minutes)
+- Manages the scan loop (every 5 minutes)
 - Calls each layer of the signal pipeline
 - Coordinates between modules
-- Handles database backups daily
 
 ### data_layer.py (Data)
-- Fetches OHLCV data from TwelveData/yfinance
+- Fetches OHLCV data from yfinance
 - Calculates technical indicators
 - Manages multi-timeframe data
 
 ### market_structure.py (Structure)
-- Classifies market trend (BULLISH/BEARISH/RANGING)
+- Classifies market trend (BULLISH/BEARISH/FLAT)
 - Detects Break of Structure (BOS)
 - Detects Change of Character (CHoCH)
 - Identifies liquidity zones
@@ -224,23 +251,19 @@ tradeknox-bot/
 - Identifies candlestick patterns
 
 ### strategies.py (Strategies)
-- Day-of-week filter per pair
+- Implements 8 backtested strategies
 - Manages per-pair configurations
-
-### false_breakout.py (False Breakout)
-- Detects false breakout patterns
-- Counter-trend strategy for ranging markets
+- Calculates strategy confluence
 
 ### scoring_engine.py (Scoring)
 - Scores signals across 6 categories
 - Applies threshold gate (11/20 minimum)
 - Calculates position sizing
 
-### signal_output.py (Output + Database)
+### signal_output.py (Output)
 - Formats Telegram messages
-- Manages trade database
-- Handles performance analytics
-- Creates database backups
+- Manages price formatting
+- Handles signal delivery
 
 ### charts.py (Charts)
 - Renders candlestick charts
@@ -248,14 +271,24 @@ tradeknox-bot/
 - Generates blurred preview for free tier
 
 ### commands.py (Commands)
-- Handles bot commands (/start, /stats, etc.)
+- Handles bot commands (/start, /subscribe, etc.)
 - Manages user interactions
 - Provides bot status and stats
 
-### health_server.py (Health Check)
-- Serves health check endpoint
-- Validates database connectivity
-- Reports service status
+### stripe_webhook.py (Payments)
+- Handles Stripe webhook events
+- Manages subscription lifecycle
+- Processes payments
+
+### subscriptions.py (License)
+- Generates HMAC license keys
+- Validates keys on each scan
+- Manages subscription status
+
+### user_manager.py (Users)
+- Registers new users
+- Checks tier access
+- Enforces signal limits
 
 ### config.py (Configuration)
 - Loads environment variables
