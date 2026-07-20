@@ -19,6 +19,20 @@ logger = logging.getLogger(__name__)
 DIRECTION_EMOJI = {"buy": "🟢", "sell": "🔴"}
 CONFIDENCE_EMOJI = {range(80, 101): "🔥", range(65, 80): "✅", range(0, 65): "⚠️"}
 
+# MarkdownV2 special characters that must be escaped
+_MDV2_SPECIAL = r"_*[]()~`>#+-=|{}.!"
+
+
+def _escape_mdv2(text: str) -> str:
+    """Escape all MarkdownV2 special characters in a string."""
+    result = []
+    for ch in text:
+        if ch in _MDV2_SPECIAL:
+            result.append(f"\\{ch}")
+        else:
+            result.append(ch)
+    return "".join(result)
+
 
 def _conf_emoji(pct: float) -> str:
     for r, em in CONFIDENCE_EMOJI.items():
@@ -59,13 +73,13 @@ def format_signal_message(symbol: str, direction: str, entry: float,
     tp2_pts = abs(tp2 - entry)
     tp3_pts = abs(tp3 - entry)
 
-    session_display = {
-        "overlap": "London–NY Overlap 🏆",
+    session_display = _escape_mdv2({
+        "overlap": "London-NY Overlap",
         "london": "London Session",
         "new_york": "New York Session",
         "asia": "Asian Session",
         "dead_zone": "Off-Hours",
-    }.get(session, session.replace("_", " ").title())
+    }.get(session, session.replace("_", " ").title()))
 
     now_utc = datetime.now(timezone.utc)
     expiry_time = now_utc + timedelta(hours=expiry_hours)
@@ -88,7 +102,7 @@ def format_signal_message(symbol: str, direction: str, entry: float,
 ⌛ *Expires:*    {expiry_str}
 
 💡 *Reason:*
-_{reason}_
+_{_escape_mdv2(reason)}_
 
 ━━━━━━━━━━━━━━━━━━━━━━
 ⚠️ _Manage risk\\. Move SL to breakeven after TP1\\._

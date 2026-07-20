@@ -117,7 +117,20 @@ class TradingSignalBot:
                 logger.info(f"Telegram message sent to {chat_id}")
                 return
             except Exception as e:
-                wait = 2 ** attempt  # 1s, 2s, 4s
+                if "can't parse entities" in str(e).lower() or "bad request" in str(e).lower():
+                    logger.warning(f"MarkdownV2 parse failed, retrying as plain text: {e}")
+                    try:
+                        await self.bot.send_message(
+                            chat_id=chat_id,
+                            text=text,
+                            disable_web_page_preview=True
+                        )
+                        logger.info(f"Telegram message sent (plain text) to {chat_id}")
+                        return
+                    except Exception as e2:
+                        logger.error(f"Plain text fallback also failed: {e2}")
+                        return
+                wait = 2 ** attempt
                 if attempt < max_retries - 1:
                     logger.warning(f"Telegram send attempt {attempt + 1} failed: {e}. Retrying in {wait}s...")
                     await asyncio.sleep(wait)
